@@ -1,0 +1,71 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 'v4.4.0'
+    hooks:
+    -   id: trailing-whitespace
+    -   id: check-byte-order-marker
+    -   id: fix-encoding-pragma
+    -   id: check-executables-have-shebangs
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-xml
+    -   id: requirements-txt-fixer
+    -   id: check-added-large-files
+
+# sort imports
+-   repo: https://github.com/miki725/importanize
+    rev: '0.8.0-alpha2'
+    hooks:
+    -   id: importanize
+        name: importanize
+        description: Organize python imports
+        entry: importanize
+        language: python
+        language_version: python3
+        types: [python]
+        args: [-v, --no-auto-pipe]
+
+  # mypy static type checker
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v1.4.1'
+    hooks:
+    -   id: mypy
+        args: [--no-strict-optional, --ignore-missing-imports]
+
+# style formatter
+-   repo: https://github.com/PyCQA/flake8
+    rev: '6.0.0'
+    hooks:
+    -   id: flake8
+
+# security scanner
+-   repo: https://github.com/PyCQA/bandit
+    rev: '1.7.5'
+    hooks:
+    -   id: bandit
+        name: bandit
+        description: 'Bandit is a tool for finding common security issues in Python code'
+        entry: bandit
+        language: python
+        language_version: python3
+        types: [python]
+        require_serial: true
+
+# docstring checker
+-   repo: https://github.com/PyCQA/pydocstyle
+    rev: '6.3.0'
+    hooks:
+    -   id: pydocstyle
+        name: pydocstyle
+        description: pydocstyle is a static analysis tool for checking compliance with Python docstring conventions.
+        entry: pydocstyle
+        language: python
+        types: [python]
+
+# markdown formatter
+-   repo:  https://github.com/executablebooks/mdformat
+    rev: '0.7.16'
+    hooks:
+    -   id: mdformat
