@@ -4,6 +4,7 @@ from typing import Any
 import customtkinter as ctk
 import fitz  # PyMuPDF
 from PIL import Image
+
 from widgets import CollapsableFrame
 
 
@@ -24,7 +25,8 @@ class SidePanel(CollapsableFrame):
         self.tabview.pack(expand=True, fill="both")
 
         # preview and navigator tab
-        self.navigator_tab = _NavigatorPanel(parent=self.tabview.tab("Navigator"))
+        self.navigator_tab = _NavigatorPanel(
+            parent=self.tabview.tab("Navigator"))
         self.navigator_tab.pack(expand=True, fill="both")
 
     def get_new_document(self, document: fitz.Document) -> None:
@@ -91,7 +93,8 @@ class _PageView(ctk.CTkScrollableFrame):
         for page in document:
             image = self._convert_page(page)
 
-            ctk.CTkLabel(self, image=image, text="").pack(expand=True, fill="x", padx=5, pady=7)
+            ctk.CTkLabel(self, image=image, text="").pack(
+                expand=True, fill="x", padx=5, pady=7)
 
     def _convert_page(self, page: fitz.Page) -> ctk.CTkImage:
         """
