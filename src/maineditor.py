@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import re
 import tkinter as tk
-from tkinter import messagebox
 from typing import Any, Callable
 
 import customtkinter as ctk
 import fitz  # PyMuPDF
+from CTkMessagebox import CTkMessagebox
 from PIL import Image
 
 
@@ -71,8 +71,9 @@ class MainEditor(ctk.CTkFrame):
         # Check if the scale string matches the expected format
         if not re.match(r'^([1-9]([0-9]){1,2})%$', scale_string):
             # Show an error message if the scale string is invalid
-            messagebox.showerror(
+            CTkMessagebox(
                 title="Invalid scaling",
+                icon="warning",
                 message="You entered an invalid scaling factor. "
                         "Please make sure you entered a number.",
             )
@@ -84,8 +85,9 @@ class MainEditor(ctk.CTkFrame):
         # Check if the scale is greater than 200%
         if int(scale) > 200:
             # Show an error message if the scale is too high
-            messagebox.showerror(
+            CTkMessagebox(
                 title="Invalid scaling",
+                icon="warning",
                 message="You entered a too high scaling. "
                         "Please enter a scaling smaller than 200%.",
             )
