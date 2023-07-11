@@ -37,6 +37,7 @@ class MainEditor(ctk.CTkFrame):
             text="open file",
             command=open_file_command
         )
+
         self.open_file_button.pack(expand=True)
 
         # page view
@@ -116,9 +117,7 @@ class MainEditor(ctk.CTkFrame):
         self.document_view.update_scaling(self.document, scale_decimal)
 
     def close_document(self):
-        """
-        Close the current document in the Main Editor.
-        """
+        """Close the current document in the Main Editor."""
         self.document = None
 
         self.document_view.clear()
@@ -160,12 +159,11 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         self._labels = [
             ctk.CTkLabel(self, image=image, text="") for image in self._images
         ]
+
         self._update_grid()
 
     def update_pages(self) -> None:
-        """
-        Update the document pages if there is a change in grid dimensions.
-        """
+        """Update the document pages if there is a change in grid dimensions."""
         self._update_grid()
 
     def update_scaling(self, document: fitz.Document, new_scaling: float) -> None:
@@ -243,7 +241,8 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
 
         for index, label in enumerate(self._labels):
             label.grid(
-                column=index % self._rows, row=index // self._rows, padx=5, pady=7)
+                column=index % self._rows, row=index // self._rows, padx=5, pady=7
+            )
 
         return True
 
@@ -264,9 +263,7 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         )
 
     def clear(self) -> None:
-        """
-        Remove all widgets within the frame and reset data.
-        """
+        """Remove all widgets within the frame and reset data."""
         self._images = []
         self._labels = []
         self._rows = 0

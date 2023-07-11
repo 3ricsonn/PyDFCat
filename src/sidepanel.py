@@ -4,6 +4,7 @@ from typing import Any
 import customtkinter as ctk
 import fitz  # PyMuPDF
 from PIL import Image
+
 from widgets import CollapsableFrame
 
 
@@ -26,7 +27,8 @@ class SidePanel(CollapsableFrame):
         self.tabview.pack(expand=True, fill="both")
 
         # preview and navigator tab
-        self.navigator_tab = _NavigatorPanel(parent=self.tabview.tab("Navigator"))
+        self.navigator_tab = _NavigatorPanel(
+            parent=self.tabview.tab("Navigator"))
         self.navigator_tab.pack(expand=True, fill="both")
 
     def get_new_document(self, document: fitz.Document) -> None:
@@ -39,9 +41,7 @@ class SidePanel(CollapsableFrame):
         self.navigator_tab.get_new_document(document)
 
     def close_document(self) -> None:
-        """
-        Close the current document in the Side Panel.
-        """
+        """Close the current document in the Side Panel."""
         self.navigator_tab.close_document()
 
 
@@ -78,9 +78,7 @@ class _NavigatorPanel(ctk.CTkFrame):
         self.document_view.load_pages(self.document)
 
     def close_document(self) -> None:
-        """
-        Close the current document.
-        """
+        """Close the current document."""
         self.document = None
 
         self.document_view.clear()
