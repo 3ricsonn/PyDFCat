@@ -2,7 +2,6 @@
 from typing import Any, Literal, Optional, Tuple, Union
 
 import customtkinter as ctk
-from PIL import ImageTk
 
 
 class CollapsableFrame(ctk.CTkFrame):
