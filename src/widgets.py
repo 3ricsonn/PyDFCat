@@ -137,22 +137,27 @@ class CollapsableFrame(ctk.CTkFrame):
             None
         """
         if "button_corner_radius" in kwargs:
-            self._hide_button.configure(corner_radius=kwargs.pop("button_corner_radius"))
+            self._hide_button.configure(
+                corner_radius=kwargs.pop("button_corner_radius"))
 
         if "button_border_width" in kwargs:
-            self._hide_button.configure(border_width=kwargs.pop("button_border_width"))
+            self._hide_button.configure(
+                border_width=kwargs.pop("button_border_width"))
 
         if "button_fg_color" in kwargs:
             self._hide_button.configure(fg_color=kwargs.pop("button_fg_color"))
 
         if "button_hover_color" in kwargs:
-            self._hide_button.configure(hover_color=kwargs.pop("button_hover_color"))
+            self._hide_button.configure(
+                hover_color=kwargs.pop("button_hover_color"))
 
         if "button_border_color" in kwargs:
-            self._hide_button.configure(border_color=kwargs.pop("button_border_color"))
+            self._hide_button.configure(
+                border_color=kwargs.pop("button_border_color"))
 
         if "button_text_color" in kwargs:
-            self._hide_button.configure(text_color=kwargs.pop("button_text_color"))
+            self._hide_button.configure(
+                text_color=kwargs.pop("button_text_color"))
 
         if "button_image" in kwargs:
             self._hide_button.configure(image=kwargs.pop("button_image"))

@@ -2,6 +2,7 @@
 from typing import Any, Callable
 
 import customtkinter as ctk
+
 from settings import SCALING_FACTORS
 
 
@@ -31,17 +32,21 @@ class ToolBar(ctk.CTkFrame):
         super().__init__(master=parent, **kwargs)
 
         # Open button
-        ctk.CTkButton(self, text="Open", command=open_file_command, width=50).pack(side="left", padx=5, pady=7)
+        ctk.CTkButton(self, text="Open", command=open_file_command,
+                      width=50).pack(side="left", padx=5, pady=7)
 
         # Save button with option menu
-        ctk.CTkOptionMenu(self, values=["save", "save as"], command=save_file_command).pack(side="left", padx=5, pady=7)
+        ctk.CTkOptionMenu(self, values=["save", "save as"], command=save_file_command).pack(
+            side="left", padx=5, pady=7)
 
         # Undo button (initially disabled)
-        self.undo_button = ctk.CTkButton(self, text="Undo", command=lambda: print("undone"), width=50, state="disabled")
+        self.undo_button = ctk.CTkButton(
+            self, text="Undo", command=lambda: print("undone"), width=50, state="disabled")
         self.undo_button.pack(side="left", padx=5, pady=7)
 
         # Redo button (initially disabled)
-        self.redo_button = ctk.CTkButton(self, text="Redo", command=lambda: print("redone"), width=50, state="disabled")
+        self.redo_button = ctk.CTkButton(
+            self, text="Redo", command=lambda: print("redone"), width=50, state="disabled")
         self.redo_button.pack(side="left", padx=5, pady=7)
 
         # Scaling combobox (initially disabled)

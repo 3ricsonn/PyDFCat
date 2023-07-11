@@ -1,18 +1,13 @@
 # -*- coding: utf-8 -*-
+import os
 from tkinter.filedialog import askopenfilename
 
 import customtkinter as ctk
 import fitz  # PyMuPDF
-import os
+
 from maineditor import MainEditor
-from settings import (
-    CLOSE_RED,
-    WHITE,
-    WINDOW_HEIGHT,
-    WINDOW_MIN_HEIGHT,
-    WINDOW_MIN_WIDTH,
-    WINDOW_WIDTH,
-)
+from settings import (CLOSE_RED, WHITE, WINDOW_HEIGHT, WINDOW_MIN_HEIGHT,
+                      WINDOW_MIN_WIDTH, WINDOW_WIDTH)
 from sidepanel import SidePanel
 from toolbar import ToolBar
 
@@ -43,7 +38,8 @@ class ApplicationWindow(ctk.CTk):
         self.sidebar.grid(column=0, row=1, sticky="news", padx=10, pady=10)
 
         # main editor
-        self.main_editor = MainEditor(self, open_file_command=self.open_file, scaling_variable=scaling_variable)
+        self.main_editor = MainEditor(
+            self, open_file_command=self.open_file, scaling_variable=scaling_variable)
         self.main_editor.grid(column=1, row=1, sticky="news", padx=10, pady=10)
 
         # close dokument button
