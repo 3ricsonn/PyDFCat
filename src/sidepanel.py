@@ -9,6 +9,8 @@ from widgets import CollapsableFrame
 
 
 class SidePanel(CollapsableFrame):
+    """Side panel to preview the file and the selection"""
+
     def __init__(self, parent: Any):
         """
         Initialize the Side Panel.
@@ -44,6 +46,8 @@ class SidePanel(CollapsableFrame):
 
 
 class _NavigatorPanel(ctk.CTkFrame):
+    """Class to preview document and navigator for main editor"""
+
     def __init__(self, parent: Any):
         """
         Initialize the Navigator Panel.
@@ -84,17 +88,33 @@ class _NavigatorPanel(ctk.CTkFrame):
 
 
 class _PageView(ctk.CTkScrollableFrame):
+    """Preview class to display file pages"""
+
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         # data
 
     def load_pages(self, document: fitz.Document) -> None:
+        """
+        Load and display the pages of a document.
+
+        Parameters:
+            document (fitz.Document): The document to load the pages from.
+
+        Returns:
+            None
+        """
         for page in document:
+            # Convert the page to an image
             image = self._convert_page(page)
 
-            ctk.CTkLabel(self, image=image, text="").pack(
-                expand=True, fill="x", padx=5, pady=7)
+            # Create a labeled image widget and pack it
+            ctk.CTkLabel(
+                self,
+                image=image,
+                text=""
+            ).pack(expand=True, fill="x", padx=5, pady=7)
 
     def _convert_page(self, page: fitz.Page) -> ctk.CTkImage:
         """
@@ -125,5 +145,11 @@ class _PageView(ctk.CTkScrollableFrame):
         return ctk_img
 
     def clear(self):
+        """
+        Clear all child widgets from the container.
+
+        Returns:
+            None
+        """
         for widget in self.winfo_children():
             widget.destroy()

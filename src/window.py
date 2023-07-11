@@ -106,6 +106,7 @@ class ApplicationWindow(ctk.CTk):
             self.close_button.place(relx=0.97, rely=0.05, anchor="ne")
 
     def close_file(self):
+        """CLose file and discard all changes"""
         self.main_editor.close_document()
         self.sidebar.close_document()
         self.toolbar.disable_tools()

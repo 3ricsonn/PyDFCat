@@ -10,7 +10,14 @@ from PIL import Image
 
 
 class MainEditor(ctk.CTkFrame):
-    def __init__(self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar) -> None:
+    """Main editor class to manage file pages"""
+
+    def __init__(
+            self,
+            parent: Any,
+            open_file_command: Callable,
+            scaling_variable: ctk.StringVar
+    ) -> None:
         """
         Initialize the Main Editor.
 
@@ -26,12 +33,19 @@ class MainEditor(ctk.CTkFrame):
 
         # button to open file
         self.open_file_button = ctk.CTkButton(
-            self, text="open file", command=open_file_command)
+            self,
+            text="open file",
+            command=open_file_command
+        )
+
         self.open_file_button.pack(expand=True)
 
         # page view
         self.document_view = _DocumentEditor(
-            self, fg_color="transparent", orientation="vertical")
+            self,
+            fg_color="transparent",
+            orientation="vertical"
+        )
 
     def get_new_document(self, document: fitz.Document) -> None:
         """
@@ -117,6 +131,8 @@ class MainEditor(ctk.CTkFrame):
 
 
 class _DocumentEditor(ctk.CTkScrollableFrame):
+    """Class to display file pages"""
+
     def __init__(self, *args, **kwargs) -> None:
         """
         Initialize the Document Editor.
@@ -140,8 +156,10 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         """
         self.clear()
         self._images = [self._convert_page(page) for page in document]
-        self._labels = [ctk.CTkLabel(self, image=image, text="")
-                        for image in self._images]
+        self._labels = [
+            ctk.CTkLabel(self, image=image, text="") for image in self._images
+        ]
+
         self._update_grid()
 
     def update_pages(self) -> None:
@@ -162,8 +180,9 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         self.clear()
 
         self._images = [self._convert_page(page) for page in document]
-        self._labels = [ctk.CTkLabel(self, image=image, text="")
-                        for image in self._images]
+        self._labels = [
+            ctk.CTkLabel(self, image=image, text="") for image in self._images
+        ]
 
         self._update_grid()
 
@@ -221,8 +240,10 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         self.columnconfigure(tuple(range(columns)), weight=1)
 
         for index, label in enumerate(self._labels):
-            label.grid(column=index % self._rows, row=index //
-                       self._rows, padx=5, pady=7)
+            label.grid(
+                column=index % self._rows, row=index // self._rows, padx=5, pady=7
+            )
+
 
         return True
 
