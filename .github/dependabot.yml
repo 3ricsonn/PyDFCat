@@ -1,0 +1,27 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - 3ricsonn
+    assignees:
+      - 3ricsonn
+  commit-message:
+    prefix: fix
+    prefix-development: chore
+    include: scope
+  
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - 3ricsonn
+    assignees:
+      - 3ricsonn
+    commit-message:
+      prefix: fix
+      prefix-development: chore
+      include: scope
