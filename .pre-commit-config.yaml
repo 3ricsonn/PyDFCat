@@ -55,9 +55,3 @@ repos:
         language_version: python3
         types: [python]
         require_serial: true
-
-# markdown formatter
--   repo:  https://github.com/executablebooks/mdformat
-    rev: '0.7.16'
-    hooks:
-    -   id: mdformat

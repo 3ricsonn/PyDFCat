@@ -1,3 +1,9 @@
+<p align="center">
+ <a href="https://app.deepsource.com/gh/3ricsonn/PyDFCat/?ref=repository-badge}" target="_blank">
+ <img alt="DeepSource" title="DeepSource" src="https://app.deepsource.com/gh/3ricsonn/PyDFCat.svg/?label=active+issues&show_trend=true&token=Y2NWKSxBUnhCv3qSaX8gARR-"/>
+</a>
+</p>
+
 <h1 align="center">PyDFCat - PDF Editor</h1>
 
 PyDFCat is a Python-based PDF editor built using the CustomTkinter library. It provides various functionalities to
@@ -5,12 +11,12 @@ display, rearrange, delete, duplicate, and add pages to a PDF file.
 
 ## (Planned) Features
 
-- \[x\] Open and display PDF-Files.
-- \[ \] Duplicate pages within a PDF document.
-- \[ \] Copy, cut and past pages within the document.
-- \[ \] View copied and cut pages in clipboard tab.
-- \[ \] Delete specific pages from a PDF document.
-- \[ \] Add new pages from an existing PDF document.
+- [x] Open and display PDF-Files.
+- [ ] Duplicate pages within a PDF document.
+- [ ] Copy, cut and past pages within the document.
+- [ ] View copied and cut pages in clipboard tab.
+- [ ] Delete specific pages from a PDF document.
+- [ ] Add new pages from an existing PDF document.
 
 ## Installation
 
@@ -22,14 +28,14 @@ To use PyDFCat, follow these steps:
    git clone https://github.com/3ricsonn/PyDFCat.git
    ```
 
-1. Install the required dependencies. Make sure you have Python installed on your system. Use pip to install the
+2. Install the required dependencies. Make sure you have Python installed on your system. Use pip to install the
    dependencies:
 
    ```
    pip install -r requirements.txt
    ```
 
-1. Run the application:
+3. Run the application:
 
    ```
    python __main__.py
@@ -43,7 +49,7 @@ To uninstall PyDFCat with its dependencies, follow these steps:
    ```
    pip uninstall -r requirements.txt
    ```
-1. Further you can delete the downloaded files
+2. Further you can delete the downloaded files
 
 ## Contact
 
