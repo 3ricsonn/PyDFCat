@@ -6,6 +6,7 @@ from settings import SCALING_FACTORS
 
 
 class ToolBar(ctk.CTkFrame):
+    """Collection of tools to manipulate the pdf file pages"""
     def __init__(
         self,
         parent: Any,
