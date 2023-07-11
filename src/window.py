@@ -1,18 +1,13 @@
 # -*- coding: utf-8 -*-
+import os
 from tkinter.filedialog import askopenfilename
 
 import customtkinter as ctk
 import fitz  # PyMuPDF
-import os
+
 from maineditor import MainEditor
-from settings import (
-    CLOSE_RED,
-    WHITE,
-    WINDOW_HEIGHT,
-    WINDOW_MIN_HEIGHT,
-    WINDOW_MIN_WIDTH,
-    WINDOW_WIDTH,
-)
+from settings import (CLOSE_RED, WHITE, WINDOW_HEIGHT, WINDOW_MIN_HEIGHT,
+                      WINDOW_MIN_WIDTH, WINDOW_WIDTH)
 from sidepanel import SidePanel
 from toolbar import ToolBar
 
@@ -43,20 +38,20 @@ class ApplicationWindow(ctk.CTk):
         self.sidebar.grid(column=0, row=1, sticky="news", padx=10, pady=10)
 
         # main editor
-        self.main_editor = MainEditor(self, open_file_command=self.open_file, scaling_variable=scaling_variable)
+        self.main_editor = MainEditor(self,
+                                      open_file_command=self.open_file,
+                                      scaling_variable=scaling_variable)
         self.main_editor.grid(column=1, row=1, sticky="news", padx=10, pady=10)
 
         # close dokument button
-        self.close_button = ctk.CTkButton(
-            self,
-            text="x",
-            text_color=WHITE,
-            fg_color="transparent",
-            hover_color=CLOSE_RED,
-            width=40,
-            height=40,
-            command=self.close_file
-        )
+        self.close_button = ctk.CTkButton(self,
+                                          text="x",
+                                          text_color=WHITE,
+                                          fg_color="transparent",
+                                          hover_color=CLOSE_RED,
+                                          width=40,
+                                          height=40,
+                                          command=self.close_file)
 
         # toolbar
         self.toolbar = ToolBar(
@@ -65,8 +60,7 @@ class ApplicationWindow(ctk.CTk):
             save_file_command=lambda _: print("save file"),
             scale_page_command=self.main_editor.update_scaling,
             scaling_variable=scaling_variable,
-            height=60
-        )
+            height=60)
         # ctk.CTkLabel(self.toolbar, text="Toolbar").place(relx=0.5, rely=0.5, anchor="center")
         self.toolbar.grid(column=0, row=0, columnspan=2, sticky="news")
 

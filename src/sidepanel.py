@@ -4,10 +4,12 @@ from typing import Any
 import customtkinter as ctk
 import fitz  # PyMuPDF
 from PIL import Image
+
 from widgets import CollapsableFrame
 
 
 class SidePanel(CollapsableFrame):
+
     def __init__(self, parent: Any):
         """
         Initialize the Side Panel.
@@ -15,7 +17,9 @@ class SidePanel(CollapsableFrame):
         Args:
             parent (Any): The parent widget.
         """
-        super().__init__(parent=parent, alignment="left", fg_color="transparent")
+        super().__init__(parent=parent,
+                         alignment="left",
+                         fg_color="transparent")
 
         # tabview
         self.tabview = ctk.CTkTabview(master=self, width=253)
@@ -24,7 +28,8 @@ class SidePanel(CollapsableFrame):
         self.tabview.pack(expand=True, fill="both")
 
         # preview and navigator tab
-        self.navigator_tab = _NavigatorPanel(parent=self.tabview.tab("Navigator"))
+        self.navigator_tab = _NavigatorPanel(
+            parent=self.tabview.tab("Navigator"))
         self.navigator_tab.pack(expand=True, fill="both")
 
     def get_new_document(self, document: fitz.Document) -> None:
@@ -44,6 +49,7 @@ class SidePanel(CollapsableFrame):
 
 
 class _NavigatorPanel(ctk.CTkFrame):
+
     def __init__(self, parent: Any):
         """
         Initialize the Navigator Panel.
@@ -86,6 +92,7 @@ class _NavigatorPanel(ctk.CTkFrame):
 
 
 class _PageView(ctk.CTkScrollableFrame):
+
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
@@ -95,7 +102,10 @@ class _PageView(ctk.CTkScrollableFrame):
         for page in document:
             image = self._convert_page(page)
 
-            ctk.CTkLabel(self, image=image, text="").pack(expand=True, fill="x", padx=5, pady=7)
+            ctk.CTkLabel(self, image=image, text="").pack(expand=True,
+                                                          fill="x",
+                                                          padx=5,
+                                                          pady=7)
 
     def _convert_page(self, page: fitz.Page) -> ctk.CTkImage:
         """
@@ -117,11 +127,9 @@ class _PageView(ctk.CTkScrollableFrame):
         img_width = self._parent_canvas.winfo_width()
         img_height = img_width / ratio
 
-        ctk_img = ctk.CTkImage(
-            light_image=img,
-            dark_image=img,
-            size=(int(img_width), int(img_height))
-        )
+        ctk_img = ctk.CTkImage(light_image=img,
+                               dark_image=img,
+                               size=(int(img_width), int(img_height)))
 
         return ctk_img
 
