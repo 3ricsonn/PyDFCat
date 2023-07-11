@@ -101,9 +101,7 @@ class MainEditor(ctk.CTkFrame):
         self.document_view.update_scaling(self.document, scale_decimal)
 
     def close_document(self):
-        """
-        Close the current document in the Main Editor.
-        """
+        """Close the current document in the Main Editor."""
         self.document = None
 
         self.document_view.clear()
@@ -144,9 +142,7 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         self._update_grid()
 
     def update_pages(self) -> None:
-        """
-        Update the document pages if there is a change in grid dimensions.
-        """
+        """Update the document pages if there is a change in grid dimensions."""
         self._update_grid()
 
     def update_scaling(self, document: fitz.Document, new_scaling: float) -> None:
@@ -242,9 +238,7 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         )
 
     def clear(self) -> None:
-        """
-        Remove all widgets within the frame and reset data.
-        """
+        """Remove all widgets within the frame and reset data."""
         self._images = []
         self._labels = []
         self._rows = 0
