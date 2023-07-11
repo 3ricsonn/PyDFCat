@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import re
 import tkinter as tk
+from tkinter import messagebox
 from typing import Any, Callable
 
 import customtkinter as ctk
@@ -8,7 +10,7 @@ from PIL import Image
 
 
 class MainEditor(ctk.CTkFrame):
-    def __init__(self, parent: Any, open_file_command: Callable) -> None:
+    def __init__(self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar) -> None:
         """
         Initialize the Main Editor.
 
@@ -20,6 +22,7 @@ class MainEditor(ctk.CTkFrame):
 
         # data
         self.document = fitz.Document()
+        self.scaling_variable = scaling_variable
 
         # button to open file
         self.open_file_button = ctk.CTkButton(self, text="open file", command=open_file_command)
@@ -53,7 +56,47 @@ class MainEditor(ctk.CTkFrame):
         Args:
             _event (tk.Event): The event object.
         """
-        self.document_view.update_pages(self.document)
+        self.document_view.update_pages()
+
+    def update_scaling(self, scale_string: str) -> None:
+        """
+        Update the scaling factor of the document view.
+
+        Parameters:
+            scale_string (str): The scaling factor as a percentage.
+
+        Returns:
+            None
+        """
+        # Check if the scale string matches the expected format
+        if not re.match(r'^([1-9]([0-9]){1,2})%$', scale_string):
+            # Show an error message if the scale string is invalid
+            messagebox.showerror(
+                title="Invalid scaling",
+                message="You entered an invalid scaling factor. "
+                        "Please make sure you entered a number.",
+            )
+            self.scaling_variable.set("100%")
+            return
+
+        scale = scale_string[:-1]
+
+        # Check if the scale is greater than 200%
+        if int(scale) > 200:
+            # Show an error message if the scale is too high
+            messagebox.showerror(
+                title="Invalid scaling",
+                message="You entered a too high scaling. "
+                        "Please enter a scaling smaller than 200%.",
+            )
+            self.scaling_variable.set("100%")
+            return
+
+        # Convert the scale to a decimal value
+        scale_decimal = int(scale) / 100
+
+        # Update the scaling of the document view
+        self.document_view.update_scaling(self.document, scale_decimal)
 
     def close_document(self):
         """
@@ -84,6 +127,7 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         self._images: list[ctk.CTkImage] = []
         self._labels: list[ctk.CTkLabel] = []
         self._rows = 0
+        self._scale = 1.0
 
     def load_pages(self, document: fitz.Document) -> None:
         """
@@ -92,18 +136,33 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         Args:
             document (fitz.Document): The document to display.
         """
+        self.clear()
         self._images = [self._convert_page(page) for page in document]
         self._labels = [ctk.CTkLabel(self, image=image, text="") for image in self._images]
         self._update_grid()
 
-    def update_pages(self, document: fitz.Document) -> None:
+    def update_pages(self) -> None:
         """
         Update the document pages if there is a change in grid dimensions.
+        """
+        self._update_grid()
+
+    def update_scaling(self, document: fitz.Document, new_scaling: float) -> None:
+        """
+        Update the scaling of the document and refresh the view.
 
         Args:
-            document (fitz.Document): The updated document.
+            document (fitz.Document): The document to update.
+            new_scaling (float): The new scaling factor.
         """
-        # self._images = [self._convert_page(page) for page in document]
+        self._scale = new_scaling
+
+        # Clear the existing labels and images
+        self.clear()
+
+        self._images = [self._convert_page(page) for page in document]
+        self._labels = [ctk.CTkLabel(self, image=image, text="") for image in self._images]
+
         self._update_grid()
 
     def _convert_page(self, page: fitz.Page) -> ctk.CTkImage:
@@ -132,12 +191,10 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
             img_height = canvas_height
             img_width = img_height * ratio
 
-        scale = 1
-
         ctk_img = ctk.CTkImage(
             light_image=img,
             dark_image=img,
-            size=(int(img_width * scale), int(img_height * scale))
+            size=(int(img_width * self._scale), int(img_height * self._scale))
         )
 
         return ctk_img
@@ -155,9 +212,11 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
             return False
 
         self._rows = max(1, rows)
+        columns = max(len(self._images) // self._rows, 1)
 
+        self.update()
         self.rowconfigure(tuple(range(self._rows)), weight=1)
-        self.columnconfigure(tuple(range(len(self._images) // self._rows)), weight=1)
+        self.columnconfigure(tuple(range(columns)), weight=1)
 
         for index, label in enumerate(self._labels):
             label.grid(column=index % self._rows, row=index // self._rows, padx=5, pady=7)

@@ -10,3 +10,6 @@ WINDOW_MIN_HEIGHT = 730
 BLACK = '#000'
 WHITE = '#FFF'
 CLOSE_RED = '#8A0606'
+
+# toolbar option
+SCALING_FACTORS = ["100%", "75%", "50%", "25%"]

@@ -14,6 +14,7 @@ from settings import (
     WINDOW_WIDTH,
 )
 from sidepanel import SidePanel
+from toolbar import ToolBar
 
 
 class ApplicationWindow(ctk.CTk):
@@ -34,17 +35,15 @@ class ApplicationWindow(ctk.CTk):
         self.columnconfigure(0, weight=0)
         self.columnconfigure(1, weight=1)
 
-        # toolbar
-        self.toolbar = ctk.CTkFrame(self, fg_color="red", height=50)
-        ctk.CTkLabel(self.toolbar, text="Toolbar").place(relx=0.5, rely=0.5, anchor="center")
-        self.toolbar.grid(column=0, row=0, columnspan=2, sticky="news")
+        # data
+        scaling_variable = ctk.StringVar(value="100%")
 
         # sidebar
         self.sidebar = SidePanel(self)
         self.sidebar.grid(column=0, row=1, sticky="news", padx=10, pady=10)
 
         # main editor
-        self.main_editor = MainEditor(self, open_file_command=self.open_file)
+        self.main_editor = MainEditor(self, open_file_command=self.open_file, scaling_variable=scaling_variable)
         self.main_editor.grid(column=1, row=1, sticky="news", padx=10, pady=10)
 
         # close dokument button
@@ -58,6 +57,18 @@ class ApplicationWindow(ctk.CTk):
             height=40,
             command=self.close_file
         )
+
+        # toolbar
+        self.toolbar = ToolBar(
+            self,
+            open_file_command=self.open_file,
+            save_file_command=lambda _: print("save file"),
+            scale_page_command=self.main_editor.update_scaling,
+            scaling_variable=scaling_variable,
+            height=60
+        )
+        # ctk.CTkLabel(self.toolbar, text="Toolbar").place(relx=0.5, rely=0.5, anchor="center")
+        self.toolbar.grid(column=0, row=0, columnspan=2, sticky="news")
 
         # self.main_editor.bind(
         #     "<Configure>",
@@ -86,6 +97,7 @@ class ApplicationWindow(ctk.CTk):
             # Update the PDF document in the main editor and sidebar
             self.main_editor.get_new_document(pdf_document)
             self.sidebar.get_new_document(pdf_document)
+            self.toolbar.enable_tools()
 
             # Update the application title with the file name
             self.title(f"PyDFCat - Editing: {os.path.basename(file_name)}")
@@ -96,6 +108,7 @@ class ApplicationWindow(ctk.CTk):
     def close_file(self):
         self.main_editor.close_document()
         self.sidebar.close_document()
+        self.toolbar.disable_tools()
 
         self.title("PyDFCat")
         self.close_button.place_forget()
