@@ -244,7 +244,6 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
                 column=index % self._rows, row=index // self._rows, padx=5, pady=7
             )
 
-
         return True
 
     def _get_grid_dimension(self, img: ctk.CTkImage) -> tuple[int, int]:
