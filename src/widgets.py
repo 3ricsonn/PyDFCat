@@ -95,12 +95,24 @@ class CollapsableFrame(ctk.CTkFrame):
             self._hide()
 
     def _hide(self) -> None:
+        """
+        Hide the widget by forgetting it and updating the hide button.
+
+        Returns:
+            None
+        """
         self.expanded = False
         super().pack_forget()
         self._hide_button.configure(text=self.char[1], command=self._show)
         self.update()
 
     def _show(self) -> None:
+        """
+        Show the widget by packing it with expand and fill options, and updating the hide button.
+
+        Returns:
+            None
+        """
         self.expanded = True
         super().pack(expand=True, fill="both")
         self._hide_button.configure(text=self.char[0], command=self._hide)

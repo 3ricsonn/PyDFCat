@@ -8,7 +8,8 @@ from widgets import CollapsableFrame
 
 
 class SidePanel(CollapsableFrame):
-    """Side panel to prieview the file and the selection"""
+    """Side panel to preview the file and the selection"""
+
     def __init__(self, parent: Any):
         """
         Initialize the Side Panel.
@@ -45,6 +46,8 @@ class SidePanel(CollapsableFrame):
 
 
 class _NavigatorPanel(ctk.CTkFrame):
+    """Class to preview document and navigator for main editor"""
+
     def __init__(self, parent: Any):
         """
         Initialize the Navigator Panel.
@@ -88,6 +91,7 @@ class _NavigatorPanel(ctk.CTkFrame):
 
 class _PageView(ctk.CTkScrollableFrame):
     """Preview class to display file pages"""
+
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 

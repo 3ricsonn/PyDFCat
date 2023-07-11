@@ -11,6 +11,7 @@ from PIL import Image
 
 class MainEditor(ctk.CTkFrame):
     """Main editor class to manage file pages"""
+
     def __init__(
             self,
             parent: Any,
@@ -132,6 +133,7 @@ class MainEditor(ctk.CTkFrame):
 
 class _DocumentEditor(ctk.CTkScrollableFrame):
     """Class to display file pages"""
+
     def __init__(self, *args, **kwargs) -> None:
         """
         Initialize the Document Editor.
