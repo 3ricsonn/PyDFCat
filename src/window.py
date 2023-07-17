@@ -1,18 +1,10 @@
 # -*- coding: utf-8 -*-
-from tkinter.filedialog import askopenfilename
-
+import crossfiledialog
 import customtkinter as ctk
 import fitz  # PyMuPDF
 import os
 from maineditor import MainEditor
-from settings import (
-    CLOSE_RED,
-    WHITE,
-    WINDOW_HEIGHT,
-    WINDOW_MIN_HEIGHT,
-    WINDOW_MIN_WIDTH,
-    WINDOW_WIDTH,
-)
+from settings import CLOSE_RED, WHITE, WINDOW_HEIGHT, WINDOW_WIDTH
 from sidepanel import SidePanel
 from toolbar import ToolBar
 
@@ -27,7 +19,7 @@ class ApplicationWindow(ctk.CTk):
         # window setup
         self.title("PyDFCat")
         self.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
-        self.minsize(WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT)
+        # self.minsize(WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT)
 
         # layout
         self.rowconfigure(0, weight=0)
@@ -85,12 +77,11 @@ class ApplicationWindow(ctk.CTk):
     def open_file(self) -> None:
         """Open a PDF file and load it into the PDF editor application."""
         # Open file dialog to select a PDF file
-        file_name = askopenfilename(
-            title="Choose your PDF you want to edit:",
-            filetypes=[("PDF-Files", "*.pdf")],
+        file_name = crossfiledialog.open_file(
+            title="Choose your PDF you want to edit:"
         )
 
-        if file_name:
+        if file_name and has_file_extension(file_name, ".pdf"):
             # Load the selected PDF file using fitz
             pdf_document = fitz.Document(file_name)
 
@@ -104,6 +95,9 @@ class ApplicationWindow(ctk.CTk):
 
             # Place the close button in the top right corner
             self.close_button.place(relx=0.97, rely=0.05, anchor="ne")
+        else:
+            # user selected a non-pdf file
+            self.main_editor.open_file_error()
 
     def close_file(self):
         """CLose file and discard all changes"""
@@ -113,3 +107,18 @@ class ApplicationWindow(ctk.CTk):
 
         self.title("PyDFCat")
         self.close_button.place_forget()
+
+
+def has_file_extension(file_name: str, extension: str) -> bool:
+    """
+    Check if the file name has the specified file extension.
+
+    Args:
+        file_name (str): The file name to check.
+        extension (str): The desired file extension (e.g., ".txt").
+
+    Returns:
+        bool: True if the file name has the specified extension, False otherwise.
+    """
+    file_extension = os.path.splitext(file_name)[1]
+    return file_extension.lower() == extension.lower()

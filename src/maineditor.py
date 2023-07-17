@@ -31,14 +31,20 @@ class MainEditor(ctk.CTkFrame):
         self.document = fitz.Document()
         self.scaling_variable = scaling_variable
 
+        # ui frame
+        self.ui_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.ui_frame.pack(expand=True, fill="both")
+        self.ui_frame.rowconfigure((0, 1), weight=1, uniform="a")
+        self.ui_frame.columnconfigure(0, weight=1)
+
         # button to open file
         self.open_file_button = ctk.CTkButton(
-            self,
+            self.ui_frame,
             text="open file",
             command=open_file_command
         )
 
-        self.open_file_button.pack(expand=True)
+        self.open_file_button.grid(row=0, column=0, sticky="s", pady=5)
 
         # page view
         self.document_view = _DocumentEditor(
@@ -46,6 +52,9 @@ class MainEditor(ctk.CTkFrame):
             fg_color="transparent",
             orientation="vertical"
         )
+
+        # label for error message
+        self.error_label = ctk.CTkLabel(self.ui_frame, text="Wrong file type!", text_color="#FF0000")
 
     def get_new_document(self, document: fitz.Document) -> None:
         """
@@ -57,7 +66,8 @@ class MainEditor(ctk.CTkFrame):
         self.document = document
 
         # remove file-open-button and place page view
-        self.open_file_button.pack_forget()
+        self.ui_frame.pack_forget()
+        self.error_label.grid_forget()
         self.document_view.pack(expand=True, fill="both")
 
         self.document_view.load_pages(self.document)
@@ -116,6 +126,11 @@ class MainEditor(ctk.CTkFrame):
         # Update the scaling of the document view
         self.document_view.update_scaling(self.document, scale_decimal)
 
+    def open_file_error(self) -> None:
+        # display error message
+        if not self.document_view.winfo_ismapped():
+            self.error_label.grid(row=1, column=0, sticky="n", pady=5)
+
     def close_document(self):
         """Close the current document in the Main Editor."""
         self.document = None
@@ -124,7 +139,8 @@ class MainEditor(ctk.CTkFrame):
 
         # remove page view and place file-open-button
         self.document_view.pack_forget()
-        self.open_file_button.pack(expand=True)
+        self.error_label.grid_forget()
+        self.ui_frame.pack(expand=True, fill="both")
 
         # events
         self.unbind("<Configure>")

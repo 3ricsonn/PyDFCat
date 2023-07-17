@@ -1,3 +1,4 @@
+crossfiledialog
 CTKMessageBox
 customtkinter==5.2.0
 Pillow==10.0.0
