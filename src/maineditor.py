@@ -128,7 +128,7 @@ class MainEditor(ctk.CTkFrame):
         self.document_view.update_scaling(self.document, scale_decimal)
 
     def open_file_error(self) -> None:
-        # display error message
+        """display error message"""
         if not self.document_view.winfo_ismapped():
             self.error_label.grid(row=1, column=0, sticky="n", pady=5)
 
