@@ -4,6 +4,7 @@ from typing import Any
 import customtkinter as ctk
 import fitz  # PyMuPDF
 from PIL import Image
+
 from widgets import CollapsableFrame
 
 

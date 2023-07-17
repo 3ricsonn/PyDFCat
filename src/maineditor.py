@@ -54,7 +54,8 @@ class MainEditor(ctk.CTkFrame):
         )
 
         # label for error message
-        self.error_label = ctk.CTkLabel(self.ui_frame, text="Wrong file type!", text_color="#FF0000")
+        self.error_label = ctk.CTkLabel(
+            self.ui_frame, text="Wrong file type!", text_color="#FF0000")
 
     def get_new_document(self, document: fitz.Document) -> None:
         """
