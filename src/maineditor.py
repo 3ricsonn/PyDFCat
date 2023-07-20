@@ -171,7 +171,9 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         self._ctk_images = self._create_images(self._images, self._get_img_size(self._images[0]))
         for image in self._ctk_images:
             label = ctk.CTkLabel(self, image=image, text="")
-            label.bind("<Button-1>", self._select_page)
+            label.bind("<Button-1>", command=self._select_page)
+            label.bind("<Control-Button-1>", command=self._select_pages_control)
+            label.bind("<Shift-Button-1>", command=self._select_pages_shift)
             self._labels.append(label)
 
         self._update_grid()
@@ -308,14 +310,14 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
             self._parent_canvas.winfo_height() // img.cget("size")[1],
         )
 
-    @staticmethod
-    def _select_page(event: tk.Event) -> None:
-        """Select page if right-clicked"""
-        print(type(event.widget))
-        # clear selection
-        # self._selection.clear()
+    def _select_page(self, event: tk.Event) -> None:
+        """Select page with a single click."""
 
-        # add page to selection
+    def _select_pages_control(self, event: tk.Event) -> None:
+        """Select multiple pages by holding control."""
+
+    def _select_pages_shift(self, event: tk.Event) -> None:
+        """Selection a range of pages by holding shift and clicking start and end."""
 
     def clear(self) -> None:
         """Remove all widgets within the frame and reset data."""

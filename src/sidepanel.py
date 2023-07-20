@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
+import tkinter as tk
 from typing import Any
 
 import customtkinter as ctk
 import fitz  # PyMuPDF
 from PIL import Image
-
 from widgets import CollapsableFrame
 
 
@@ -110,9 +110,9 @@ class _PageView(ctk.CTkScrollableFrame):
             image = self._convert_page(page)
 
             # Create a labeled image widget and pack it
-            ctk.CTkLabel(self, image=image, text="").pack(
-                expand=True, fill="x", padx=5, pady=7
-            )
+            label = ctk.CTkLabel(self, image=image, text="")
+            label.bind("<Button-1>", command=self._select_page)
+            label.pack(expand=True, fill="x", padx=5, pady=7)
 
     def _convert_page(self, page: fitz.Page) -> ctk.CTkImage:
         """
@@ -140,6 +140,9 @@ class _PageView(ctk.CTkScrollableFrame):
         )
 
         return ctk_img
+
+    def _select_page(self, event: tk.Event) -> None:
+        """Select q page with a single click and jumps to it in the main editor."""
 
     def clear(self):
         """
