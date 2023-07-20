@@ -83,7 +83,7 @@ class MainEditor(ctk.CTkFrame):
         Args:
             _event (tk.Event): The event object.
         """
-        self.document_view.update_pages()
+        self.document_view.load_pages(self.document)
 
     def update_scaling(self, scale_string: str) -> None:
         """
@@ -173,9 +173,10 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         """
         self.clear()
         self._images = [self._convert_page(page) for page in document]
-        self._labels = [
-            ctk.CTkLabel(self, image=image, text="") for image in self._images
-        ]
+        for image in self._images:
+            label = ctk.CTkLabel(self, image=image, text="")
+            label.bind("<Button-1>", self._select_page)
+            self._labels.append(label)
 
         self._update_grid()
 
@@ -197,9 +198,10 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         self.clear()
 
         self._images = [self._convert_page(page) for page in document]
-        self._labels = [
-            ctk.CTkLabel(self, image=image, text="") for image in self._images
-        ]
+        for image in self._images:
+            label = ctk.CTkLabel(self, image=image, text="")
+            label.bind("<Button-1>", self._select_page)
+            self._labels.append(label)
 
         self._update_grid()
 
@@ -219,15 +221,21 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
 
         self._parent_canvas.update()
 
-        ratio = img.size[0] / img.size[1]
+        img_ratio = img.size[0] / img.size[1]
         canvas_width = self._parent_canvas.winfo_width()
         canvas_height = self._parent_canvas.winfo_height()
+        canvas_ratio = canvas_width / canvas_height
 
-        img_width = canvas_height * ratio if ratio < 1 else canvas_width
-        img_height = canvas_height if ratio < 1 else canvas_width / ratio
-        if img_height > canvas_height:
-            img_height = canvas_height
-            img_width = img_height * ratio
+        if canvas_ratio >= 1:
+            if canvas_height * img_ratio <= canvas_width:
+                img_height = canvas_height
+                img_width = canvas_height * img_ratio
+            else:
+                img_width = canvas_width
+                img_height = canvas_width / img_ratio
+        else:
+            img_width = canvas_width
+            img_height = canvas_width / img_ratio
 
         ctk_img = ctk.CTkImage(
             light_image=img,
@@ -278,6 +286,13 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
             self._parent_canvas.winfo_width() // img.cget("size")[0],
             self._parent_canvas.winfo_height() // img.cget("size")[1]
         )
+
+    def _select_page(self, event: tk.Event) -> None:
+        print(event)
+        # clear selection
+        # self._selection.clear()
+
+        # add page to selection
 
     def clear(self) -> None:
         """Remove all widgets within the frame and reset data."""

@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
-# windows properties
-WINDOW_WIDTH = 1225
-WINDOW_HEIGHT = 1300
+from screeninfo import get_monitors
 
-WINDOW_MIN_WIDTH = 760
-WINDOW_MIN_HEIGHT = 730
+
+# -*- coding: utf-8 -*-
+# windows properties
+screen = get_monitors()[0]
+WINDOW_RATIO = 0.9423076923076923
+
+WINDOW_HEIGHT = screen.height
+WINDOW_WIDTH = int(WINDOW_RATIO * WINDOW_HEIGHT)
+
+WINDOW_MIN_WIDTH = int(0.62 * WINDOW_WIDTH)
+WINDOW_MIN_HEIGHT = int(0.56 * WINDOW_HEIGHT)
 
 # colors
 BLACK = '#000'

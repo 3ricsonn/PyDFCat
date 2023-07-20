@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
-import os
-
 import crossfiledialog
 import customtkinter as ctk
 import fitz  # PyMuPDF
-
+import os
 from maineditor import MainEditor
-from settings import CLOSE_RED, WHITE, WINDOW_HEIGHT, WINDOW_WIDTH
+from settings import (
+    CLOSE_RED,
+    WHITE,
+    WINDOW_HEIGHT,
+    WINDOW_MIN_HEIGHT,
+    WINDOW_MIN_WIDTH,
+    WINDOW_WIDTH,
+)
 from sidepanel import SidePanel
 from toolbar import ToolBar
 
@@ -21,7 +26,7 @@ class ApplicationWindow(ctk.CTk):
         # window setup
         self.title("PyDFCat")
         self.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
-        # self.minsize(WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT)
+        self.minsize(WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT)
 
         # layout
         self.rowconfigure(0, weight=0)
@@ -67,7 +72,7 @@ class ApplicationWindow(ctk.CTk):
 
         # self.main_editor.bind(
         #     "<Configure>",
-        #     lambda _: print(
+        #    lambda _: print(
         #         self.main_editor.winfo_geometry()
         #         + " ("
         #         + self.winfo_geometry()
