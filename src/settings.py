@@ -12,9 +12,9 @@ WINDOW_MIN_WIDTH = int(0.62 * WINDOW_WIDTH)
 WINDOW_MIN_HEIGHT = int(0.56 * WINDOW_HEIGHT)
 
 # colors
-BLACK = '#000'
-WHITE = '#FFF'
-CLOSE_RED = '#8A0606'
+BLACK = "#000"
+WHITE = "#FFF"
+CLOSE_RED = "#8A0606"
 
 # toolbar option
 SCALING_FACTORS = ["100%", "75%", "50%", "25%"]

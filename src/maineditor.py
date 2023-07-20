@@ -13,10 +13,7 @@ class MainEditor(ctk.CTkFrame):
     """Main editor class to manage file pages"""
 
     def __init__(
-            self,
-            parent: Any,
-            open_file_command: Callable,
-            scaling_variable: ctk.StringVar
+        self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar
     ) -> None:
         """
         Initialize the Main Editor.
@@ -39,23 +36,20 @@ class MainEditor(ctk.CTkFrame):
 
         # button to open file
         self.open_file_button = ctk.CTkButton(
-            self.ui_frame,
-            text="open file",
-            command=open_file_command
+            self.ui_frame, text="open file", command=open_file_command
         )
 
         self.open_file_button.grid(row=0, column=0, sticky="s", pady=5)
 
         # page view
         self.document_view = _DocumentEditor(
-            self,
-            fg_color="transparent",
-            orientation="vertical"
+            self, fg_color="transparent", orientation="vertical"
         )
 
         # label for error message
         self.error_label = ctk.CTkLabel(
-            self.ui_frame, text="Wrong file type!", text_color="#FF0000")
+            self.ui_frame, text="Wrong file type!", text_color="#FF0000"
+        )
 
     def get_new_document(self, document: fitz.Document) -> None:
         """
@@ -96,13 +90,13 @@ class MainEditor(ctk.CTkFrame):
             None
         """
         # Check if the scale string matches the expected format
-        if not re.match(r'^([1-9]([0-9]){1,2})%$', scale_string):
+        if not re.match(r"^([1-9]([0-9]){1,2})%$", scale_string):
             # Show an error message if the scale string is invalid
             CTkMessagebox(
                 title="Invalid scaling",
                 icon="warning",
                 message="You entered an invalid scaling factor. "
-                        "Please make sure you entered a number.",
+                "Please make sure you entered a number.",
             )
             self.scaling_variable.set("100%")
             return
@@ -116,7 +110,7 @@ class MainEditor(ctk.CTkFrame):
                 title="Invalid scaling",
                 icon="warning",
                 message="You entered a too high scaling. "
-                        "Please enter a scaling smaller than 200%.",
+                "Please enter a scaling smaller than 200%.",
             )
             self.scaling_variable.set("100%")
             return
@@ -240,7 +234,7 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         ctk_img = ctk.CTkImage(
             light_image=img,
             dark_image=img,
-            size=(int(img_width * self._scale), int(img_height * self._scale))
+            size=(int(img_width * self._scale), int(img_height * self._scale)),
         )
 
         return ctk_img
@@ -284,7 +278,7 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         self._parent_canvas.update()
         return (
             self._parent_canvas.winfo_width() // img.cget("size")[0],
-            self._parent_canvas.winfo_height() // img.cget("size")[1]
+            self._parent_canvas.winfo_height() // img.cget("size")[1],
         )
 
     @staticmethod

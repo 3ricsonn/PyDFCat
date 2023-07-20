@@ -110,11 +110,9 @@ class _PageView(ctk.CTkScrollableFrame):
             image = self._convert_page(page)
 
             # Create a labeled image widget and pack it
-            ctk.CTkLabel(
-                self,
-                image=image,
-                text=""
-            ).pack(expand=True, fill="x", padx=5, pady=7)
+            ctk.CTkLabel(self, image=image, text="").pack(
+                expand=True, fill="x", padx=5, pady=7
+            )
 
     def _convert_page(self, page: fitz.Page) -> ctk.CTkImage:
         """
@@ -137,9 +135,8 @@ class _PageView(ctk.CTkScrollableFrame):
         img_height = img_width / ratio
 
         ctk_img = ctk.CTkImage(
-            light_image=img,
-            dark_image=img,
-            size=(int(img_width), int(img_height))
+            light_image=img, dark_image=img, size=(
+                int(img_width), int(img_height))
         )
 
         return ctk_img
