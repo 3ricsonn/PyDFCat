@@ -168,7 +168,9 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         """
         self.clear()
         self._images = [self._convert_page(page) for page in document]
-        self._ctk_images = self._create_images(self._images, self._get_img_size(self._images[0]))
+        self._ctk_images = self._create_images(
+            self._images, self._get_img_size(self._images[0])
+        )
         for image in self._ctk_images:
             label = ctk.CTkLabel(self, image=image, text="")
             label.bind("<Button-1>", self._select_page)
@@ -188,7 +190,9 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         if new_scaling is not None:
             self._scale = new_scaling
 
-        if new_scaling is not None or (new_size and self._ctk_images[0].cget("size") != new_size):
+        if new_scaling is not None or (
+            new_size and self._ctk_images[0].cget("size") != new_size
+        ):
             self._ctk_images = self._create_images(self._images, new_size)
             for label, img in zip(self._labels, self._ctk_images):
                 label.configure(image=img)
@@ -212,7 +216,9 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
 
         return img
 
-    def _create_images(self, images: list[Image], size: tuple[int, int]) -> list[ctk.CTkImage]:
+    def _create_images(
+        self, images: list[Image], size: tuple[int, int]
+    ) -> list[ctk.CTkImage]:
         """
         Create a list of ctk.CTkImage objects from a list of PIL.Image objects.
 
@@ -229,9 +235,7 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
             ctk_img = ctk.CTkImage(
                 light_image=img,
                 dark_image=img,
-                size=(
-                    int(size[0] * self._scale), int(size[1] * self._scale)
-                )
+                size=(int(size[0] * self._scale), int(size[1] * self._scale)),
             )
             img_list.append(ctk_img)
 
