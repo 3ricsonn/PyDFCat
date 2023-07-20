@@ -31,17 +31,33 @@ class ToolBar(ctk.CTkFrame):
         super().__init__(master=parent, **kwargs)
 
         # Open button
-        ctk.CTkButton(self, text="Open", command=open_file_command, width=50).pack(side="left", padx=5, pady=7)
+        ctk.CTkButton(self, text="Open", command=open_file_command, width=50).pack(
+            side="left", padx=5, pady=7
+        )
 
         # Save button with option menu
-        ctk.CTkOptionMenu(self, values=["save", "save as"], command=save_file_command).pack(side="left", padx=5, pady=7)
+        ctk.CTkOptionMenu(
+            self, values=["save", "save as"], command=save_file_command
+        ).pack(side="left", padx=5, pady=7)
 
         # Undo button (initially disabled)
-        self.undo_button = ctk.CTkButton(self, text="Undo", command=lambda: print("undone"), width=50, state="disabled")
+        self.undo_button = ctk.CTkButton(
+            self,
+            text="Undo",
+            command=lambda: print("undone"),
+            width=50,
+            state="disabled",
+        )
         self.undo_button.pack(side="left", padx=5, pady=7)
 
         # Redo button (initially disabled)
-        self.redo_button = ctk.CTkButton(self, text="Redo", command=lambda: print("redone"), width=50, state="disabled")
+        self.redo_button = ctk.CTkButton(
+            self,
+            text="Redo",
+            command=lambda: print("redone"),
+            width=50,
+            state="disabled",
+        )
         self.redo_button.pack(side="left", padx=5, pady=7)
 
         # Scaling combobox (initially disabled)
@@ -50,7 +66,7 @@ class ToolBar(ctk.CTkFrame):
             values=SCALING_FACTORS,
             command=scale_page_command,
             variable=scaling_variable,
-            state="disabled"
+            state="disabled",
         )
         self.scaling_combobox.set(scaling_variable.get())
         self.scaling_combobox.pack(side="left", padx=5, pady=7)
