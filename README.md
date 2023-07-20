@@ -2,6 +2,7 @@
  <a href="https://app.deepsource.com/gh/3ricsonn/PyDFCat/?ref=repository-badge}" target="_blank">
  <img alt="DeepSource" title="DeepSource" src="https://app.deepsource.com/gh/3ricsonn/PyDFCat.svg/?label=active+issues&show_trend=true&token=Y2NWKSxBUnhCv3qSaX8gARR-"/>
 </a>
+ <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
 
 <h1 align="center">PyDFCat - PDF Editor</h1>
