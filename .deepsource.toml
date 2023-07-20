@@ -11,4 +11,7 @@ name = "python"
   max_line_length = 120
 
 [[transformers]]
+name = "yapf"
+
+[[transformers]]
 name = "autopep8"
