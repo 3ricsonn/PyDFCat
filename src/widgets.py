@@ -9,23 +9,24 @@ class CollapsableFrame(ctk.CTkFrame):
     """Collapsible Frame Class."""
 
     def __init__(
-            self, parent: Any,
-            alignment: Literal["left", "right"],
-            expanded: bool = True,
-            corner_radius: Optional[Union[int, str]] = None,
-            border_width: Optional[Union[int, str]] = None,
-            bg_color: Union[str, Tuple[str, str]] = "transparent",
-            fg_color: Optional[Union[str, Tuple[str, str]]] = None,
-            border_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_corner_radius: Optional[Union[int, str]] = None,
-            button_border_width: Optional[Union[int, str]] = None,
-            button_fg_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_hover_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_border_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_text_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_image: Union[ctk.CTkImage, ImageTk.PhotoImage, None] = None,
-            button_hover: bool = True,
-            button_compound: str = "left",
+        self,
+        parent: Any,
+        alignment: Literal["left", "right"],
+        expanded: bool = True,
+        corner_radius: Optional[Union[int, str]] = None,
+        border_width: Optional[Union[int, str]] = None,
+        bg_color: Union[str, Tuple[str, str]] = "transparent",
+        fg_color: Optional[Union[str, Tuple[str, str]]] = None,
+        border_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_corner_radius: Optional[Union[int, str]] = None,
+        button_border_width: Optional[Union[int, str]] = None,
+        button_fg_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_hover_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_border_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_text_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_image: Union[ctk.CTkImage, ImageTk.PhotoImage, None] = None,
+        button_hover: bool = True,
+        button_compound: str = "left",
     ) -> None:
         """
 
@@ -48,14 +49,12 @@ class CollapsableFrame(ctk.CTkFrame):
         :param button_compound:
         """
         # container
-        self._parent_frame = ctk.CTkFrame(
-            master=parent,
-            corner_radius=corner_radius,
-            border_width=border_width,
-            bg_color=bg_color,
-            fg_color=fg_color,
-            border_color=border_color
-        )
+        self._parent_frame = ctk.CTkFrame(master=parent,
+                                          corner_radius=corner_radius,
+                                          border_width=border_width,
+                                          bg_color=bg_color,
+                                          fg_color=fg_color,
+                                          border_color=border_color)
 
         super().__init__(master=self._parent_frame, fg_color="transparent")
 
@@ -70,20 +69,19 @@ class CollapsableFrame(ctk.CTkFrame):
 
         # widgets
         start_char = self.char[0] if self.expanded else self.char[1]
-        self._hide_button = ctk.CTkButton(
-            master=self._parent_frame,
-            text=start_char,
-            width=20, height=50,
-            corner_radius=button_corner_radius,
-            border_width=button_border_width,
-            fg_color=button_fg_color,
-            hover_color=button_hover_color,
-            border_color=button_border_color,
-            text_color=button_text_color,
-            image=button_image,
-            hover=button_hover,
-            compound=button_compound
-        )
+        self._hide_button = ctk.CTkButton(master=self._parent_frame,
+                                          text=start_char,
+                                          width=20,
+                                          height=50,
+                                          corner_radius=button_corner_radius,
+                                          border_width=button_border_width,
+                                          fg_color=button_fg_color,
+                                          hover_color=button_hover_color,
+                                          border_color=button_border_color,
+                                          text_color=button_text_color,
+                                          image=button_image,
+                                          hover=button_hover,
+                                          compound=button_compound)
         if alignment == "left":
             self._hide_button.pack(side="right")
         else:
@@ -137,22 +135,27 @@ class CollapsableFrame(ctk.CTkFrame):
             None
         """
         if "button_corner_radius" in kwargs:
-            self._hide_button.configure(corner_radius=kwargs.pop("button_corner_radius"))
+            self._hide_button.configure(
+                corner_radius=kwargs.pop("button_corner_radius"))
 
         if "button_border_width" in kwargs:
-            self._hide_button.configure(border_width=kwargs.pop("button_border_width"))
+            self._hide_button.configure(
+                border_width=kwargs.pop("button_border_width"))
 
         if "button_fg_color" in kwargs:
             self._hide_button.configure(fg_color=kwargs.pop("button_fg_color"))
 
         if "button_hover_color" in kwargs:
-            self._hide_button.configure(hover_color=kwargs.pop("button_hover_color"))
+            self._hide_button.configure(
+                hover_color=kwargs.pop("button_hover_color"))
 
         if "button_border_color" in kwargs:
-            self._hide_button.configure(border_color=kwargs.pop("button_border_color"))
+            self._hide_button.configure(
+                border_color=kwargs.pop("button_border_color"))
 
         if "button_text_color" in kwargs:
-            self._hide_button.configure(text_color=kwargs.pop("button_text_color"))
+            self._hide_button.configure(
+                text_color=kwargs.pop("button_text_color"))
 
         if "button_image" in kwargs:
             self._hide_button.configure(image=kwargs.pop("button_image"))
@@ -298,10 +301,10 @@ if __name__ == '__main__':
     collapsable_frame.pack(side="left", expand=True, fill="both")
     # collapsable_frame.grid(column=0, row=0, sticky="news")
 
-    ctk.CTkLabel(collapsable_frame, text="Test Label").pack(
-        fill="x", expand=True)
-    ctk.CTkButton(collapsable_frame, text="Test Button").pack(
-        fill="x", expand=True)
+    ctk.CTkLabel(collapsable_frame, text="Test Label").pack(fill="x",
+                                                            expand=True)
+    ctk.CTkButton(collapsable_frame, text="Test Button").pack(fill="x",
+                                                              expand=True)
 
     # debugging scrollable frame
     scrollable_frame = ctk.CTkScrollableFrame(window)  # , orientation="auto")

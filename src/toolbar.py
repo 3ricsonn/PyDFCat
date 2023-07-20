@@ -8,15 +8,9 @@ from settings import SCALING_FACTORS
 class ToolBar(ctk.CTkFrame):
     """Collection of tools to manipulate the pdf file pages"""
 
-    def __init__(
-        self,
-        parent: Any,
-        save_file_command: Callable,
-        open_file_command: Callable,
-        scale_page_command: Callable,
-        scaling_variable: ctk.StringVar,
-        **kwargs
-    ) -> None:
+    def __init__(self, parent: Any, save_file_command: Callable,
+                 open_file_command: Callable, scale_page_command: Callable,
+                 scaling_variable: ctk.StringVar, **kwargs) -> None:
         """
         Initialize the ToolBar.
 
@@ -31,27 +25,38 @@ class ToolBar(ctk.CTkFrame):
         super().__init__(master=parent, **kwargs)
 
         # Open button
-        ctk.CTkButton(self, text="Open", command=open_file_command, width=50).pack(side="left", padx=5, pady=7)
+        ctk.CTkButton(self, text="Open", command=open_file_command,
+                      width=50).pack(side="left", padx=5, pady=7)
 
         # Save button with option menu
-        ctk.CTkOptionMenu(self, values=["save", "save as"], command=save_file_command).pack(side="left", padx=5, pady=7)
+        ctk.CTkOptionMenu(self,
+                          values=["save", "save as"],
+                          command=save_file_command).pack(side="left",
+                                                          padx=5,
+                                                          pady=7)
 
         # Undo button (initially disabled)
-        self.undo_button = ctk.CTkButton(self, text="Undo", command=lambda: print("undone"), width=50, state="disabled")
+        self.undo_button = ctk.CTkButton(self,
+                                         text="Undo",
+                                         command=lambda: print("undone"),
+                                         width=50,
+                                         state="disabled")
         self.undo_button.pack(side="left", padx=5, pady=7)
 
         # Redo button (initially disabled)
-        self.redo_button = ctk.CTkButton(self, text="Redo", command=lambda: print("redone"), width=50, state="disabled")
+        self.redo_button = ctk.CTkButton(self,
+                                         text="Redo",
+                                         command=lambda: print("redone"),
+                                         width=50,
+                                         state="disabled")
         self.redo_button.pack(side="left", padx=5, pady=7)
 
         # Scaling combobox (initially disabled)
-        self.scaling_combobox = ctk.CTkComboBox(
-            self,
-            values=SCALING_FACTORS,
-            command=scale_page_command,
-            variable=scaling_variable,
-            state="disabled"
-        )
+        self.scaling_combobox = ctk.CTkComboBox(self,
+                                                values=SCALING_FACTORS,
+                                                command=scale_page_command,
+                                                variable=scaling_variable,
+                                                state="disabled")
         self.scaling_combobox.set(scaling_variable.get())
         self.scaling_combobox.pack(side="left", padx=5, pady=7)
 

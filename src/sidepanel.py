@@ -18,7 +18,9 @@ class SidePanel(CollapsableFrame):
         Args:
             parent (Any): The parent widget.
         """
-        super().__init__(parent=parent, alignment="left", fg_color="transparent")
+        super().__init__(parent=parent,
+                         alignment="left",
+                         fg_color="transparent")
 
         # tabview
         self.tabview = ctk.CTkTabview(master=self, width=253)
@@ -110,11 +112,10 @@ class _PageView(ctk.CTkScrollableFrame):
             image = self._convert_page(page)
 
             # Create a labeled image widget and pack it
-            ctk.CTkLabel(
-                self,
-                image=image,
-                text=""
-            ).pack(expand=True, fill="x", padx=5, pady=7)
+            ctk.CTkLabel(self, image=image, text="").pack(expand=True,
+                                                          fill="x",
+                                                          padx=5,
+                                                          pady=7)
 
     def _convert_page(self, page: fitz.Page) -> ctk.CTkImage:
         """
@@ -136,11 +137,9 @@ class _PageView(ctk.CTkScrollableFrame):
         img_width = self._parent_canvas.winfo_width()
         img_height = img_width / ratio
 
-        ctk_img = ctk.CTkImage(
-            light_image=img,
-            dark_image=img,
-            size=(int(img_width), int(img_height))
-        )
+        ctk_img = ctk.CTkImage(light_image=img,
+                               dark_image=img,
+                               size=(int(img_width), int(img_height)))
 
         return ctk_img
 
