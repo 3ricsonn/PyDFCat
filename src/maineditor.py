@@ -287,7 +287,9 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
             self._parent_canvas.winfo_height() // img.cget("size")[1]
         )
 
-    def _select_page(self, event: tk.Event) -> None:
+    @staticmethod
+    def _select_page(event: tk.Event) -> None:
+        """Select page if right clicked"""
         print(event)
         # clear selection
         # self._selection.clear()
