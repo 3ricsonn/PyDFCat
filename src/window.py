@@ -43,7 +43,8 @@ class ApplicationWindow(ctk.CTk):
 
         # main editor
         self.main_editor = MainEditor(
-            self, open_file_command=self.open_file, scaling_variable=scaling_variable)
+            self, open_file_command=self.open_file, scaling_variable=scaling_variable
+        )
         self.main_editor.grid(column=1, row=1, sticky="news", padx=10, pady=10)
 
         # close dokument button
@@ -55,7 +56,7 @@ class ApplicationWindow(ctk.CTk):
             hover_color=CLOSE_RED,
             width=40,
             height=40,
-            command=self.close_file
+            command=self.close_file,
         )
 
         # toolbar
@@ -65,7 +66,7 @@ class ApplicationWindow(ctk.CTk):
             save_file_command=lambda _: print("save file"),
             scale_page_command=self.main_editor.update_scaling,
             scaling_variable=scaling_variable,
-            height=60
+            height=60,
         )
         # ctk.CTkLabel(self.toolbar, text="Toolbar").place(relx=0.5, rely=0.5, anchor="center")
         self.toolbar.grid(column=0, row=0, columnspan=2, sticky="news")
@@ -86,8 +87,7 @@ class ApplicationWindow(ctk.CTk):
         """Open a PDF file and load it into the PDF editor application."""
         # Open file dialog to select a PDF file
         file_name = crossfiledialog.open_file(
-            title="Choose your PDF you want to edit:"
-        )
+            title="Choose your PDF you want to edit:")
 
         if file_name and has_file_extension(file_name, ".pdf"):
             # Load the selected PDF file using fitz
