@@ -15,7 +15,7 @@ display, rearrange, delete, duplicate, and add pages to a PDF file.
 - [x] Open and display PDF-Files.
 - [ ] Duplicate pages within a PDF document.
 - [ ] Copy, cut and past pages within the document.
-- [ ] View copied and cut pages in clipboard tab.
+- [ ] View copied and cut pages in the clipboard tab.
 - [ ] Delete specific pages from a PDF document.
 - [ ] Add new pages from an existing PDF document.
 
@@ -47,10 +47,12 @@ To use PyDFCat, follow these steps:
 To uninstall PyDFCat with its dependencies, follow these steps:
 
 1. Uninstall the installed dependencies.
+
    ```
    pip uninstall -r requirements.txt
    ```
-2. Further you can delete the downloaded files
+
+2. Further, you can delete the downloaded files
 
 ## Contact
 

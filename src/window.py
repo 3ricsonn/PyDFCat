@@ -89,7 +89,10 @@ class ApplicationWindow(ctk.CTk):
         file_name = crossfiledialog.open_file(
             title="Choose your PDF you want to edit:")
 
-        if file_name and has_file_extension(file_name, ".pdf"):
+        if not file_name:
+            return
+
+        if has_file_extension(file_name, ".pdf"):
             # Load the selected PDF file using fitz
             pdf_document = fitz.Document(file_name)
 
@@ -108,7 +111,7 @@ class ApplicationWindow(ctk.CTk):
             self.main_editor.open_file_error()
 
     def close_file(self):
-        """CLose file and discard all changes"""
+        """CLose the file and discard all changes"""
         self.main_editor.close_document()
         self.sidebar.close_document()
         self.toolbar.disable_tools()

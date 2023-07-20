@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 import tkinter as tk
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 import customtkinter as ctk
 import fitz  # PyMuPDF
@@ -77,7 +77,7 @@ class MainEditor(ctk.CTkFrame):
         Args:
             _event (tk.Event): The event object.
         """
-        self.document_view.load_pages(self.document)
+        self.document_view.update_pages()
 
     def update_scaling(self, scale_string: str) -> None:
         """
@@ -119,14 +119,14 @@ class MainEditor(ctk.CTkFrame):
         scale_decimal = int(scale) / 100
 
         # Update the scaling of the document view
-        self.document_view.update_scaling(self.document, scale_decimal)
+        self.document_view.update_pages(scale_decimal)
 
     def open_file_error(self) -> None:
         """display error message"""
         if not self.document_view.winfo_ismapped():
             self.error_label.grid(row=1, column=0, sticky="n", pady=5)
 
-    def close_document(self):
+    def close_document(self) -> None:
         """Close the current document in the Main Editor."""
         self.document = None
 
@@ -153,7 +153,8 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
             **kwargs: Arbitrary keyword arguments.
         """
         super().__init__(*args, **kwargs)
-        self._images: list[ctk.CTkImage] = []
+        self._images: list[Image] = []
+        self._ctk_images: list[ctk.CTkImage] = []
         self._labels: list[ctk.CTkLabel] = []
         self._rows = 0
         self._scale = 1.0
@@ -167,77 +168,103 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         """
         self.clear()
         self._images = [self._convert_page(page) for page in document]
-        for image in self._images:
+        self._ctk_images = self._create_images(self._images, self._get_img_size(self._images[0]))
+        for image in self._ctk_images:
             label = ctk.CTkLabel(self, image=image, text="")
             label.bind("<Button-1>", self._select_page)
             self._labels.append(label)
 
         self._update_grid()
 
-    def update_pages(self) -> None:
-        """Update the document pages if there is a change in grid dimensions."""
-        self._update_grid()
-
-    def update_scaling(self, document: fitz.Document, new_scaling: float) -> None:
+    def update_pages(self, new_scaling: Optional[float] = None) -> None:
         """
-        Update the scaling of the document and refresh the view.
+        Update the document pages with a new scaling factor or new image size.
 
-        Args:
-            document (fitz.Document): The document to update.
-            new_scaling (float): The new scaling factor.
+        Parameters:
+            new_scaling (float, optional): The new scaling factor for the images.
         """
-        self._scale = new_scaling
+        new_size = self._get_img_size(self._images[0])
 
-        # Clear the existing labels and images
-        self.clear()
+        if new_scaling is not None:
+            self._scale = new_scaling
 
-        self._images = [self._convert_page(page) for page in document]
-        for image in self._images:
-            label = ctk.CTkLabel(self, image=image, text="")
-            label.bind("<Button-1>", self._select_page)
-            self._labels.append(label)
+        if new_scaling is not None or (new_size and self._ctk_images[0].cget("size") != new_size):
+            self._ctk_images = self._create_images(self._images, new_size)
+            for label, img in zip(self._labels, self._ctk_images):
+                label.configure(image=img)
 
         self._update_grid()
 
-    def _convert_page(self, page: fitz.Page) -> ctk.CTkImage:
+    @staticmethod
+    def _convert_page(page: fitz.Page) -> Image:
         """
-        Convert a given page object to a displayable Image.
+        Convert a PyMuPDF page to a PIL.Image.
 
-        Args:
-            page (fitz.Page): The page to convert.
+        Parameters:
+            page (fitz.Page): The PyMuPDF page to convert.
 
         Returns:
-            ctk.CTkImage: The converted image.
+            Image: The PIL.Image representation of the page.
         """
         pix = page.get_pixmap()
         mode = "RGBA" if pix.alpha else "RGB"
         img = Image.frombytes(mode, (pix.width, pix.height), pix.samples)
 
+        return img
+
+    def _create_images(self, images: list[Image], size: tuple[int, int]) -> list[ctk.CTkImage]:
+        """
+        Create a list of ctk.CTkImage objects from a list of PIL.Image objects.
+
+        Parameters:
+            images (list[Image]): The list of PIL.Image objects to be converted.
+            size (tuple[int, int]): The target size of the images.
+
+        Returns:
+            list[ctk.CTkImage]: A list of ctk.CTkImage objects created from the input images.
+        """
+        img_list = []
+
+        for img in images:
+            ctk_img = ctk.CTkImage(
+                light_image=img,
+                dark_image=img,
+                size=(
+                    int(size[0] * self._scale), int(size[1] * self._scale)
+                )
+            )
+            img_list.append(ctk_img)
+
+        return img_list
+
+    def _get_img_size(self, img: Image) -> tuple[int, int]:
+        """
+        Calculate the size of the image to fit within the canvas while preserving its aspect ratio.
+
+        Parameters:
+            img (Image): The image to be resized.
+
+        Returns:
+            tuple[int, int]: A tuple containing the width and height of the resized image.
+        """
+        # Update the canvas to get the current dimensions
         self._parent_canvas.update()
 
+        # Calculate the aspect ratio of the image and canvas
         img_ratio = img.size[0] / img.size[1]
         canvas_width = self._parent_canvas.winfo_width()
         canvas_height = self._parent_canvas.winfo_height()
-        canvas_ratio = canvas_width / canvas_height
 
-        if canvas_ratio >= 1:
-            if canvas_height * img_ratio <= canvas_width:
-                img_height = canvas_height
-                img_width = canvas_height * img_ratio
-            else:
-                img_width = canvas_width
-                img_height = canvas_width / img_ratio
+        if canvas_height * img_ratio <= canvas_width:
+            # The image fits within the canvas height
+            img_height = canvas_height
+            img_width = canvas_height * img_ratio
         else:
+            # The image fits within the canvas width
             img_width = canvas_width
             img_height = canvas_width / img_ratio
 
-        ctk_img = ctk.CTkImage(
-            light_image=img,
-            dark_image=img,
-            size=(int(img_width * self._scale), int(img_height * self._scale)),
-        )
-
-        return ctk_img
+        return int(img_width), int(img_height)
 
     def _update_grid(self) -> bool:
         """
@@ -246,7 +273,7 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         Returns:
             bool: True if the grid layout was updated, False otherwise.
         """
-        rows, _ = self._get_grid_dimension(self._images[0])
+        rows, _ = self._get_grid_dimension(self._ctk_images[0])
 
         if rows == self._rows:
             return False
@@ -283,8 +310,8 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
 
     @staticmethod
     def _select_page(event: tk.Event) -> None:
-        """Select page if right clicked"""
-        print(event)
+        """Select page if right-clicked"""
+        print(type(event.widget))
         # clear selection
         # self._selection.clear()
 
