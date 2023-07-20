@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from screeninfo import get_monitors
 
-
 # -*- coding: utf-8 -*-
 # windows properties
 screen = get_monitors()[0]
