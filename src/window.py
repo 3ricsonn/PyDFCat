@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
-import os
-
 import crossfiledialog
 import customtkinter as ctk
 import fitz  # PyMuPDF
-
+import os
 from maineditor import MainEditor
-from settings import (CLOSE_RED, WHITE, WINDOW_HEIGHT, WINDOW_MIN_HEIGHT,
-                      WINDOW_MIN_WIDTH, WINDOW_WIDTH)
+from settings import (
+    CLOSE_RED,
+    WHITE,
+    WINDOW_HEIGHT,
+    WINDOW_MIN_HEIGHT,
+    WINDOW_MIN_WIDTH,
+    WINDOW_WIDTH,
+)
 from sidepanel import SidePanel
 from toolbar import ToolBar
 
