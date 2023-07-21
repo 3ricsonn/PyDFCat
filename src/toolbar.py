@@ -2,7 +2,7 @@
 from typing import Any, Callable
 
 import customtkinter as ctk
-from settings import SCALING_FACTORS
+from settings import CLOSE_RED, SCALING_FACTORS, WHITE
 
 
 class ToolBar(ctk.CTkFrame):
@@ -13,6 +13,7 @@ class ToolBar(ctk.CTkFrame):
         parent: Any,
         save_file_command: Callable,
         open_file_command: Callable,
+        close_file_command: Callable,
         scale_page_command: Callable,
         scaling_variable: ctk.StringVar,
         **kwargs
@@ -35,7 +36,7 @@ class ToolBar(ctk.CTkFrame):
             side="left", padx=5, pady=7
         )
 
-        # Save button with option menu
+        # Save button with an option menu
         ctk.CTkOptionMenu(
             self, values=["save", "save as"], command=save_file_command
         ).pack(side="left", padx=5, pady=7)
@@ -69,16 +70,30 @@ class ToolBar(ctk.CTkFrame):
             state="disabled",
         )
         self.scaling_combobox.set(scaling_variable.get())
+        self.scaling_combobox.bind("<Return>", lambda event: scale_page_command(scaling_variable.get()))
         self.scaling_combobox.pack(side="left", padx=5, pady=7)
+
+        # close dokument button (initially disabled)
+        self.close_button = ctk.CTkButton(
+            self,
+            text="x",
+            text_color=WHITE,
+            fg_color="transparent",
+            hover_color=CLOSE_RED,
+            width=30,
+            command=close_file_command,
+        )
 
     def enable_tools(self):
         """Enable the toolbar tools."""
         self.undo_button.configure(state="normal")
         self.redo_button.configure(state="normal")
         self.scaling_combobox.configure(state="normal")
+        self.close_button.pack(side="right", padx=5, pady=7)
 
     def disable_tools(self):
         """Disable the toolbar tools."""
         self.undo_button.configure(state="disabled")
         self.redo_button.configure(state="disabled")
         self.scaling_combobox.configure(state="disabled")
+        self.close_button.pack_forget()
