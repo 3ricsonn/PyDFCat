@@ -4,8 +4,7 @@ from typing import Any
 import customtkinter as ctk
 import fitz  # PyMuPDF
 from PIL import Image
-
-from widgets import CollapsableFrame
+from widgets import CollapsableFrame, PatchedScrollableFrame
 
 
 class SidePanel(CollapsableFrame):
@@ -46,7 +45,7 @@ class SidePanel(CollapsableFrame):
 
 
 class _NavigatorPanel(ctk.CTkFrame):
-    """Class to preview document and navigator for main editor"""
+    """Class to preview document and navigator for the main editor"""
 
     def __init__(self, parent: Any):
         """
@@ -87,7 +86,7 @@ class _NavigatorPanel(ctk.CTkFrame):
         self.document_view.pack_forget()
 
 
-class _PageView(ctk.CTkScrollableFrame):
+class _PageView(PatchedScrollableFrame):
     """Preview class to display file pages"""
 
     def __init__(self, *args, **kwargs) -> None:
@@ -101,10 +100,9 @@ class _PageView(ctk.CTkScrollableFrame):
 
         Parameters:
             document (fitz.Document): The document to load the pages from.
-
-        Returns:
-            None
         """
+        self.clear()
+
         for page in document:
             # Convert the page to an image
             image = self._convert_page(page)
@@ -113,6 +111,8 @@ class _PageView(ctk.CTkScrollableFrame):
             ctk.CTkLabel(self, image=image, text="").pack(
                 expand=True, fill="x", padx=5, pady=7
             )
+
+        self._reset_scrolling()
 
     def _convert_page(self, page: fitz.Page) -> ctk.CTkImage:
         """
@@ -141,12 +141,9 @@ class _PageView(ctk.CTkScrollableFrame):
 
         return ctk_img
 
-    def clear(self):
-        """
-        Clear all child widgets from the container.
-
-        Returns:
-            None
-        """
+    def clear(self) -> None:
+        """Clear all child widgets from the container."""
         for widget in self.winfo_children():
             widget.destroy()
+
+        self.update_idletasks()

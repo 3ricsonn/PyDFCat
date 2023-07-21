@@ -7,13 +7,14 @@ import customtkinter as ctk
 import fitz  # PyMuPDF
 from CTkMessagebox import CTkMessagebox
 from PIL import Image
+from widgets import PatchedScrollableFrame
 
 
 class MainEditor(ctk.CTkFrame):
     """Main editor class to manage file pages"""
 
     def __init__(
-        self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar
+            self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar
     ) -> None:
         """
         Initialize the Main Editor.
@@ -85,9 +86,6 @@ class MainEditor(ctk.CTkFrame):
 
         Parameters:
             scale_string (str): The scaling factor as a percentage.
-
-        Returns:
-            None
         """
         # Check if the scale string matches the expected format
         if not re.match(r"^([1-9]([0-9]){1,2})%$", scale_string):
@@ -96,7 +94,7 @@ class MainEditor(ctk.CTkFrame):
                 title="Invalid scaling",
                 icon="warning",
                 message="You entered an invalid scaling factor. "
-                "Please make sure you entered a number.",
+                        "Please make sure you entered a number.",
             )
             self.scaling_variable.set("100%")
             return
@@ -110,7 +108,7 @@ class MainEditor(ctk.CTkFrame):
                 title="Invalid scaling",
                 icon="warning",
                 message="You entered a too high scaling. "
-                "Please enter a scaling smaller than 200%.",
+                        "Please enter a scaling smaller than 200%.",
             )
             self.scaling_variable.set("100%")
             return
@@ -141,7 +139,7 @@ class MainEditor(ctk.CTkFrame):
         self.unbind("<Configure>")
 
 
-class _DocumentEditor(ctk.CTkScrollableFrame):
+class _DocumentEditor(PatchedScrollableFrame):
     """Class to display file pages"""
 
     def __init__(self, *args, **kwargs) -> None:
@@ -178,6 +176,8 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
 
         self._update_grid()
 
+        self._reset_scrolling()
+
     def update_pages(self, new_scaling: Optional[float] = None) -> None:
         """
         Update the document pages with a new scaling factor or new image size.
@@ -191,13 +191,15 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
             self._scale = new_scaling
 
         if new_scaling is not None or (
-            new_size and self._ctk_images[0].cget("size") != new_size
+                new_size and self._ctk_images[0].cget("size") != new_size
         ):
             self._ctk_images = self._create_images(self._images, new_size)
             for label, img in zip(self._labels, self._ctk_images):
                 label.configure(image=img)
 
         self._update_grid()
+
+        self._reset_scrolling()
 
     @staticmethod
     def _convert_page(page: fitz.Page) -> Image:
@@ -217,7 +219,7 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         return img
 
     def _create_images(
-        self, images: list[Image], size: tuple[int, int]
+            self, images: list[Image], size: tuple[int, int]
     ) -> list[ctk.CTkImage]:
         """
         Create a list of ctk.CTkImage objects from a list of PIL.Image objects.
@@ -293,7 +295,6 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
             label.grid(
                 column=index % self._rows, row=index // self._rows, padx=5, pady=7
             )
-
         return True
 
     def _get_grid_dimension(self, img: ctk.CTkImage) -> tuple[int, int]:
@@ -323,8 +324,12 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
 
     def clear(self) -> None:
         """Remove all widgets within the frame and reset data."""
-        self._images = []
-        self._labels = []
-        self._rows = 0
         for widget in self.winfo_children():
             widget.destroy()
+
+        self._images.clear()
+        self._ctk_images.clear()
+        self._labels.clear()
+        self._rows = 0
+
+        self.update_idletasks()
