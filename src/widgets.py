@@ -9,6 +9,7 @@ from PIL import ImageTk
 
 class PatchedScrollableFrame(ctk.CTkScrollableFrame):
     """Extension of the CTkScrollableFrame with some fixes, among others for Linux."""
+
     def __init__(self, *args, **kwargs):
         """Initialize the Patched Scrollable Frame."""
         super().__init__(*args, **kwargs)
