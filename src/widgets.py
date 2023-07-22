@@ -27,17 +27,23 @@ class PatchedScrollableFrame(ctk.CTkScrollableFrame):
             if sys.platform.startswith("win"):
                 if self._shift_pressed:
                     if self._parent_canvas.xview() != (0.0, 1.0):
-                        self._parent_canvas.xview("scroll", -int(event.delta / 6), "units")
+                        self._parent_canvas.xview(
+                            "scroll", -int(event.delta / 6), "units"
+                        )
                 else:
                     if self._parent_canvas.yview() != (0.0, 1.0):
-                        self._parent_canvas.yview("scroll", -int(event.delta / 6), "units")
+                        self._parent_canvas.yview(
+                            "scroll", -int(event.delta / 6), "units"
+                        )
             elif sys.platform == "darwin":
                 if self._shift_pressed:
                     if self._parent_canvas.xview() != (0.0, 1.0):
-                        self._parent_canvas.xview("scroll", -event.delta, "units")
+                        self._parent_canvas.xview(
+                            "scroll", -event.delta, "units")
                 else:
                     if self._parent_canvas.yview() != (0.0, 1.0):
-                        self._parent_canvas.yview("scroll", -event.delta, "units")
+                        self._parent_canvas.yview(
+                            "scroll", -event.delta, "units")
             else:
                 if self._shift_pressed:
                     if self._parent_canvas.xview() != (0.0, 1.0):
@@ -55,37 +61,38 @@ class PatchedScrollableFrame(ctk.CTkScrollableFrame):
     def _reset_scrolling(self) -> None:
         """Reset the scrolling behavior of the canvas."""
         # Set the scrollbar position to the top
-        self._scrollbar.set(0., 1.)
+        self._scrollbar.set(0.0, 1.0)
 
         # Fit the frame dimensions to the canvas
         self._fit_frame_dimensions_to_canvas(None)
 
         # Configure the canvas scroll region to fit the contents
-        self._parent_canvas.configure(scrollregion=self._parent_canvas.bbox("all"))
+        self._parent_canvas.configure(
+            scrollregion=self._parent_canvas.bbox("all"))
 
 
 class CollapsableFrame(ctk.CTkFrame):
     """Collapsible Frame Class."""
 
     def __init__(
-            self,
-            parent: Any,
-            alignment: Literal["left", "right"],
-            expanded: bool = True,
-            corner_radius: Optional[Union[int, str]] = None,
-            border_width: Optional[Union[int, str]] = None,
-            bg_color: Union[str, Tuple[str, str]] = "transparent",
-            fg_color: Optional[Union[str, Tuple[str, str]]] = None,
-            border_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_corner_radius: Optional[Union[int, str]] = None,
-            button_border_width: Optional[Union[int, str]] = None,
-            button_fg_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_hover_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_border_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_text_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_image: Union[ctk.CTkImage, ImageTk.PhotoImage, None] = None,
-            button_hover: bool = True,
-            button_compound: str = "left",
+        self,
+        parent: Any,
+        alignment: Literal["left", "right"],
+        expanded: bool = True,
+        corner_radius: Optional[Union[int, str]] = None,
+        border_width: Optional[Union[int, str]] = None,
+        bg_color: Union[str, Tuple[str, str]] = "transparent",
+        fg_color: Optional[Union[str, Tuple[str, str]]] = None,
+        border_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_corner_radius: Optional[Union[int, str]] = None,
+        button_border_width: Optional[Union[int, str]] = None,
+        button_fg_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_hover_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_border_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_text_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_image: Union[ctk.CTkImage, ImageTk.PhotoImage, None] = None,
+        button_hover: bool = True,
+        button_compound: str = "left",
     ) -> None:
         """
         Initialize the Collapsible Frame.
