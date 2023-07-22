@@ -70,7 +70,10 @@ class ToolBar(ctk.CTkFrame):
             state="disabled",
         )
         self.scaling_combobox.set(scaling_variable.get())
-        self.scaling_combobox.bind("<Return>", lambda event: scale_page_command(scaling_variable.get()))
+        self.scaling_combobox.bind(
+            "<Return>", lambda event: scale_page_command(
+                scaling_variable.get())
+        )
         self.scaling_combobox.pack(side="left", padx=5, pady=7)
 
         # close dokument button (initially disabled)
