@@ -14,7 +14,7 @@ class MainEditor(ctk.CTkFrame):
     """Main editor class to manage file pages"""
 
     def __init__(
-            self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar
+        self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar
     ) -> None:
         """
         Initialize the Main Editor.
@@ -94,7 +94,7 @@ class MainEditor(ctk.CTkFrame):
                 title="Invalid scaling",
                 icon="warning",
                 message="You entered an invalid scaling factor. "
-                        "Please make sure you entered a number.",
+                "Please make sure you entered a number.",
             )
             self.scaling_variable.set("100%")
             return
@@ -108,7 +108,7 @@ class MainEditor(ctk.CTkFrame):
                 title="Invalid scaling",
                 icon="warning",
                 message="You entered a too high scaling. "
-                        "Please enter a scaling smaller than 200%.",
+                "Please enter a scaling smaller than 200%.",
             )
             self.scaling_variable.set("100%")
             return
@@ -191,7 +191,7 @@ class _DocumentEditor(PatchedScrollableFrame):
             self._scale = new_scaling
 
         if new_scaling is not None or (
-                new_size and self._ctk_images[0].cget("size") != new_size
+            new_size and self._ctk_images[0].cget("size") != new_size
         ):
             self._ctk_images = self._create_images(self._images, new_size)
             for label, img in zip(self._labels, self._ctk_images):
@@ -219,7 +219,7 @@ class _DocumentEditor(PatchedScrollableFrame):
         return img
 
     def _create_images(
-            self, images: list[Image], size: tuple[int, int]
+        self, images: list[Image], size: tuple[int, int]
     ) -> list[ctk.CTkImage]:
         """
         Create a list of ctk.CTkImage objects from a list of PIL.Image objects.
