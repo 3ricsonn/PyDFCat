@@ -47,7 +47,7 @@ class SidePanel(CollapsableFrame):
 
 
 class _NavigatorPanel(ctk.CTkFrame):
-    """Class to preview document and navigator for main editor"""
+    """Class to preview document and navigator for the main editor"""
 
     def __init__(self, parent: Any):
         """
@@ -97,6 +97,8 @@ class _PageView(ScrollableFrame):
         Parameters:
             document (fitz.Document): The document to load the pages from.
         """
+        self.clear()
+
         for page in document:
             # Convert the page to an image
             image = self._convert_page(page)
@@ -105,6 +107,8 @@ class _PageView(ScrollableFrame):
             label = ctk.CTkLabel(self, image=image, text="")
             label.bind("<Button-1>", command=self._select_page)
             label.pack(expand=True, fill="x", padx=PAGE_X_PADDING, pady=7)
+
+        self._reset_scrolling()
 
     def _convert_page(self, page: fitz.Page) -> ctk.CTkImage:
         """
@@ -119,6 +123,7 @@ class _PageView(ScrollableFrame):
         pix = page.get_pixmap()
         mode = "RGBA" if pix.alpha else "RGB"
         img = Image.frombytes(mode, (pix.width, pix.height), pix.samples)
+
         self._parent_canvas.update()
 
         ratio = img.size[0] / img.size[1]
@@ -136,7 +141,9 @@ class _PageView(ScrollableFrame):
     def _select_page(self, event: tk.Event) -> None:
         """Select q page with a single click and jumps to it in the main editor."""
 
-    def clear(self):
+    def clear(self) -> None:
         """Clear all child widgets from the container."""
         for widget in self.winfo_children():
             widget.destroy()
+
+        self.update_idletasks()

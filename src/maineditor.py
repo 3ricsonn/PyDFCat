@@ -15,7 +15,7 @@ class MainEditor(ctk.CTkFrame):
     """Main editor class to manage file pages"""
 
     def __init__(
-            self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar
+        self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar
     ) -> None:
         """
         Initialize the Main Editor.
@@ -95,7 +95,7 @@ class MainEditor(ctk.CTkFrame):
                 title="Invalid scaling",
                 icon="warning",
                 message="You entered an invalid scaling factor. "
-                        "Please make sure you entered a number.",
+                "Please make sure you entered a number.",
             )
             self.scaling_variable.set("100%")
             return
@@ -109,7 +109,7 @@ class MainEditor(ctk.CTkFrame):
                 title="Invalid scaling",
                 icon="warning",
                 message="You entered a too high scaling. "
-                        "Please enter a scaling smaller than 200%.",
+                "Please enter a scaling smaller than 200%.",
             )
             self.scaling_variable.set("100%")
             return
@@ -167,7 +167,9 @@ class _DocumentEditor(ScrollableFrame):
         """
         self.clear()
         self._images = [self._convert_page(page) for page in document]
-        self._ctk_images = self._create_images(self._images, self._get_img_size(self._images[0]))
+        self._ctk_images = self._create_images(
+            self._images, self._get_img_size(self._images[0])
+        )
         for image in self._ctk_images:
             label = ctk.CTkLabel(self, image=image, text="")
             label.bind("<Button-1>", command=self._select_page)
@@ -176,6 +178,8 @@ class _DocumentEditor(ScrollableFrame):
             self._labels.append(label)
 
         self._update_grid()
+
+        self._reset_scrolling()
 
     def update_pages(self, new_scaling: Optional[float] = None) -> None:
         """
@@ -189,12 +193,16 @@ class _DocumentEditor(ScrollableFrame):
         if new_scaling is not None:
             self._scale = new_scaling
 
-        if new_scaling is not None or (new_size and self._ctk_images[0].cget("size") != new_size):
+        if new_scaling is not None or (
+            new_size and self._ctk_images[0].cget("size") != new_size
+        ):
             self._ctk_images = self._create_images(self._images, new_size)
             for label, img in zip(self._labels, self._ctk_images):
                 label.configure(image=img)
 
         self._update_grid()
+
+        self._reset_scrolling()
 
     @staticmethod
     def _convert_page(page: fitz.Page) -> Image:
@@ -213,7 +221,9 @@ class _DocumentEditor(ScrollableFrame):
 
         return img
 
-    def _create_images(self, images: list[Image], size: tuple[int, int]) -> list[ctk.CTkImage]:
+    def _create_images(
+        self, images: list[Image], size: tuple[int, int]
+    ) -> list[ctk.CTkImage]:
         """
         Create a list of ctk.CTkImage objects from a list of PIL.Image objects.
 
@@ -230,9 +240,7 @@ class _DocumentEditor(ScrollableFrame):
             ctk_img = ctk.CTkImage(
                 light_image=img,
                 dark_image=img,
-                size=(
-                    int(size[0] * self._scale), int(size[1] * self._scale)
-                )
+                size=(int(size[0] * self._scale), int(size[1] * self._scale)),
             )
             img_list.append(ctk_img)
 
@@ -253,17 +261,17 @@ class _DocumentEditor(ScrollableFrame):
 
         # Calculate the aspect ratio of the image and canvas
         img_ratio = img.size[0] / img.size[1]
-        frame_width = self._parent_canvas.winfo_width()
-        frame_height = self._parent_canvas.winfo_height()
+        canvas_width = self._parent_canvas.winfo_width()
+        canvas_height = self._parent_canvas.winfo_height()
 
-        if (frame_width - 2 * PAGE_X_PADDING - SCROLLBAR_WIDTH) / img_ratio <= frame_height:
+        if (canvas_width - 2 * PAGE_X_PADDING - SCROLLBAR_WIDTH) / img_ratio <= canvas_height:
             # The image fits within the canvas width
-            img_width = frame_width - 2 * PAGE_X_PADDING - SCROLLBAR_WIDTH
-            img_height = frame_width / img_ratio
+            img_width = canvas_width - 2 * PAGE_X_PADDING - SCROLLBAR_WIDTH
+            img_height = canvas_width / img_ratio
         else:
             # The image fits within the canvas height
-            img_height = frame_height
-            img_width = frame_height * img_ratio
+            img_height = canvas_height
+            img_width = canvas_height * img_ratio
 
         return int(img_width), int(img_height)
 
@@ -320,8 +328,12 @@ class _DocumentEditor(ScrollableFrame):
 
     def clear(self) -> None:
         """Remove all widgets within the frame and reset data."""
-        self._images = []
-        self._labels = []
-        self._rows = 0
         for widget in self.winfo_children():
             widget.destroy()
+
+        self._images.clear()
+        self._ctk_images.clear()
+        self._labels.clear()
+        self._rows = 0
+
+        self.update_idletasks()

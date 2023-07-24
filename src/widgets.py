@@ -9,28 +9,69 @@ from customtkinter.windows.widgets.core_widget_classes import CTkBaseClass
 
 
 class CollapsableFrame(ctk.CTkFrame):
-    """Collapsible Frame Class."""
+    """
+    Collapsible Frame Class.
+
+    This class is a custom Tkinter Frame that can collapse and expand its contents.
+    """
 
     def __init__(
-            self,
-            parent: Any,
-            alignment: Literal["left", "right"],
-            expanded: bool = True,
-            corner_radius: Optional[Union[int, str]] = None,
-            border_width: Optional[Union[int, str]] = None,
-            bg_color: Union[str, Tuple[str, str]] = "transparent",
-            fg_color: Optional[Union[str, Tuple[str, str]]] = None,
-            border_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_corner_radius: Optional[Union[int, str]] = None,
-            button_border_width: Optional[Union[int, str]] = None,
-            button_fg_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_hover_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_border_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_text_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_image: Union[ctk.CTkImage, ImageTk.PhotoImage, None] = None,
-            button_hover: bool = True,
-            button_compound: str = "left",
+        self,
+        parent: Any,
+        alignment: Literal["left", "right"],
+        expanded: bool = True,
+        corner_radius: Optional[Union[int, str]] = None,
+        border_width: Optional[Union[int, str]] = None,
+        bg_color: Union[str, Tuple[str, str]] = "transparent",
+        fg_color: Optional[Union[str, Tuple[str, str]]] = None,
+        border_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_corner_radius: Optional[Union[int, str]] = None,
+        button_border_width: Optional[Union[int, str]] = None,
+        button_fg_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_hover_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_border_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_text_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_image: Union[ctk.CTkImage, ImageTk.PhotoImage, None] = None,
+        button_hover: bool = True,
+        button_compound: str = "left",
     ) -> None:
+        """
+        Initialize the Collapsible Frame.
+
+        Parameters:
+            parent (Any): The parent widget.
+            alignment (Literal["left", "right"]): The alignment of the hide button.
+            expanded (bool, optional): Whether the frame is initially expanded.
+            Default is True.
+            corner_radius (Optional[Union[int, str]], optional): The corner radius of the frame.
+            Default is None.
+            border_width (Optional[Union[int, str]], optional): The border width of the frame.
+            Default is None.
+            bg_color (Union[str, Tuple[str, str]], optional): The background color of the frame.
+            Default is "transparent".
+            fg_color (Optional[Union[str, Tuple[str, str]]], optional): The foreground color of the frame.
+            Default is None.
+            border_color (Optional[Union[str, Tuple[str, str]]], optional): The border color of the frame.
+            Default is None.
+            button_corner_radius (Optional[Union[int, str]], optional): The corner radius of the hide button.
+            Default is None.
+            button_border_width (Optional[Union[int, str]], optional): The border width of the hide button.
+            Default is None.
+            button_fg_color (Optional[Union[str, Tuple[str, str]]], optional): The foreground color of the hide button.
+            Default is None.
+            button_hover_color (Optional[Union[str, Tuple[str, str]]], optional): The hover color of the hide button.
+            Default is None.
+            button_border_color (Optional[Union[str, Tuple[str, str]]], optional): The border color of the hide button.
+            Default is None.
+            button_text_color (Optional[Union[str, Tuple[str, str]]], optional): The text color of the hide button.
+            Default is None.
+            button_image (Union[ctk.CTkImage, ImageTk.PhotoImage, None], optional): The image of the hide button.
+            Default is None.
+            button_hover (bool, optional): Whether the hide button should have a hover effect.
+            Default is True.
+            button_compound (str, optional): The compound style of the hide button.
+            Default is "left".
+        """
         # container
         self._parent_frame = ctk.CTkFrame(
             master=parent,
