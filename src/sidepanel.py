@@ -5,7 +5,8 @@ from typing import Any
 import customtkinter as ctk
 import fitz  # PyMuPDF
 from PIL import Image
-from widgets import CollapsableFrame
+from settings import PAGE_X_PADDING, SCROLLBAR_WIDTH
+from widgets import CollapsableFrame, ScrollableFrame
 
 
 class SidePanel(CollapsableFrame):
@@ -61,7 +62,7 @@ class _NavigatorPanel(ctk.CTkFrame):
         self.document = fitz.Document()
 
         # page view
-        self.document_view = _PageView(self)
+        self.document_view = _PageView(self, fg_color="transparent", width=210)
 
     def get_new_document(self, document: fitz.Document) -> None:
         """
@@ -87,23 +88,14 @@ class _NavigatorPanel(ctk.CTkFrame):
         self.document_view.pack_forget()
 
 
-class _PageView(ctk.CTkScrollableFrame):
+class _PageView(ScrollableFrame):
     """Preview class to display file pages"""
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
-        # data
-
     def load_pages(self, document: fitz.Document) -> None:
         """
         Load and display the pages of a document.
 
         Parameters:
             document (fitz.Document): The document to load the pages from.
-
-        Returns:
-            None
         """
         for page in document:
             # Convert the page to an image
@@ -112,7 +104,7 @@ class _PageView(ctk.CTkScrollableFrame):
             # Create a labeled image widget and pack it
             label = ctk.CTkLabel(self, image=image, text="")
             label.bind("<Button-1>", command=self._select_page)
-            label.pack(expand=True, fill="x", padx=5, pady=7)
+            label.pack(expand=True, fill="x", padx=PAGE_X_PADDING, pady=7)
 
     def _convert_page(self, page: fitz.Page) -> ctk.CTkImage:
         """
@@ -127,11 +119,11 @@ class _PageView(ctk.CTkScrollableFrame):
         pix = page.get_pixmap()
         mode = "RGBA" if pix.alpha else "RGB"
         img = Image.frombytes(mode, (pix.width, pix.height), pix.samples)
-
         self._parent_canvas.update()
 
         ratio = img.size[0] / img.size[1]
-        img_width = self._parent_canvas.winfo_width()
+        img_width = self._parent_canvas.winfo_width() - 2 * PAGE_X_PADDING - SCROLLBAR_WIDTH
+
         img_height = img_width / ratio
 
         ctk_img = ctk.CTkImage(
@@ -145,11 +137,6 @@ class _PageView(ctk.CTkScrollableFrame):
         """Select q page with a single click and jumps to it in the main editor."""
 
     def clear(self):
-        """
-        Clear all child widgets from the container.
-
-        Returns:
-            None
-        """
+        """Clear all child widgets from the container."""
         for widget in self.winfo_children():
             widget.destroy()

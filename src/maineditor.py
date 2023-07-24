@@ -7,13 +7,15 @@ import customtkinter as ctk
 import fitz  # PyMuPDF
 from CTkMessagebox import CTkMessagebox
 from PIL import Image
+from settings import PAGE_X_PADDING, SCROLLBAR_WIDTH
+from widgets import ScrollableFrame
 
 
 class MainEditor(ctk.CTkFrame):
     """Main editor class to manage file pages"""
 
     def __init__(
-        self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar
+            self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar
     ) -> None:
         """
         Initialize the Main Editor.
@@ -85,9 +87,6 @@ class MainEditor(ctk.CTkFrame):
 
         Parameters:
             scale_string (str): The scaling factor as a percentage.
-
-        Returns:
-            None
         """
         # Check if the scale string matches the expected format
         if not re.match(r"^([1-9]([0-9]){1,2})%$", scale_string):
@@ -96,7 +95,7 @@ class MainEditor(ctk.CTkFrame):
                 title="Invalid scaling",
                 icon="warning",
                 message="You entered an invalid scaling factor. "
-                "Please make sure you entered a number.",
+                        "Please make sure you entered a number.",
             )
             self.scaling_variable.set("100%")
             return
@@ -110,7 +109,7 @@ class MainEditor(ctk.CTkFrame):
                 title="Invalid scaling",
                 icon="warning",
                 message="You entered a too high scaling. "
-                "Please enter a scaling smaller than 200%.",
+                        "Please enter a scaling smaller than 200%.",
             )
             self.scaling_variable.set("100%")
             return
@@ -141,7 +140,7 @@ class MainEditor(ctk.CTkFrame):
         self.unbind("<Configure>")
 
 
-class _DocumentEditor(ctk.CTkScrollableFrame):
+class _DocumentEditor(ScrollableFrame):
     """Class to display file pages"""
 
     def __init__(self, *args, **kwargs) -> None:
@@ -254,17 +253,17 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
 
         # Calculate the aspect ratio of the image and canvas
         img_ratio = img.size[0] / img.size[1]
-        canvas_width = self._parent_canvas.winfo_width()
-        canvas_height = self._parent_canvas.winfo_height()
+        frame_width = self._parent_canvas.winfo_width()
+        frame_height = self._parent_canvas.winfo_height()
 
-        if canvas_height * img_ratio <= canvas_width:
-            # The image fits within the canvas height
-            img_height = canvas_height
-            img_width = canvas_height * img_ratio
-        else:
+        if (frame_width - 2 * PAGE_X_PADDING - SCROLLBAR_WIDTH) / img_ratio <= frame_height:
             # The image fits within the canvas width
-            img_width = canvas_width
-            img_height = canvas_width / img_ratio
+            img_width = frame_width - 2 * PAGE_X_PADDING - SCROLLBAR_WIDTH
+            img_height = frame_width / img_ratio
+        else:
+            # The image fits within the canvas height
+            img_height = frame_height
+            img_width = frame_height * img_ratio
 
         return int(img_width), int(img_height)
 
@@ -289,7 +288,7 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
 
         for index, label in enumerate(self._labels):
             label.grid(
-                column=index % self._rows, row=index // self._rows, padx=5, pady=7
+                column=index % self._rows, row=index // self._rows, padx=PAGE_X_PADDING, pady=7
             )
 
         return True
