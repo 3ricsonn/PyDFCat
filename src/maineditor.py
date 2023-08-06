@@ -179,8 +179,6 @@ class _DocumentEditor(ScrollableFrame):
 
         self._update_grid()
 
-        self._reset_scrolling()
-
     def update_pages(self, new_scaling: Optional[float] = None) -> None:
         """
         Update the document pages with a new scaling factor or new image size.
@@ -201,8 +199,6 @@ class _DocumentEditor(ScrollableFrame):
                 label.configure(image=img)
 
         self._update_grid()
-
-        self._reset_scrolling()
 
     @staticmethod
     def _convert_page(page: fitz.Page) -> Image:
@@ -298,6 +294,9 @@ class _DocumentEditor(ScrollableFrame):
             label.grid(
                 column=index % self._rows, row=index // self._rows, padx=PAGE_X_PADDING, pady=7
             )
+        self.update_idletasks()
+
+        self._parent_canvas.configure(scrollregion=self._parent_canvas.bbox("all"))
 
         return True
 

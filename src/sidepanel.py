@@ -49,7 +49,7 @@ class SidePanel(CollapsableFrame):
 class _NavigatorPanel(ctk.CTkFrame):
     """Class to preview document and navigator for the main editor"""
 
-    def __init__(self, parent: Any):
+    def __init__(self, parent: Any) -> None:
         """
         Initialize the Navigator Panel.
 
@@ -90,6 +90,7 @@ class _NavigatorPanel(ctk.CTkFrame):
 
 class _PageView(ScrollableFrame):
     """Preview class to display file pages"""
+
     def load_pages(self, document: fitz.Document) -> None:
         """
         Load and display the pages of a document.
@@ -98,6 +99,10 @@ class _PageView(ScrollableFrame):
             document (fitz.Document): The document to load the pages from.
         """
         self.clear()
+
+        # TODO: Delete debugging
+        predicted_height = self._convert_page(document[0]).cget("size")[1] * len(document)
+        print(f"Predicted height: {predicted_height}, Current Height: {self.winfo_height()}")
 
         for page in document:
             # Convert the page to an image
@@ -108,7 +113,8 @@ class _PageView(ScrollableFrame):
             label.bind("<Button-1>", command=self._select_page)
             label.pack(expand=True, fill="x", padx=PAGE_X_PADDING, pady=7)
 
-        self._reset_scrolling()
+        self.update_idletasks()
+        self._parent_canvas.configure(scrollregion=self._parent_canvas.bbox("all"))
 
     def _convert_page(self, page: fitz.Page) -> ctk.CTkImage:
         """
