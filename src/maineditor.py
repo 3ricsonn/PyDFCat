@@ -16,7 +16,7 @@ class MainEditor(ctk.CTkFrame):
     """Main editor class to manage file pages"""
 
     def __init__(
-            self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar
+        self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar
     ) -> None:
         """
         Initialize the Main Editor.
@@ -94,7 +94,7 @@ class MainEditor(ctk.CTkFrame):
                 title="Invalid scaling",
                 icon="warning",
                 message="You entered an invalid scaling factor. "
-                        "Please make sure you entered a number.",
+                "Please make sure you entered a number.",
             )
             self.scaling_variable.set("100%")
             return
@@ -108,7 +108,7 @@ class MainEditor(ctk.CTkFrame):
                 title="Invalid scaling",
                 icon="warning",
                 message="You entered a too high scaling. "
-                        "Please enter a scaling smaller than 200%.",
+                "Please enter a scaling smaller than 200%.",
             )
             self.scaling_variable.set("100%")
             return
@@ -172,7 +172,8 @@ class _DocumentEditor(DynamicScrollableFrame):
         for image in self._ctk_images:
             label = ctk.CTkLabel(self, image=image, text="")
             label.bind("<Button-1>", command=self._select_page)
-            label.bind("<Control-Button-1>", command=self._select_pages_control)
+            label.bind("<Control-Button-1>",
+                       command=self._select_pages_control)
             label.bind("<Shift-Button-1>", command=self._select_pages_shift)
             self._labels.append(label)
 
@@ -195,7 +196,7 @@ class _DocumentEditor(DynamicScrollableFrame):
             self._scale = new_scaling
 
         if new_scaling is not None or (
-                new_size and self._ctk_images[0].cget("size") != new_size
+            new_size and self._ctk_images[0].cget("size") != new_size
         ):
             self._ctk_images = self._create_images(self._images, new_size)
             for label, img in zip(self._labels, self._ctk_images):
@@ -221,7 +222,7 @@ class _DocumentEditor(DynamicScrollableFrame):
         return img
 
     def _create_images(
-            self, images: list[Image], size: tuple[int, int]
+        self, images: list[Image], size: tuple[int, int]
     ) -> list[ctk.CTkImage]:
         """
         Create a list of ctk.CTkImage objects from a list of PIL.Image objects.
@@ -295,11 +296,15 @@ class _DocumentEditor(DynamicScrollableFrame):
 
         for index, label in enumerate(self._labels):
             label.grid(
-                column=index % self._rows, row=index // self._rows, padx=PAGE_X_PADDING, pady=7
+                column=index % self._rows,
+                row=index // self._rows,
+                padx=PAGE_X_PADDING,
+                pady=7,
             )
         self.update_idletasks()
 
-        self._parent_canvas.configure(scrollregion=self._parent_canvas.bbox("all"))
+        self._parent_canvas.configure(
+            scrollregion=self._parent_canvas.bbox("all"))
 
         return True
 
@@ -326,9 +331,13 @@ class _DocumentEditor(DynamicScrollableFrame):
         Args:
             document (fitz.Document): The document whose pages are being displayed.
         """
-        page_in_sight = math.ceil(self._parent_canvas.winfo_height() / self.winfo_children()[0].winfo_height())
+        page_in_sight = math.ceil(
+            self._parent_canvas.winfo_height(
+            ) / self.winfo_children()[0].winfo_height()
+        )
 
-        self._images[:page_in_sight] = [self._convert_page(page) for page in document]
+        self._images[:page_in_sight] = [
+            self._convert_page(page) for page in document]
 
         self._ctk_images[:page_in_sight] = self._create_images(
             self._images[:page_in_sight], self._get_img_size(self._images[0])

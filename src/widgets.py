@@ -15,24 +15,24 @@ class CollapsableFrame(ctk.CTkFrame):
     """
 
     def __init__(
-            self,
-            parent: Any,
-            alignment: Literal["left", "right"],
-            expanded: bool = True,
-            corner_radius: Optional[Union[int, str]] = None,
-            border_width: Optional[Union[int, str]] = None,
-            bg_color: Union[str, Tuple[str, str]] = "transparent",
-            fg_color: Optional[Union[str, Tuple[str, str]]] = None,
-            border_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_corner_radius: Optional[Union[int, str]] = None,
-            button_border_width: Optional[Union[int, str]] = None,
-            button_fg_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_hover_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_border_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_text_color: Optional[Union[str, Tuple[str, str]]] = None,
-            button_image: Union[ctk.CTkImage, ImageTk.PhotoImage, None] = None,
-            button_hover: bool = True,
-            button_compound: str = "left",
+        self,
+        parent: Any,
+        alignment: Literal["left", "right"],
+        expanded: bool = True,
+        corner_radius: Optional[Union[int, str]] = None,
+        border_width: Optional[Union[int, str]] = None,
+        bg_color: Union[str, Tuple[str, str]] = "transparent",
+        fg_color: Optional[Union[str, Tuple[str, str]]] = None,
+        border_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_corner_radius: Optional[Union[int, str]] = None,
+        button_border_width: Optional[Union[int, str]] = None,
+        button_fg_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_hover_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_border_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_text_color: Optional[Union[str, Tuple[str, str]]] = None,
+        button_image: Union[ctk.CTkImage, ImageTk.PhotoImage, None] = None,
+        button_hover: bool = True,
+        button_compound: str = "left",
     ) -> None:
         """
         Initialize the Collapsible Frame.
@@ -311,6 +311,7 @@ class DynamicScrollableFrame(ctk.CTkScrollableFrame):
 
     This class inherits from ctk.CTkScrollableFrame.
     """
+
     def __init__(self, *args, **kwargs) -> None:
         """
         Create a scrollable frame.
@@ -334,9 +335,13 @@ class DynamicScrollableFrame(ctk.CTkScrollableFrame):
 
         #
         if self._orientation == "horizontal":
-            self._parent_canvas.configure(xscrollcommand=self._dynamic_horizontal_scrollbar)
+            self._parent_canvas.configure(
+                xscrollcommand=self._dynamic_horizontal_scrollbar
+            )
         elif self._orientation == "vertical":
-            self._parent_canvas.configure(yscrollcommand=self._dynamic_vertical_scrollbar)
+            self._parent_canvas.configure(
+                yscrollcommand=self._dynamic_vertical_scrollbar
+            )
 
         # events binding
         # These functions prevent the canvas from scrolling unless the cursor is in it
@@ -380,9 +385,11 @@ class DynamicScrollableFrame(ctk.CTkScrollableFrame):
         """
         if self._parent_canvas.yview() != (0.0, 1.0):
             if sys.platform.startswith("win"):
-                self._parent_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+                self._parent_canvas.yview_scroll(
+                    int(-1 * (event.delta / 120)), "units")
             elif sys.platform == "darwin":
-                self._parent_canvas.yview_scroll(int(-1 * event.delta), "units")
+                self._parent_canvas.yview_scroll(
+                    int(-1 * event.delta), "units")
             else:
                 if event.num == 4:
                     self._parent_canvas.yview_scroll(-1, "units")
@@ -398,9 +405,11 @@ class DynamicScrollableFrame(ctk.CTkScrollableFrame):
         """
         if self._parent_canvas.xview() != (0.0, 1.0):
             if sys.platform.startswith("win"):
-                self._parent_canvas.xview_scroll(int(-1 * (event.delta / 120)), "units")
+                self._parent_canvas.xview_scroll(
+                    int(-1 * (event.delta / 120)), "units")
             elif sys.platform == "darwin":
-                self._parent_canvas.xview_scroll(int(-1 * event.delta), "units")
+                self._parent_canvas.xview_scroll(
+                    int(-1 * event.delta), "units")
             else:
                 if event.num == 4:
                     self._parent_canvas.xview_scroll(-1, "units")
@@ -415,13 +424,22 @@ class DynamicScrollableFrame(ctk.CTkScrollableFrame):
             _event (tk.Event): The enter event.
         """
         if sys.platform.startswith("linux"):
-            self._parent_canvas.bind_all("<Button-4>", self._on_mouse_wheel, add="+")
-            self._parent_canvas.bind_all("<Button-5>", self._on_mouse_wheel, add="+")
-            self._parent_canvas.bind_all("<Shift-Button-4>", self._on_shift_mouse_wheel, add="+")
-            self._parent_canvas.bind_all("<Shift-Button-5>", self._on_shift_mouse_wheel, add="+")
+            self._parent_canvas.bind_all(
+                "<Button-4>", self._on_mouse_wheel, add="+")
+            self._parent_canvas.bind_all(
+                "<Button-5>", self._on_mouse_wheel, add="+")
+            self._parent_canvas.bind_all(
+                "<Shift-Button-4>", self._on_shift_mouse_wheel, add="+"
+            )
+            self._parent_canvas.bind_all(
+                "<Shift-Button-5>", self._on_shift_mouse_wheel, add="+"
+            )
         else:
-            self._parent_canvas.bind_all("<MouseWheel>", self._on_mouse_wheel, add="+")
-            self._parent_canvas.bind_all("<Shift-MouseWheel>", self._on_shift_mouse_wheel, add="+")
+            self._parent_canvas.bind_all(
+                "<MouseWheel>", self._on_mouse_wheel, add="+")
+            self._parent_canvas.bind_all(
+                "<Shift-MouseWheel>", self._on_shift_mouse_wheel, add="+"
+            )
 
     def _leave_frame(self, _event: tk.Event) -> None:
         """
