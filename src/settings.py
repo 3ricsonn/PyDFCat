@@ -14,7 +14,6 @@ WINDOW_MIN_HEIGHT = int(0.56 * WINDOW_HEIGHT)
 
 # widgets properties
 PAGE_X_PADDING = 5
-SCROLLBAR_WIDTH = 16  # TODO: Determent automatically?
 
 # colors
 BLACK = "#000"
