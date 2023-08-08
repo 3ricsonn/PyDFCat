@@ -119,7 +119,8 @@ class _PageView(DynamicScrollableFrame):
             self._labels.append(label)
 
         self.update_idletasks()
-        self._parent_canvas.configure(scrollregion=self._parent_canvas.bbox("all"))
+        self._parent_canvas.configure(
+            scrollregion=self._parent_canvas.bbox("all"))
         self.update()
 
         # updates the first few pages so the scrollbar wound overlaps with the images
@@ -148,14 +149,17 @@ class _PageView(DynamicScrollableFrame):
         img_height = img_width / ratio
 
         ctk_img = ctk.CTkImage(
-            light_image=img, dark_image=img,
-            size=(int(img_width), int(img_height))
+            light_image=img, dark_image=img, size=(
+                int(img_width), int(img_height))
         )
 
         return ctk_img
 
     def _update_pages_in_sight(self, document: fitz.Document) -> None:
-        page_in_sight = math.ceil(self._parent_canvas.winfo_height() / self.winfo_children()[0].winfo_height())
+        page_in_sight = math.ceil(
+            self._parent_canvas.winfo_height(
+            ) / self.winfo_children()[0].winfo_height()
+        )
 
         for index in range(page_in_sight):
             img = self._convert_page(document[index])
