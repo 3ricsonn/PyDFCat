@@ -7,7 +7,7 @@ import customtkinter as ctk
 import fitz  # PyMuPDF
 from PIL import Image
 from settings import PAGE_X_PADDING
-from widgets import CollapsableFrame, ScrollableFrame
+from widgets import CollapsableFrame, DynamicScrollableFrame
 
 
 class SidePanel(CollapsableFrame):
@@ -89,11 +89,11 @@ class _NavigatorPanel(ctk.CTkFrame):
         self.document_view.pack_forget()
 
 
-class _PageView(ScrollableFrame):
+class _PageView(DynamicScrollableFrame):
     """Preview class to display file pages"""
 
     def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs, orientation="vertical")
 
         # data
         self._labels: list[ctk.CTkLabel] = []
@@ -118,10 +118,9 @@ class _PageView(ScrollableFrame):
 
             self._labels.append(label)
 
-            print(f"Frame width: {self.winfo_width()} (Slider: {self._vertical_scrollbar.winfo_width()})")
-
         self.update_idletasks()
         self._parent_canvas.configure(scrollregion=self._parent_canvas.bbox("all"))
+        self.update()
 
         # updates the first few pages so the scrollbar wound overlaps with the images
         if self.winfo_height() > self._parent_canvas.winfo_height():

@@ -9,7 +9,7 @@ import fitz  # PyMuPDF
 from CTkMessagebox import CTkMessagebox
 from PIL import Image
 from settings import PAGE_X_PADDING
-from widgets import ScrollableFrame
+from widgets import DynamicScrollableFrame
 
 
 class MainEditor(ctk.CTkFrame):
@@ -45,9 +45,7 @@ class MainEditor(ctk.CTkFrame):
         self.open_file_button.grid(row=0, column=0, sticky="s", pady=5)
 
         # page view
-        self.document_view = _DocumentEditor(
-            self, fg_color="transparent", orientation="vertical"
-        )
+        self.document_view = _DocumentEditor(self, fg_color="transparent")
 
         # label for error message
         self.error_label = ctk.CTkLabel(
@@ -141,7 +139,7 @@ class MainEditor(ctk.CTkFrame):
         self.unbind("<Configure>")
 
 
-class _DocumentEditor(ScrollableFrame):
+class _DocumentEditor(DynamicScrollableFrame):
     """Class to display file pages"""
 
     def __init__(self, *args, **kwargs) -> None:
@@ -152,7 +150,7 @@ class _DocumentEditor(ScrollableFrame):
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs, orientation="vertical")
         self._images: list[Image] = []
         self._ctk_images: list[ctk.CTkImage] = []
         self._labels: list[ctk.CTkLabel] = []

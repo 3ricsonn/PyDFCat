@@ -5,7 +5,6 @@ from typing import Any, Literal, Optional, Tuple, Union
 
 import customtkinter as ctk
 from PIL import ImageTk
-from customtkinter.windows.widgets.core_widget_classes import CTkBaseClass
 
 
 class CollapsableFrame(ctk.CTkFrame):
@@ -16,24 +15,24 @@ class CollapsableFrame(ctk.CTkFrame):
     """
 
     def __init__(
-        self,
-        parent: Any,
-        alignment: Literal["left", "right"],
-        expanded: bool = True,
-        corner_radius: Optional[Union[int, str]] = None,
-        border_width: Optional[Union[int, str]] = None,
-        bg_color: Union[str, Tuple[str, str]] = "transparent",
-        fg_color: Optional[Union[str, Tuple[str, str]]] = None,
-        border_color: Optional[Union[str, Tuple[str, str]]] = None,
-        button_corner_radius: Optional[Union[int, str]] = None,
-        button_border_width: Optional[Union[int, str]] = None,
-        button_fg_color: Optional[Union[str, Tuple[str, str]]] = None,
-        button_hover_color: Optional[Union[str, Tuple[str, str]]] = None,
-        button_border_color: Optional[Union[str, Tuple[str, str]]] = None,
-        button_text_color: Optional[Union[str, Tuple[str, str]]] = None,
-        button_image: Union[ctk.CTkImage, ImageTk.PhotoImage, None] = None,
-        button_hover: bool = True,
-        button_compound: str = "left",
+            self,
+            parent: Any,
+            alignment: Literal["left", "right"],
+            expanded: bool = True,
+            corner_radius: Optional[Union[int, str]] = None,
+            border_width: Optional[Union[int, str]] = None,
+            bg_color: Union[str, Tuple[str, str]] = "transparent",
+            fg_color: Optional[Union[str, Tuple[str, str]]] = None,
+            border_color: Optional[Union[str, Tuple[str, str]]] = None,
+            button_corner_radius: Optional[Union[int, str]] = None,
+            button_border_width: Optional[Union[int, str]] = None,
+            button_fg_color: Optional[Union[str, Tuple[str, str]]] = None,
+            button_hover_color: Optional[Union[str, Tuple[str, str]]] = None,
+            button_border_color: Optional[Union[str, Tuple[str, str]]] = None,
+            button_text_color: Optional[Union[str, Tuple[str, str]]] = None,
+            button_image: Union[ctk.CTkImage, ImageTk.PhotoImage, None] = None,
+            button_hover: bool = True,
+            button_compound: str = "left",
     ) -> None:
         """
         Initialize the Collapsible Frame.
@@ -305,27 +304,14 @@ class CollapsableFrame(ctk.CTkFrame):
         self._parent_frame.lower(belowThis)
 
 
-class ScrollableFrame(ctk.CTkFrame):
+class DynamicScrollableFrame(ctk.CTkScrollableFrame):
     """
-    A customtkinter frame with built-in scrolling functionality.
+    An extension for the build-in customtkinter scrollable frame with dynamic placed scrollbars
+    and patched mousewheel scrolling for linux
 
-    This class inherits from ctk.CTkFrame.
+    This class inherits from ctk.CTkScrollableFrame.
     """
-    def __init__(
-            self,
-            parent: Any,
-            width: Optional[Union[int, float]] = None,
-            height: Optional[Union[int, float]] = None,
-            corner_radius: Optional[Union[int, str]] = None,
-            border_width: Optional[Union[int, str]] = None,
-            bg_color: Union[str, Tuple[str, str]] = "transparent",
-            fg_color: Optional[Union[str, Tuple[str, str]]] = None,
-            border_color: Optional[Union[str, Tuple[str, str]]] = None,
-            scrollbar_fg_color: Optional[Union[str, Tuple[str, str]]] = None,
-            scrollbar_button_color: Optional[Union[str, Tuple[str, str]]] = None,
-            scrollbar_button_hover_color: Optional[Union[str, Tuple[str, str]]] = None,
-            orientation: Literal["horizontal", "vertical", "both"] = "vertical"
-    ) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         """
         Create a scrollable frame.
 
@@ -344,158 +330,18 @@ class ScrollableFrame(ctk.CTkFrame):
                 The color of the scrollbar buttons when hovered.
             orientation (Literal["horizontal", "vertical", "both"]): The scrolling orientation.
         """
-        # data
-        self._orientation = orientation
-        if self._orientation in ["horizontal", "vertical", "both"]:
-            self.vertically_scrollable = self._orientation in ["horizontal", "both"]
-            self.horizontally_scrollable = self._orientation in ["vertical", "both"]
-        else:
-            raise ValueError("Direction must be 'horizontal', 'vertical' or 'both'")
+        super().__init__(*args, **kwargs)
 
-        # dimensions independent of scaling
-        self._desired_width = width
-        self._desired_height = height
+        #
+        if self._orientation == "horizontal":
+            self._parent_canvas.configure(xscrollcommand=self._dynamic_horizontal_scrollbar)
+        elif self._orientation == "vertical":
+            self._parent_canvas.configure(yscrollcommand=self._dynamic_vertical_scrollbar)
 
-        # widgets
-        # container widgets
-        self._parent_frame = ctk.CTkFrame(
-            master=parent,
-            width=0, height=0,
-            corner_radius=corner_radius,
-            border_width=border_width,
-            bg_color=bg_color,
-            fg_color=fg_color,
-            border_color=border_color
-        )
-
-        self._parent_canvas = tk.Canvas(
-            master=self._parent_frame,
-            bd=0,
-            highlightthickness=0,
-            relief="ridge"
-        )
-
-        # scrollbars
-        self._vertical_scrollbar = ctk.CTkScrollbar(
-            master=self._parent_frame,
-            orientation="vertical",
-            command=self._parent_canvas.yview,
-            fg_color=scrollbar_fg_color,
-            button_color=scrollbar_button_color,
-            button_hover_color=scrollbar_button_hover_color
-        )
-        self._parent_canvas.configure(yscrollcommand=self._dynamic_vertical_scrollbar)
-
-        self._horizontal_scrollbar = ctk.CTkScrollbar(
-            master=self._parent_frame,
-            orientation="horizontal",
-            command=self._parent_canvas.xview,
-            fg_color=scrollbar_fg_color,
-            button_color=scrollbar_button_color,
-            button_hover_color=scrollbar_button_hover_color
-        )
-        self._parent_canvas.configure(xscrollcommand=self._dynamic_horizontal_scrollbar)
-
-        if self._parent_frame.cget("fg_color") == "transparent":
-            self._parent_canvas.configure(
-                bg=self._parent_frame._apply_appearance_mode(self._parent_frame.cget("bg_color"))
-            )
-        else:
-            self._parent_canvas.configure(
-                bg=self._parent_frame._apply_appearance_mode(self._parent_frame.cget("fg_color"))
-            )
-
-        super().__init__(master=self._parent_canvas, fg_color=self._parent_frame.cget("fg_color"),
-                         bg_color=self._parent_frame.cget("fg_color"))
-
-        self._canvas_window = self._parent_canvas.create_window(
-            (0, 0), window=self, anchor="nw"
-        )
-
-        self._parent_canvas.configure(
-            width=self._apply_widget_scaling(self._desired_width),
-            height=self._apply_widget_scaling(self._desired_height)
-        )
-
-        # layout
-        self._parent_frame.grid_columnconfigure(0, weight=1)
-        self._parent_frame.grid_rowconfigure(0, weight=1)
-
-        self._parent_canvas.grid(column=0, row=0, sticky="news")
-        self._update_direction()
-
-        # events
+        # events binding
         # These functions prevent the canvas from scrolling unless the cursor is in it
         self._parent_canvas.bind("<Enter>", self._enter_frame)
         self._parent_canvas.bind("<Leave>", self._leave_frame)
-
-        self.bind("<Configure>", self._on_frame_configure)
-        self._parent_canvas.bind("<Configure>", self._on_canvas_configure)
-
-    def _on_frame_configure(self, _event: tk.Event) -> None:
-        """
-        Called when the viewport size changes.
-
-        Parameters:
-            _event (tk.Event): The event object.
-        """
-        self._parent_canvas.configure(scrollregion=self._parent_canvas.bbox("all"))
-
-    def _on_canvas_configure(self, _event: tk.Event) -> None:
-        """
-        Called when the canvas size changes.
-
-        Parameters:
-            _event (tk.Event): The event object.
-        """
-        if self._orientation == "horizontal":
-            self._parent_canvas.itemconfigure(self._canvas_window, height=self._parent_canvas.winfo_height())
-        elif self._orientation == "vertical":
-            self._parent_canvas.itemconfigure(self._canvas_window, width=self._parent_canvas.winfo_width())
-
-    def _set_scaling(self, new_widget_scaling: float, new_window_scaling: float) -> None:
-        """
-        Set the scaling for the widget and window.
-
-        Parameters:
-            new_widget_scaling (float): The new widget scaling value.
-            new_window_scaling (float): The new window scaling value.
-        """
-
-        super()._set_scaling(new_widget_scaling, new_window_scaling)
-
-        self._parent_canvas.configure(width=self._apply_widget_scaling(self._desired_width),
-                                      height=self._apply_widget_scaling(self._desired_height))
-
-    def _set_dimensions(
-            self,
-            width: Optional[Union[int, float]] = None,
-            height: Optional[Union[int, float]] = None
-    ) -> None:
-        """
-        Set the dimensions of the frame.
-
-        Parameters:
-            width (Optional[int | float]): The desired width of the frame.
-            height (Optional[int | float]): The desired height of the frame.
-        """
-        if width is not None:
-            self._desired_width = width
-        if height is not None:
-            self._desired_height = height
-
-        self._parent_canvas.configure(width=self._apply_widget_scaling(self._desired_width),
-                                      height=self._apply_widget_scaling(self._desired_height))
-
-    def _update_direction(self) -> None:
-        """Update the scrolling direction of the frame."""
-        self._vertical_scrollbar.grid_forget()
-        self._horizontal_scrollbar.grid_forget()
-
-        if self.horizontally_scrollable and self._parent_canvas.xview() != (0.0, 1.0):
-            self._horizontal_scrollbar.grid(row=1, column=0, sticky="wes")
-        if self.vertically_scrollable and self._parent_canvas.yview() != (0.0, 1.0):
-            self._vertical_scrollbar.grid(row=0, column=1, sticky="nse")
 
     def _dynamic_vertical_scrollbar(self, x: float, y: float) -> None:
         """
@@ -506,10 +352,10 @@ class ScrollableFrame(ctk.CTkFrame):
             y (float): The y-coordinate.
         """
         if float(x) == 0.0 and float(y) == 1.0:
-            self._vertical_scrollbar.grid_forget()
+            self._scrollbar.grid_forget()
         else:
-            self._vertical_scrollbar.grid(row=0, column=1, sticky="nse")
-        self._vertical_scrollbar.set(x, y)
+            self._create_grid()
+        self._scrollbar.set(x, y)
 
     def _dynamic_horizontal_scrollbar(self, x: float, y: float) -> None:
         """
@@ -520,10 +366,10 @@ class ScrollableFrame(ctk.CTkFrame):
             y (float): The y-coordinate.
         """
         if float(x) == 0.0 and float(y) == 1.0:
-            self._horizontal_scrollbar.grid_forget()
+            self._scrollbar.grid_forget()
         else:
-            self._horizontal_scrollbar.grid(row=1, column=0, sticky="wes")
-        self._horizontal_scrollbar.set(x, y)
+            self._create_grid()
+        self._scrollbar.set(x, y)
 
     def _on_mouse_wheel(self, event: tk.Event) -> None:
         """
@@ -569,17 +415,13 @@ class ScrollableFrame(ctk.CTkFrame):
             _event (tk.Event): The enter event.
         """
         if sys.platform.startswith("linux"):
-            if self.horizontally_scrollable:
-                self._parent_canvas.bind_all("<Button-4>", self._on_mouse_wheel)
-                self._parent_canvas.bind_all("<Button-5>", self._on_mouse_wheel)
-            if self.vertically_scrollable:
-                self._parent_canvas.bind_all("<Shift-Button-4>", self._on_shift_mouse_wheel)
-                self._parent_canvas.bind_all("<Shift-Button-5>", self._on_shift_mouse_wheel)
+            self._parent_canvas.bind_all("<Button-4>", self._on_mouse_wheel, add="+")
+            self._parent_canvas.bind_all("<Button-5>", self._on_mouse_wheel, add="+")
+            self._parent_canvas.bind_all("<Shift-Button-4>", self._on_shift_mouse_wheel, add="+")
+            self._parent_canvas.bind_all("<Shift-Button-5>", self._on_shift_mouse_wheel, add="+")
         else:
-            if self.horizontally_scrollable:
-                self._parent_canvas.bind_all("<MouseWheel>", self._on_mouse_wheel)
-            if self.vertically_scrollable:
-                self._parent_canvas.bind_all("<Shift-MouseWheel>", self._on_shift_mouse_wheel)
+            self._parent_canvas.bind_all("<MouseWheel>", self._on_mouse_wheel, add="+")
+            self._parent_canvas.bind_all("<Shift-MouseWheel>", self._on_shift_mouse_wheel, add="+")
 
     def _leave_frame(self, _event: tk.Event) -> None:
         """
@@ -589,173 +431,13 @@ class ScrollableFrame(ctk.CTkFrame):
             _event (tk.Event): The leave event.
         """
         if sys.platform.startswith("linux"):
-            if self.horizontally_scrollable:
-                self._parent_canvas.unbind_all("<Button-4>")
-                self._parent_canvas.unbind_all("<Button-5>")
-            if self.vertically_scrollable:
-                self._parent_canvas.unbind_all("<Shift-Button-4>")
-                self._parent_canvas.unbind_all("<Shift-Button-5>")
+            self._parent_canvas.unbind_all("<Button-4>")
+            self._parent_canvas.unbind_all("<Button-5>")
+            self._parent_canvas.unbind_all("<Shift-Button-4>")
+            self._parent_canvas.unbind_all("<Shift-Button-5>")
         else:
-            if self.horizontally_scrollable:
-                self._parent_canvas.unbind_all("<MouseWheel>")
-            if self.vertically_scrollable:
-                self._parent_canvas.unbind_all("<Shift-MouseWheel>")
-
-    def _set_appearance_mode(self, mode_string: str) -> None:
-        """
-        Set the appearance mode for the frame.
-
-        Parameters:
-            mode_string (str): The appearance mode string.
-        """
-        super()._set_appearance_mode(mode_string)
-        if self._parent_frame.cget("fg_color") == "transparent":
-            self._parent_canvas.configure(bg=self._apply_appearance_mode(self._parent_frame.cget("bg_color")))
-        else:
-            self._parent_canvas.configure(bg=self._apply_appearance_mode(self._parent_frame.cget("fg_color")))
-
-    def configure(self, **kwargs) -> None:
-        """
-        Configure the ScrollableFrame.
-
-        Parameters:
-            **kwargs: configuration arguments (see __init__).
-        """
-        if "direction" in kwargs:
-            self._orientation = kwargs.pop("direction")
-            if self._orientation in ["x", "y", "both"]:
-                self.horizontally_scrollable = self._orientation in ["x", "both"]
-                self.vertically_scrollable = self._orientation in ["y", "both"]
-            else:
-                raise ValueError("Direction must be 'x', 'y' or 'both'")
-            self._update_direction()
-
-        if "corner_radius" in kwargs:
-            new_corner_radius = kwargs.pop("corner_radius")
-            self._parent_frame.configure(corner_radius=new_corner_radius)
-
-        if "border_width" in kwargs:
-            self._parent_frame.configure(border_width=kwargs.pop("border_width"))
-
-        if "fg_color" in kwargs:
-            self._parent_frame.configure(fg_color=kwargs.pop("fg_color"))
-
-            if self._parent_frame.cget("fg_color") == "transparent":
-                tk.Frame.configure(self, bg=self._apply_appearance_mode(self._parent_frame.cget("bg_color")))
-                self._parent_canvas.configure(bg=self._apply_appearance_mode(self._parent_frame.cget("bg_color")))
-            else:
-                tk.Frame.configure(self, bg=self._apply_appearance_mode(self._parent_frame.cget("fg_color")))
-                self._parent_canvas.configure(bg=self._apply_appearance_mode(self._parent_frame.cget("fg_color")))
-
-            for child in self.winfo_children():
-                if isinstance(child, CTkBaseClass):
-                    child.configure(bg_color=self._parent_frame.cget("fg_color"))
-
-        if "scrollbar_fg_color" in kwargs:
-            self._horizontal_scrollbar.configure(fg_color=kwargs.pop("scrollbar_fg_color"))
-            self._vertical_scrollbar.configure(fg_color=kwargs.pop("scrollbar_fg_color"))
-
-        if "scrollbar_button_color" in kwargs:
-            self._horizontal_scrollbar.configure(button_color=kwargs.pop("scrollbar_button_color"))
-            self._vertical_scrollbar.configure(button_color=kwargs.pop("scrollbar_button_color"))
-
-        if "scrollbar_button_hover_color" in kwargs:
-            self._horizontal_scrollbar.configure(button_hover_color=kwargs.pop("scrollbar_button_hover_color"))
-            self._vertical_scrollbar.configure(button_hover_color=kwargs.pop("scrollbar_button_hover_color"))
-
-        self._parent_frame.configure(**kwargs)
-
-    def pack(self, **kwargs) -> None:
-        """
-        Mimics packing the parent frame with the given packing options.
-
-        Args:
-            **kwargs: Packing options to be passed to the pack method of the parent frame.
-        """
-        self._parent_frame.pack(**kwargs)
-
-    def place(self, **kwargs) -> None:
-        """
-        Mimics placing the parent frame with the given options.
-
-        Args:
-            **kwargs: Options to be passed to the place method of the parent frame.
-        """
-        self._parent_frame.place(**kwargs)
-
-    def grid(self, **kwargs) -> None:
-        """
-        Mimics gridding the parent frame with the given grid options.
-
-        Args:
-            **kwargs: Grid options to be passed to the grid method of the parent frame.
-        """
-        self._parent_frame.grid(**kwargs)
-
-    def pack_forget(self) -> None:
-        """
-        Mimics unpacking/removing the parent frame from the view using pack manager.
-        """
-        self._parent_frame.pack_forget()
-
-    def place_forget(self) -> None:
-        """
-        Mimics unplacing/removing the parent frame from the view using place manager.
-        """
-        self._parent_frame.place_forget()
-
-    def grid_forget(self) -> None:
-        """
-        Mimics ungridding/removing the parent frame from the view using grid manager.
-        """
-        self._parent_frame.grid_forget()
-
-    def grid_remove(self) -> None:
-        """
-        Mimics temporarily removing the parent frame from the grid manager without destroying it.
-        """
-        self._parent_frame.grid_remove()
-
-    def grid_propagate(self, **kwargs) -> None:
-        """
-        Mimics configuring the grid propagation behavior for the parent frame.
-
-        Args:
-            **kwargs: Grid propagation options to be passed to grid_propagate method of the parent frame.
-        """
-        self._parent_frame.grid_propagate(**kwargs)
-
-    def grid_info(self):
-        """
-        Mimics returning a dictionary with information about the parent frame's grid layout.
-
-        Returns:
-            dict: A dictionary containing information about the grid layout of the parent frame.
-        """
-        return self._parent_frame.grid_info()
-
-    def lift(self, aboveThis: Optional[Any] = None) -> None:
-        """
-        Mimics raising the parent frame above the specified widget in the stacking order.
-
-        Args:
-            aboveThis (Optional[Any]): The widget above which to raise the parent frame.
-        """
-        self._parent_frame.lift(aboveThis)
-
-    def lower(self, belowThis: Optional[Any] = None) -> None:
-        """
-        Mimics lowering the parent frame below the specified widget in the stacking order.
-
-        Args:
-            belowThis (Optional[Any]): The widget below which to lower the parent frame.
-        """
-        self._parent_frame.lower(belowThis)
-
-    def destroy(self):
-        """Mimics destroying the parent frame along with its associated widgets and resources."""
-        super().destroy()
-        self._parent_frame.destroy()
+            self._parent_canvas.unbind_all("<MouseWheel>")
+            self._parent_canvas.unbind_all("<Shift-MouseWheel>")
 
 
 if __name__ == "__main__":
@@ -779,7 +461,7 @@ if __name__ == "__main__":
         fill="x", expand=True)
 
     # debugging scrollable frame
-    scrollable_frame = ScrollableFrame(window)  # , orientation="auto")
+    scrollable_frame = DynamicScrollableFrame(window)  # , orientation="auto")
     scrollable_frame.pack(side="left", expand=True, fill="both")
     # scrollable_frame.grid(column=1, row=0, sticky="news")
 
