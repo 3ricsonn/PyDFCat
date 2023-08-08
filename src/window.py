@@ -37,15 +37,15 @@ class ApplicationWindow(ctk.CTk):
         # data
         scaling_variable = ctk.StringVar(value="100%")
 
-        # sidebar
-        self.sidebar = SidePanel(self)
-        self.sidebar.grid(column=0, row=1, sticky="news", padx=10, pady=10)
-
         # main editor
         self.main_editor = MainEditor(
             self, open_file_command=self.open_file, scaling_variable=scaling_variable
         )
         self.main_editor.grid(column=1, row=1, sticky="news", padx=10, pady=10)
+
+        # sidebar
+        self.sidebar = SidePanel(self, jump_to_page_command=self.main_editor.jump_to_page)
+        self.sidebar.grid(column=0, row=1, sticky="news", padx=10, pady=10)
 
         # close dokument button
         self.close_button = ctk.CTkButton(

@@ -7,6 +7,7 @@ import customtkinter as ctk
 import fitz  # PyMuPDF
 from CTkMessagebox import CTkMessagebox
 from PIL import Image
+from settings import PAGE_X_PADDING, PAGE_Y_PADDING
 
 
 class MainEditor(ctk.CTkFrame):
@@ -126,6 +127,9 @@ class MainEditor(ctk.CTkFrame):
         if not self.document_view.winfo_ismapped():
             self.error_label.grid(row=1, column=0, sticky="n", pady=5)
 
+    def jump_to_page(self, page_num: int) -> None:
+        self.document_view.jump_to_page(page_num)
+
     def close_document(self) -> None:
         """Close the current document in the Main Editor."""
         self.document = None
@@ -157,6 +161,7 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         self._ctk_images: list[ctk.CTkImage] = []
         self._labels: list[ctk.CTkLabel] = []
         self._rows = 0
+        self._columns = 0
         self._scale = 1.0
 
     def load_pages(self, document: fitz.Document) -> None:
@@ -275,21 +280,21 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         Returns:
             bool: True if the grid layout was updated, False otherwise.
         """
-        rows, _ = self._get_grid_dimension(self._ctk_images[0])
+        columns, rows = self._get_grid_dimension(self._ctk_images[0])
 
-        if rows == self._rows:
+        if columns == self._columns:
             return False
 
-        self._rows = max(1, rows)
-        columns = max(len(self._images) // self._rows, 1)
+        self._columns = max(1, columns)
+        self._rows = max(len(self._images) // self._columns, 1)
 
         self.update()
-        self.rowconfigure(tuple(range(self._rows)), weight=1)
-        self.columnconfigure(tuple(range(columns)), weight=1)
+        self.rowconfigure(tuple(range(self._columns)), weight=1)
+        self.columnconfigure(tuple(range(self._rows)), weight=1)
 
         for index, label in enumerate(self._labels):
             label.grid(
-                column=index % self._rows, row=index // self._rows, padx=5, pady=7
+                column=index % self._columns, row=index // self._columns, padx=PAGE_X_PADDING, pady=PAGE_Y_PADDING
             )
 
         return True
@@ -310,6 +315,12 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
             self._parent_canvas.winfo_height() // img.cget("size")[1],
         )
 
+    def jump_to_page(self, page_num: int) -> None:
+        page_overlap = 1 if len(self._labels) % self._columns != 0 else 0
+        row_num = page_num // self._columns
+
+        self._parent_canvas.yview_moveto(str(row_num / (self._rows + page_overlap)))
+
     def _select_page(self, event: tk.Event) -> None:
         """Select page with a single click."""
 
@@ -324,5 +335,6 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         self._images = []
         self._labels = []
         self._rows = 0
+        self._columns = 0
         for widget in self.winfo_children():
             widget.destroy()

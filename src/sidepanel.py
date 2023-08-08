@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 import tkinter as tk
-from typing import Any
+from typing import Any, Callable
 
 import customtkinter as ctk
 import fitz  # PyMuPDF
 from PIL import Image
+from settings import PAGE_IPADDING, PAGE_X_PADDING, SELECTED
 from widgets import CollapsableFrame
 
 
 class SidePanel(CollapsableFrame):
     """Side panel to preview the file and the selection"""
 
-    def __init__(self, parent: Any):
+    def __init__(self, parent: Any, jump_to_page_command: Callable):
         """
         Initialize the Side Panel.
 
@@ -28,7 +29,8 @@ class SidePanel(CollapsableFrame):
 
         # preview and navigator tab
         self.navigator_tab = _NavigatorPanel(
-            parent=self.tabview.tab("Navigator"))
+            parent=self.tabview.tab("Navigator"), jump_to_page_command=jump_to_page_command
+        )
         self.navigator_tab.pack(expand=True, fill="both")
 
     def get_new_document(self, document: fitz.Document) -> None:
@@ -48,7 +50,7 @@ class SidePanel(CollapsableFrame):
 class _NavigatorPanel(ctk.CTkFrame):
     """Class to preview document and navigator for main editor"""
 
-    def __init__(self, parent: Any):
+    def __init__(self, parent: Any, jump_to_page_command: Callable):
         """
         Initialize the Navigator Panel.
 
@@ -61,7 +63,7 @@ class _NavigatorPanel(ctk.CTkFrame):
         self.document = fitz.Document()
 
         # page view
-        self.document_view = _PageView(self)
+        self.document_view = _PageView(self, jump_to_page_command)
 
     def get_new_document(self, document: fitz.Document) -> None:
         """
@@ -90,10 +92,11 @@ class _NavigatorPanel(ctk.CTkFrame):
 class _PageView(ctk.CTkScrollableFrame):
     """Preview class to display file pages"""
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, parent, jump_page_command: Callable, *args, **kwargs) -> None:
+        super().__init__(master=parent, *args, **kwargs)
 
         # data
+        self._jump_to_page_command = jump_page_command
 
     def load_pages(self, document: fitz.Document) -> None:
         """
@@ -112,7 +115,7 @@ class _PageView(ctk.CTkScrollableFrame):
             # Create a labeled image widget and pack it
             label = ctk.CTkLabel(self, image=image, text="")
             label.bind("<Button-1>", command=self._select_page)
-            label.pack(expand=True, fill="x", padx=5, pady=7)
+            label.pack(expand=True, fill="x", ipadx=PAGE_IPADDING, ipady=PAGE_IPADDING, padx=PAGE_X_PADDING, pady=7)
 
     def _convert_page(self, page: fitz.Page) -> ctk.CTkImage:
         """
@@ -131,7 +134,7 @@ class _PageView(ctk.CTkScrollableFrame):
         self._parent_canvas.update()
 
         ratio = img.size[0] / img.size[1]
-        img_width = self._parent_canvas.winfo_width()
+        img_width = self._parent_canvas.winfo_width() - 2 * (PAGE_IPADDING + PAGE_X_PADDING)
         img_height = img_width / ratio
 
         ctk_img = ctk.CTkImage(
@@ -142,7 +145,21 @@ class _PageView(ctk.CTkScrollableFrame):
         return ctk_img
 
     def _select_page(self, event: tk.Event) -> None:
-        """Select q page with a single click and jumps to it in the main editor."""
+        """Select a page with a single click and jumps to it in the main editor."""
+        self.clear_selection()
+
+        ctk_label: ctk.CTkLabel = event.widget.master
+
+        ctk_label.configure(fg_color=SELECTED)
+
+        page_num = ctk_label.winfo_y() // ctk_label.winfo_height()
+
+        self._jump_to_page_command(page_num)
+
+    def clear_selection(self) -> None:
+        """Remove selected pages from selection and reset page background."""
+        for widget in self.winfo_children():
+            widget.configure(fg_color="#2B2B2B")
 
     def clear(self):
         """
