@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
+import math
 import tkinter as tk
 from typing import Any
 
 import customtkinter as ctk
 import fitz  # PyMuPDF
 from PIL import Image
-from settings import PAGE_X_PADDING, SCROLLBAR_WIDTH
+from settings import PAGE_X_PADDING
 from widgets import CollapsableFrame, ScrollableFrame
 
 
@@ -91,6 +92,12 @@ class _NavigatorPanel(ctk.CTkFrame):
 class _PageView(ScrollableFrame):
     """Preview class to display file pages"""
 
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+        # data
+        self._labels: list[ctk.CTkLabel] = []
+
     def load_pages(self, document: fitz.Document) -> None:
         """
         Load and display the pages of a document.
@@ -99,10 +106,6 @@ class _PageView(ScrollableFrame):
             document (fitz.Document): The document to load the pages from.
         """
         self.clear()
-
-        # TODO: Delete debugging
-        predicted_height = self._convert_page(document[0]).cget("size")[1] * len(document)
-        print(f"Predicted height: {predicted_height}, Current Height: {self.winfo_height()}")
 
         for page in document:
             # Convert the page to an image
@@ -113,8 +116,16 @@ class _PageView(ScrollableFrame):
             label.bind("<Button-1>", command=self._select_page)
             label.pack(expand=True, fill="x", padx=PAGE_X_PADDING, pady=7)
 
+            self._labels.append(label)
+
+            print(f"Frame width: {self.winfo_width()} (Slider: {self._vertical_scrollbar.winfo_width()})")
+
         self.update_idletasks()
         self._parent_canvas.configure(scrollregion=self._parent_canvas.bbox("all"))
+
+        # updates the first few pages so the scrollbar wound overlaps with the images
+        if self.winfo_height() > self._parent_canvas.winfo_height():
+            self._update_pages_in_sight(document)
 
     def _convert_page(self, page: fitz.Page) -> ctk.CTkImage:
         """
@@ -133,16 +144,23 @@ class _PageView(ScrollableFrame):
         self._parent_canvas.update()
 
         ratio = img.size[0] / img.size[1]
-        img_width = self._parent_canvas.winfo_width() - 2 * PAGE_X_PADDING - SCROLLBAR_WIDTH
+        img_width = self.winfo_width() - 2 * PAGE_X_PADDING  # - SCROLLBAR_WIDTH
 
         img_height = img_width / ratio
 
         ctk_img = ctk.CTkImage(
-            light_image=img, dark_image=img, size=(
-                int(img_width), int(img_height))
+            light_image=img, dark_image=img,
+            size=(int(img_width), int(img_height))
         )
 
         return ctk_img
+
+    def _update_pages_in_sight(self, document: fitz.Document) -> None:
+        page_in_sight = math.ceil(self._parent_canvas.winfo_height() / self.winfo_children()[0].winfo_height())
+
+        for index in range(page_in_sight):
+            img = self._convert_page(document[index])
+            self._labels[index].configure(image=img)
 
     def _select_page(self, event: tk.Event) -> None:
         """Select q page with a single click and jumps to it in the main editor."""
@@ -151,5 +169,7 @@ class _PageView(ScrollableFrame):
         """Clear all child widgets from the container."""
         for widget in self.winfo_children():
             widget.destroy()
+
+        self._labels.clear()
 
         self.update_idletasks()

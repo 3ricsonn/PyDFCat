@@ -4,7 +4,7 @@ from screeninfo import get_monitors
 
 # windows properties
 screen = get_monitors()[0]
-WINDOW_RATIO = 0.9423076923076923
+WINDOW_RATIO = 0.9296407185628742
 
 WINDOW_HEIGHT = screen.height
 WINDOW_WIDTH = int(WINDOW_RATIO * WINDOW_HEIGHT)

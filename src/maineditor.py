@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import math
 import re
 import tkinter as tk
 from typing import Any, Callable, Optional
@@ -7,7 +8,7 @@ import customtkinter as ctk
 import fitz  # PyMuPDF
 from CTkMessagebox import CTkMessagebox
 from PIL import Image
-from settings import PAGE_X_PADDING, SCROLLBAR_WIDTH
+from settings import PAGE_X_PADDING
 from widgets import ScrollableFrame
 
 
@@ -15,7 +16,7 @@ class MainEditor(ctk.CTkFrame):
     """Main editor class to manage file pages"""
 
     def __init__(
-        self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar
+            self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar
     ) -> None:
         """
         Initialize the Main Editor.
@@ -95,7 +96,7 @@ class MainEditor(ctk.CTkFrame):
                 title="Invalid scaling",
                 icon="warning",
                 message="You entered an invalid scaling factor. "
-                "Please make sure you entered a number.",
+                        "Please make sure you entered a number.",
             )
             self.scaling_variable.set("100%")
             return
@@ -109,7 +110,7 @@ class MainEditor(ctk.CTkFrame):
                 title="Invalid scaling",
                 icon="warning",
                 message="You entered a too high scaling. "
-                "Please enter a scaling smaller than 200%.",
+                        "Please enter a scaling smaller than 200%.",
             )
             self.scaling_variable.set("100%")
             return
@@ -179,6 +180,10 @@ class _DocumentEditor(ScrollableFrame):
 
         self._update_grid()
 
+        # updates the first few pages so the scrollbar wound overlaps with the images
+        if self.winfo_height() > self._parent_canvas.winfo_height():
+            self._update_pages_in_sight(document)
+
     def update_pages(self, new_scaling: Optional[float] = None) -> None:
         """
         Update the document pages with a new scaling factor or new image size.
@@ -192,7 +197,7 @@ class _DocumentEditor(ScrollableFrame):
             self._scale = new_scaling
 
         if new_scaling is not None or (
-            new_size and self._ctk_images[0].cget("size") != new_size
+                new_size and self._ctk_images[0].cget("size") != new_size
         ):
             self._ctk_images = self._create_images(self._images, new_size)
             for label, img in zip(self._labels, self._ctk_images):
@@ -218,7 +223,7 @@ class _DocumentEditor(ScrollableFrame):
         return img
 
     def _create_images(
-        self, images: list[Image], size: tuple[int, int]
+            self, images: list[Image], size: tuple[int, int]
     ) -> list[ctk.CTkImage]:
         """
         Create a list of ctk.CTkImage objects from a list of PIL.Image objects.
@@ -260,9 +265,9 @@ class _DocumentEditor(ScrollableFrame):
         canvas_width = self._parent_canvas.winfo_width()
         canvas_height = self._parent_canvas.winfo_height()
 
-        if (canvas_width - 2 * PAGE_X_PADDING - SCROLLBAR_WIDTH) / img_ratio <= canvas_height:
+        if (canvas_width - 2 * PAGE_X_PADDING) / img_ratio <= canvas_height:
             # The image fits within the canvas width
-            img_width = canvas_width - 2 * PAGE_X_PADDING - SCROLLBAR_WIDTH
+            img_width = canvas_width - 2 * PAGE_X_PADDING
             img_height = canvas_width / img_ratio
         else:
             # The image fits within the canvas height
@@ -315,6 +320,23 @@ class _DocumentEditor(ScrollableFrame):
             self._parent_canvas.winfo_width() // img.cget("size")[0],
             self._parent_canvas.winfo_height() // img.cget("size")[1],
         )
+
+    def _update_pages_in_sight(self, document: fitz.Document) -> None:
+        """
+        Update the visible pages based on the current canvas size and document content.
+
+        Args:
+            document (fitz.Document): The document whose pages are being displayed.
+        """
+        page_in_sight = math.ceil(self._parent_canvas.winfo_height() / self.winfo_children()[0].winfo_height())
+
+        self._images[:page_in_sight] = [self._convert_page(page) for page in document]
+
+        self._ctk_images[:page_in_sight] = self._create_images(
+            self._images[:page_in_sight], self._get_img_size(self._images[0])
+        )
+        for index, label in enumerate(self._labels[:page_in_sight]):
+            label.configure(image=self._ctk_images[index])
 
     def _select_page(self, event: tk.Event) -> None:
         """Select page with a single click."""

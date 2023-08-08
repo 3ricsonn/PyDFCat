@@ -59,10 +59,11 @@ class ApplicationWindow(ctk.CTk):
 
         # self.main_editor.bind(
         #     "<Configure>",
-        #    lambda _: print(
+        #     lambda _: print(
         #         self.main_editor.winfo_geometry()
         #         + " ("
-        #         + self.winfo_geometry()
+        #         + str(self.winfo_width() / self.winfo_height())
+        #         # + self.winfo_geometry()
         #         + " - "
         #         + self.toolbar.winfo_geometry()
         #         + ")"
