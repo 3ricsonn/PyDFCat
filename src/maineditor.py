@@ -299,7 +299,7 @@ class _DocumentEditor(DynamicScrollableFrame):
         Returns:
             bool: True if the grid layout was updated, False otherwise.
         """
-        columns, _ = self._get_grid_dimension(self._ctk_images[0])
+        columns, rows = self._get_grid_dimension(self._ctk_images[0])
 
         if columns == self._columns:
             return False
@@ -421,7 +421,7 @@ class _DocumentEditor(DynamicScrollableFrame):
             for label in self.winfo_children()[page_num:self._last_selected]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
 
-        self._selected_pages.update(set(page_index for page_index in range(self._last_selected, page_num + 1)))
+        self._selected_pages.update(set(range(self._last_selected, page_num + 1)))
 
     def clear_selection(self) -> None:
         """Remove selected pages from selection and reset page background."""
