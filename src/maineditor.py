@@ -131,6 +131,12 @@ class MainEditor(ctk.CTkFrame):
             self.error_label.grid(row=1, column=0, sticky="n", pady=5)
 
     def jump_to_page(self, page_num: int) -> None:
+        """
+        Jump in the main editor to the specified page number.
+
+        Args:
+            page_num (int): The page number to jump to.
+        """
         self.document_view.jump_to_page(page_num)
 
     def close_document(self) -> None:
@@ -293,7 +299,7 @@ class _DocumentEditor(DynamicScrollableFrame):
         Returns:
             bool: True if the grid layout was updated, False otherwise.
         """
-        columns, rows = self._get_grid_dimension(self._ctk_images[0])
+        columns, _ = self._get_grid_dimension(self._ctk_images[0])
 
         if columns == self._columns:
             return False
@@ -357,6 +363,12 @@ class _DocumentEditor(DynamicScrollableFrame):
             label.configure(image=self._ctk_images[index])
 
     def jump_to_page(self, page_num: int) -> None:
+        """
+        Jump to the specified page number.
+
+        Args:
+            page_num (int): The page number to jump to.
+        """
         page_overlap = 1 if len(self._labels) % self._columns != 0 else 0
         row_num = page_num // self._columns
 
@@ -409,7 +421,7 @@ class _DocumentEditor(DynamicScrollableFrame):
             for label in self.winfo_children()[page_num:self._last_selected]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
 
-        self._selected_pages.update({page_index for page_index in range(self._last_selected, page_num + 1)})
+        self._selected_pages.update(set(page_index for page_index in range(self._last_selected, page_num + 1)))
 
     def clear_selection(self) -> None:
         """Remove selected pages from selection and reset page background."""
