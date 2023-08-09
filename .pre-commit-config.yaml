@@ -10,7 +10,6 @@ repos:
     -   id: check-executables-have-shebangs
     -   id: end-of-file-fixer
     -   id: check-yaml
-    -   id: check-xml
     -   id: requirements-txt-fixer
     -   id: check-added-large-files
     -   id: debug-statements
@@ -38,7 +37,7 @@ repos:
 
 # style formatter
 -   repo: https://github.com/PyCQA/flake8
-    rev: '6.0.0'
+    rev: '6.1.0'
     hooks:
     -   id: flake8
         args: [--max-line-length=120]

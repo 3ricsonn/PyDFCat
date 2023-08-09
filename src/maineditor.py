@@ -8,7 +8,13 @@ import customtkinter as ctk
 import fitz  # PyMuPDF
 from CTkMessagebox import CTkMessagebox
 from PIL import Image
-from settings import PAGE_X_PADDING
+from settings import (
+    COLOR_MAIN_EDITOR_BACKGROUND,
+    COLOR_SELECTED_BLUE,
+    PAGE_IPADDING,
+    PAGE_X_PADDING,
+    PAGE_Y_PADDING,
+)
 from widgets import DynamicScrollableFrame
 
 
@@ -124,6 +130,9 @@ class MainEditor(ctk.CTkFrame):
         if not self.document_view.winfo_ismapped():
             self.error_label.grid(row=1, column=0, sticky="n", pady=5)
 
+    def jump_to_page(self, page_num: int) -> None:
+        self.document_view.jump_to_page(page_num)
+
     def close_document(self) -> None:
         """Close the current document in the Main Editor."""
         self.document = None
@@ -154,7 +163,10 @@ class _DocumentEditor(DynamicScrollableFrame):
         self._images: list[Image] = []
         self._ctk_images: list[ctk.CTkImage] = []
         self._labels: list[ctk.CTkLabel] = []
+        self._selected_pages: set[int] = set()
+        self._last_selected = 0
         self._rows = 0
+        self._columns = 0
         self._scale = 1.0
 
     def load_pages(self, document: fitz.Document) -> None:
@@ -172,8 +184,7 @@ class _DocumentEditor(DynamicScrollableFrame):
         for image in self._ctk_images:
             label = ctk.CTkLabel(self, image=image, text="")
             label.bind("<Button-1>", command=self._select_page)
-            label.bind("<Control-Button-1>",
-                       command=self._select_pages_control)
+            label.bind("<Control-Button-1>", command=self._select_pages_control)
             label.bind("<Shift-Button-1>", command=self._select_pages_shift)
             self._labels.append(label)
 
@@ -282,24 +293,24 @@ class _DocumentEditor(DynamicScrollableFrame):
         Returns:
             bool: True if the grid layout was updated, False otherwise.
         """
-        rows, _ = self._get_grid_dimension(self._ctk_images[0])
+        columns, rows = self._get_grid_dimension(self._ctk_images[0])
 
-        if rows == self._rows:
+        if columns == self._columns:
             return False
 
-        self._rows = max(1, rows)
-        columns = max(len(self._images) // self._rows, 1)
+        self._columns = max(1, columns)
+        self._rows = max(len(self._images) // self._columns, 1)
 
         self.update()
-        self.rowconfigure(tuple(range(self._rows)), weight=1)
-        self.columnconfigure(tuple(range(columns)), weight=1)
+        self.rowconfigure(tuple(range(self._columns)), weight=1)
+        self.columnconfigure(tuple(range(self._rows)), weight=1)
 
         for index, label in enumerate(self._labels):
             label.grid(
-                column=index % self._rows,
-                row=index // self._rows,
-                padx=PAGE_X_PADDING,
-                pady=7,
+                column=index % self._columns,
+                row=index // self._columns,
+                ipadx=PAGE_IPADDING, ipady=PAGE_IPADDING,
+                padx=PAGE_X_PADDING, pady=(0, PAGE_Y_PADDING)
             )
         self.update_idletasks()
 
@@ -345,14 +356,67 @@ class _DocumentEditor(DynamicScrollableFrame):
         for index, label in enumerate(self._labels[:page_in_sight]):
             label.configure(image=self._ctk_images[index])
 
+    def jump_to_page(self, page_num: int) -> None:
+        page_overlap = 1 if len(self._labels) % self._columns != 0 else 0
+        row_num = page_num // self._columns
+
+        self._parent_canvas.yview_moveto(str(row_num / (self._rows + page_overlap)))
+
     def _select_page(self, event: tk.Event) -> None:
         """Select page with a single click."""
+        self.clear_selection()
+
+        ctk_label: ctk.CTkLabel = event.widget.master
+
+        ctk_label.configure(fg_color=COLOR_SELECTED_BLUE)
+
+        row_num = ctk_label.winfo_y() // ctk_label.winfo_height()
+        column_num = ctk_label.winfo_x() // ctk_label.winfo_width()
+        page_num = row_num * self._columns + column_num
+
+        self._last_selected = page_num
+        self._selected_pages.add(page_num)
 
     def _select_pages_control(self, event: tk.Event) -> None:
         """Select multiple pages by holding control."""
+        ctk_label: ctk.CTkLabel = event.widget.master
+
+        row_num = ctk_label.winfo_y() // ctk_label.winfo_height()
+        column_num = ctk_label.winfo_x() // ctk_label.winfo_width()
+        page_num = row_num * self._columns + column_num
+
+        if page_num in self._selected_pages:
+            self._last_selected = 0
+            self._selected_pages.discard(page_num)
+            ctk_label.configure(fg_color=COLOR_MAIN_EDITOR_BACKGROUND)
+        else:
+            self._last_selected = page_num
+            self._selected_pages.add(page_num)
+            ctk_label.configure(fg_color=COLOR_SELECTED_BLUE)
 
     def _select_pages_shift(self, event: tk.Event) -> None:
         """Selection a range of pages by holding shift and clicking start and end."""
+        ctk_label: ctk.CTkLabel = event.widget.master
+
+        row_num = ctk_label.winfo_y() // ctk_label.winfo_height()
+        column_num = ctk_label.winfo_x() // ctk_label.winfo_width()
+        page_num = row_num * self._columns + column_num
+
+        if self._last_selected < page_num+1:
+            for label in self.winfo_children()[self._last_selected:page_num+1]:
+                label.configure(fg_color=COLOR_SELECTED_BLUE)
+        else:
+            for label in self.winfo_children()[page_num:self._last_selected]:
+                label.configure(fg_color=COLOR_SELECTED_BLUE)
+
+        self._selected_pages.update({page_index for page_index in range(self._last_selected, page_num + 1)})
+
+    def clear_selection(self) -> None:
+        """Remove selected pages from selection and reset page background."""
+        for widget in self.winfo_children():
+            widget.configure(fg_color=COLOR_MAIN_EDITOR_BACKGROUND)
+        self._last_selected = 0
+        self._selected_pages.clear()
 
     def clear(self) -> None:
         """Remove all widgets within the frame and reset data."""

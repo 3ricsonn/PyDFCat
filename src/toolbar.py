@@ -2,7 +2,7 @@
 from typing import Any, Callable
 
 import customtkinter as ctk
-from settings import CLOSE_RED, SCALING_FACTORS, WHITE
+from settings import COLOR_CLOSE_RED, SCALING_FACTORS, WHITE
 
 
 class ToolBar(ctk.CTkFrame):
@@ -82,7 +82,7 @@ class ToolBar(ctk.CTkFrame):
             text="x",
             text_color=WHITE,
             fg_color="transparent",
-            hover_color=CLOSE_RED,
+            hover_color=COLOR_CLOSE_RED,
             width=30,
             command=close_file_command,
         )
