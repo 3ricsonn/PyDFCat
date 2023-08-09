@@ -4,14 +4,7 @@ import customtkinter as ctk
 import fitz  # PyMuPDF
 import os
 from maineditor import MainEditor
-from settings import (
-    CLOSE_RED,
-    WHITE,
-    WINDOW_HEIGHT,
-    WINDOW_MIN_HEIGHT,
-    WINDOW_MIN_WIDTH,
-    WINDOW_WIDTH,
-)
+from settings import COLOR_CLOSE_RED, WHITE
 from sidepanel import SidePanel
 from toolbar import ToolBar
 
@@ -19,14 +12,9 @@ from toolbar import ToolBar
 class ApplicationWindow(ctk.CTk):
     """Application window class"""
 
-    def __init__(self):
+    def __init__(self,):
         """Create and configure the application window"""
         super().__init__()
-
-        # window setup
-        self.title("PyDFCat")
-        self.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
-        self.minsize(WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT)
 
         # layout
         self.rowconfigure(0, weight=0)
@@ -53,7 +41,7 @@ class ApplicationWindow(ctk.CTk):
             text="x",
             text_color=WHITE,
             fg_color="transparent",
-            hover_color=CLOSE_RED,
+            hover_color=COLOR_CLOSE_RED,
             width=40,
             height=40,
             command=self.close_file,

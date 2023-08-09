@@ -7,14 +7,20 @@ import customtkinter as ctk
 import fitz  # PyMuPDF
 from CTkMessagebox import CTkMessagebox
 from PIL import Image
-from settings import PAGE_X_PADDING, PAGE_Y_PADDING
+from settings import (
+    COLOR_MAIN_EDITOR_BACKGROUND,
+    COLOR_SELECTED_BLUE,
+    PAGE_IPADDING,
+    PAGE_X_PADDING,
+    PAGE_Y_PADDING,
+)
 
 
 class MainEditor(ctk.CTkFrame):
     """Main editor class to manage file pages"""
 
     def __init__(
-        self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar
+            self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar
     ) -> None:
         """
         Initialize the Main Editor.
@@ -97,7 +103,7 @@ class MainEditor(ctk.CTkFrame):
                 title="Invalid scaling",
                 icon="warning",
                 message="You entered an invalid scaling factor. "
-                "Please make sure you entered a number.",
+                        "Please make sure you entered a number.",
             )
             self.scaling_variable.set("100%")
             return
@@ -111,7 +117,7 @@ class MainEditor(ctk.CTkFrame):
                 title="Invalid scaling",
                 icon="warning",
                 message="You entered a too high scaling. "
-                "Please enter a scaling smaller than 200%.",
+                        "Please enter a scaling smaller than 200%.",
             )
             self.scaling_variable.set("100%")
             return
@@ -160,6 +166,8 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
         self._images: list[Image] = []
         self._ctk_images: list[ctk.CTkImage] = []
         self._labels: list[ctk.CTkLabel] = []
+        self._selected_pages: set[int] = set()
+        self._last_selected = 0
         self._rows = 0
         self._columns = 0
         self._scale = 1.0
@@ -294,7 +302,10 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
 
         for index, label in enumerate(self._labels):
             label.grid(
-                column=index % self._columns, row=index // self._columns, padx=PAGE_X_PADDING, pady=PAGE_Y_PADDING
+                column=index % self._columns,
+                row=index // self._columns,
+                ipadx=PAGE_IPADDING, ipady=PAGE_IPADDING,
+                padx=PAGE_X_PADDING, pady=(0, PAGE_Y_PADDING)
             )
 
         return True
@@ -323,12 +334,59 @@ class _DocumentEditor(ctk.CTkScrollableFrame):
 
     def _select_page(self, event: tk.Event) -> None:
         """Select page with a single click."""
+        self.clear_selection()
+
+        ctk_label: ctk.CTkLabel = event.widget.master
+
+        ctk_label.configure(fg_color=COLOR_SELECTED_BLUE)
+
+        row_num = ctk_label.winfo_y() // ctk_label.winfo_height()
+        column_num = ctk_label.winfo_x() // ctk_label.winfo_width()
+        page_num = row_num * self._columns + column_num
+
+        self._last_selected = page_num
+        self._selected_pages.add(page_num)
 
     def _select_pages_control(self, event: tk.Event) -> None:
         """Select multiple pages by holding control."""
+        ctk_label: ctk.CTkLabel = event.widget.master
+
+        row_num = ctk_label.winfo_y() // ctk_label.winfo_height()
+        column_num = ctk_label.winfo_x() // ctk_label.winfo_width()
+        page_num = row_num * self._columns + column_num
+
+        if page_num in self._selected_pages:
+            self._last_selected = 0
+            self._selected_pages.discard(page_num)
+            ctk_label.configure(fg_color=COLOR_MAIN_EDITOR_BACKGROUND)
+        else:
+            self._last_selected = page_num
+            self._selected_pages.add(page_num)
+            ctk_label.configure(fg_color=COLOR_SELECTED_BLUE)
 
     def _select_pages_shift(self, event: tk.Event) -> None:
         """Selection a range of pages by holding shift and clicking start and end."""
+        ctk_label: ctk.CTkLabel = event.widget.master
+
+        row_num = ctk_label.winfo_y() // ctk_label.winfo_height()
+        column_num = ctk_label.winfo_x() // ctk_label.winfo_width()
+        page_num = row_num * self._columns + column_num
+
+        if self._last_selected < page_num+1:
+            for label in self.winfo_children()[self._last_selected:page_num+1]:
+                label.configure(fg_color=COLOR_SELECTED_BLUE)
+        else:
+            for label in self.winfo_children()[page_num:self._last_selected]:
+                label.configure(fg_color=COLOR_SELECTED_BLUE)
+
+        self._selected_pages.update({page_index for page_index in range(self._last_selected, page_num + 1)})
+
+    def clear_selection(self) -> None:
+        """Remove selected pages from selection and reset page background."""
+        for widget in self.winfo_children():
+            widget.configure(fg_color=COLOR_MAIN_EDITOR_BACKGROUND)
+        self._last_selected = 0
+        self._selected_pages.clear()
 
     def clear(self) -> None:
         """Remove all widgets within the frame and reset data."""

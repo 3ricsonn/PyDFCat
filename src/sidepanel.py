@@ -5,7 +5,12 @@ from typing import Any, Callable
 import customtkinter as ctk
 import fitz  # PyMuPDF
 from PIL import Image
-from settings import PAGE_IPADDING, PAGE_X_PADDING, SELECTED
+from settings import (
+    COLOR_SELECTED_BLUE,
+    COLOR_SIDEPANEL_BACKGROUND,
+    PAGE_IPADDING,
+    PAGE_X_PADDING,
+)
 from widgets import CollapsableFrame
 
 
@@ -96,7 +101,7 @@ class _PageView(ctk.CTkScrollableFrame):
         super().__init__(master=parent, *args, **kwargs)
 
         # data
-        self._jump_to_page_command = jump_page_command
+        self._jump_to_page = jump_page_command
 
     def load_pages(self, document: fitz.Document) -> None:
         """
@@ -150,16 +155,16 @@ class _PageView(ctk.CTkScrollableFrame):
 
         ctk_label: ctk.CTkLabel = event.widget.master
 
-        ctk_label.configure(fg_color=SELECTED)
+        ctk_label.configure(fg_color=COLOR_SELECTED_BLUE)
 
         page_num = ctk_label.winfo_y() // ctk_label.winfo_height()
 
-        self._jump_to_page_command(page_num)
+        self._jump_to_page(page_num)
 
     def clear_selection(self) -> None:
         """Remove selected pages from selection and reset page background."""
         for widget in self.winfo_children():
-            widget.configure(fg_color="#2B2B2B")
+            widget.configure(fg_color=COLOR_SIDEPANEL_BACKGROUND)
 
     def clear(self):
         """
