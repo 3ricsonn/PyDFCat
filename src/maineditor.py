@@ -300,7 +300,7 @@ class _DocumentEditor(DynamicScrollableFrame):
         Returns:
             bool: True if the grid layout was updated, False otherwise.
         """
-        columns, rows = self._get_grid_dimension(self._ctk_images[0])
+        columns, _ = self._get_grid_dimension(self._ctk_images[0])
 
         if columns == self._columns:
             return False
