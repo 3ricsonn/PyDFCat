@@ -184,7 +184,8 @@ class _DocumentEditor(DynamicScrollableFrame):
         for image in self._ctk_images:
             label = ctk.CTkLabel(self, image=image, text="")
             label.bind("<Button-1>", command=self._select_page)
-            label.bind("<Control-Button-1>", command=self._select_pages_control)
+            label.bind("<Control-Button-1>",
+                       command=self._select_pages_control)
             label.bind("<Shift-Button-1>", command=self._select_pages_shift)
             self._labels.append(label)
 
@@ -309,8 +310,10 @@ class _DocumentEditor(DynamicScrollableFrame):
             label.grid(
                 column=index % self._columns,
                 row=index // self._columns,
-                ipadx=PAGE_IPADDING, ipady=PAGE_IPADDING,
-                padx=PAGE_X_PADDING, pady=(0, PAGE_Y_PADDING)
+                ipadx=PAGE_IPADDING,
+                ipady=PAGE_IPADDING,
+                padx=PAGE_X_PADDING,
+                pady=(0, PAGE_Y_PADDING),
             )
         self.update_idletasks()
 
@@ -360,7 +363,8 @@ class _DocumentEditor(DynamicScrollableFrame):
         page_overlap = 1 if len(self._labels) % self._columns != 0 else 0
         row_num = page_num // self._columns
 
-        self._parent_canvas.yview_moveto(str(row_num / (self._rows + page_overlap)))
+        self._parent_canvas.yview_moveto(
+            str(row_num / (self._rows + page_overlap)))
 
     def _select_page(self, event: tk.Event) -> None:
         """Select page with a single click."""
@@ -402,14 +406,17 @@ class _DocumentEditor(DynamicScrollableFrame):
         column_num = ctk_label.winfo_x() // ctk_label.winfo_width()
         page_num = row_num * self._columns + column_num
 
-        if self._last_selected < page_num+1:
-            for label in self.winfo_children()[self._last_selected:page_num+1]:
+        if self._last_selected < page_num + 1:
+            for label in self.winfo_children()[self._last_selected: page_num + 1]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
         else:
-            for label in self.winfo_children()[page_num:self._last_selected]:
+            for label in self.winfo_children()[page_num: self._last_selected]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
 
-        self._selected_pages.update({page_index for page_index in range(self._last_selected, page_num + 1)})
+        self._selected_pages.update(
+            {page_index for page_index in range(
+                self._last_selected, page_num + 1)}
+        )
 
     def clear_selection(self) -> None:
         """Remove selected pages from selection and reset page background."""
