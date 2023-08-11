@@ -35,7 +35,8 @@ class SidePanel(CollapsableFrame):
 
         # preview and navigator tab
         self.navigator_tab = _NavigatorPanel(
-            parent=self.tabview.tab("Navigator"), jump_to_page_command=jump_to_page_command
+            parent=self.tabview.tab("Navigator"),
+            jump_to_page_command=jump_to_page_command,
         )
         self.navigator_tab.pack(expand=True, fill="both")
 
@@ -121,7 +122,14 @@ class _PageView(DynamicScrollableFrame):
             # Create a labeled image widget and pack it
             label = ctk.CTkLabel(self, image=image, text="")
             label.bind("<Button-1>", command=self._select_page)
-            label.pack(expand=True, fill="x", ipadx=PAGE_IPADDING, ipady=PAGE_IPADDING, padx=PAGE_X_PADDING, pady=7)
+            label.pack(
+                expand=True,
+                fill="x",
+                ipadx=PAGE_IPADDING,
+                ipady=PAGE_IPADDING,
+                padx=PAGE_X_PADDING,
+                pady=7,
+            )
 
             self._labels.append(label)
 
@@ -151,7 +159,9 @@ class _PageView(DynamicScrollableFrame):
         self._parent_canvas.update()
 
         ratio = img.size[0] / img.size[1]
-        img_width = self._parent_canvas.winfo_width() - 2 * (PAGE_IPADDING + PAGE_X_PADDING)
+        img_width = self._parent_canvas.winfo_width() - 2 * (
+            PAGE_IPADDING + PAGE_X_PADDING
+        )
         img_height = img_width / ratio
 
         ctk_img = ctk.CTkImage(

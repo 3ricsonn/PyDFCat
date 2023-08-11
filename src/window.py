@@ -31,7 +31,9 @@ class ApplicationWindow(ctk.CTk):
         self.main_editor.grid(column=1, row=1, sticky="news", padx=10, pady=10)
 
         # sidebar
-        self.sidebar = SidePanel(self, jump_to_page_command=self.main_editor.jump_to_page)
+        self.sidebar = SidePanel(
+            self, jump_to_page_command=self.main_editor.jump_to_page
+        )
         self.sidebar.grid(column=0, row=1, sticky="news", padx=10, pady=10)
 
         # toolbar
