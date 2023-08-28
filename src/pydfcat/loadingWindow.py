@@ -5,8 +5,22 @@ import customtkinter as ctk
 
 
 class LoadingWindow(ctk.CTkToplevel):
-    def __init__(self, parent, file_name: str, *args, **kwargs):
-        super().__init__(master=parent, *args, **kwargs)
+    """
+    A custom loading window for indicating file loading progress.
+
+    This class inherits from ctk.CTkToplevel, a custom Tkinter Toplevel class.
+    """
+
+    def __init__(self, parent, file_name: str, **kwargs):
+        """
+        Initialize the LoadingWindow.
+
+        Args:
+            parent: The parent widget.
+            file_name (str): The name of the file being loaded.
+            **kwargs: Configuration arguments for CTkTopLevel.
+        """
+        super().__init__(master=parent, **kwargs)
 
         # window setup
         self.title("Open file")
@@ -38,11 +52,19 @@ class LoadingWindow(ctk.CTkToplevel):
         )
 
     def aim(self, absolut: int, percentage: Optional[float] = None) -> None:
+        """
+        Set the loading aim.
+
+        Args:
+            absolut (int): The absolute value representing the loading aim.
+            percentage (float, optional): The targeted loading percentage.
+        """
         if percentage:
             self.aimed_percentage = percentage
         self.aimed_absolut = absolut
 
     def add(self) -> None:
+        """Update the loading progress."""
         self.percentage += (1 / self.aimed_absolut) * self.aimed_percentage
 
         self.loading_bar.set(self.percentage)

@@ -35,7 +35,7 @@ except ModuleNotFoundError:
 
 
 class SidePanel(CollapsableFrame):
-    """Side panel to preview the file and the selection"""
+    """Side panel to preview the file and the selection."""
 
     def __init__(self, parent: Any, jump_to_page_command: Callable):
         """
@@ -71,7 +71,7 @@ class SidePanel(CollapsableFrame):
 
         Args:
             document (fitz.Document): The PDF document to load.
-            loading_window (ctk.CTkToplevel): window for loading animation.
+            loading_window (LoadingWindow): Window for loading animation.
         """
         self.tabview.set("Navigator")
         self.navigator_tab.get_new_document(document, loading_window)
@@ -81,14 +81,16 @@ class SidePanel(CollapsableFrame):
         self.navigator_tab.close_document()
 
     def disable_tools(self):
+        """Disable the tools of the child panels."""
         self.clipboard_tab.disable_tools()
 
     def enable_tools(self):
+        """Enable the tools of the child panels."""
         self.clipboard_tab.enable_tools()
 
 
 class _NavigatorPanel(ctk.CTkFrame):
-    """Class to preview document and navigator for the main editor"""
+    """Class to preview document and navigator for the main editor."""
 
     def __init__(self, parent: Any, jump_to_page_command: Callable) -> None:
         """
@@ -113,7 +115,7 @@ class _NavigatorPanel(ctk.CTkFrame):
 
         Args:
             document (fitz.Document): The PDF document to load.
-            loading_window (ctk.CTkToplevel): window for loading animation.
+            loading_window (LoadingWindow): Window for loading animation.
         """
         self.document = document
 
@@ -133,10 +135,22 @@ class _NavigatorPanel(ctk.CTkFrame):
 
 
 class _NavigatorPageView(DynamicScrollableFrame):
-    """Preview class to display file pages"""
+    """
+    A class representing a preview to display file pages.
 
-    def __init__(self, parent, jump_page_command: Callable, *args, **kwargs) -> None:
-        super().__init__(master=parent, *args, **kwargs, orientation="vertical")
+    This class inherits from DynamicScrollableFrame, a custom scrollable frame class.
+    """
+
+    def __init__(self, parent, jump_page_command: Callable, **kwargs) -> None:
+        """
+        Initialize the _NavigatorPageView.
+
+        Args:
+            parent: The parent widget.
+            jump_page_command (Callable): A callable to jump to a specific page.
+            **kwargs: Configuration arguments for DynamicScrollableFrame.
+        """
+        super().__init__(master=parent, **kwargs, orientation="vertical")
 
         # data
         self._jump_to_page = jump_page_command
@@ -150,7 +164,7 @@ class _NavigatorPageView(DynamicScrollableFrame):
 
         Parameters:
             document (fitz.Document): The document to load the pages from.
-            loading_window (ctk.CTkToplevel): window for loading animation.
+            loading_window (LoadingWindow): Window for loading animation.
         """
         loading_window.aim(percentage=0.5, absolut=len(document) + 1)
         self.clear()
@@ -256,8 +270,22 @@ class _NavigatorPageView(DynamicScrollableFrame):
 
 
 class _ClipboardPanel(ctk.CTkFrame):
-    def __init__(self, parent: Any, *args, **kwargs):
-        super().__init__(master=parent, *args, **kwargs, fg_color="transparent")
+    """
+    A private class representing a clipboard panel.
+
+    This class inherits from ctk.CTkFrame, a custom Tkinter Frame class.
+    It's intended to be used internally within the Clipboard class.
+    """
+
+    def __init__(self, parent: Any, **kwargs):
+        """
+        Initialize the _ClipboardPanel.
+
+        Args:
+            parent: The parent widget.
+            **kwargs: Configuration arguments for ctk.CTkFrame.
+        """
+        super().__init__(master=parent, **kwargs, fg_color="transparent")
 
         # toolbar
         self.toolbar = ctk.CTkFrame(self, fg_color="transparent")
@@ -317,12 +345,14 @@ class _ClipboardPanel(ctk.CTkFrame):
         self.page_view.pack(expand=True, fill="both")
 
     def enable_tools(self):
+        """Enable clipboard tools."""
         self.open_file_button.enable()
         self.select_all_button.enable()
         self.clear_select_button.enable()
         self.clear_clipboard_button.enable()
 
     def disable_tools(self):
+        """Disable clipboard tools."""
         self.open_file_button.disable()
         self.select_all_button.disable()
         self.clear_select_button.disable()
@@ -330,11 +360,35 @@ class _ClipboardPanel(ctk.CTkFrame):
 
 
 class _ClipboardPageView(DynamicScrollableFrame):
+    """
+    A private class representing a view for clipboard pages.
+
+    This class inherits from DynamicScrollableFrame, a custom scrollable frame class.
+    It's intended to be used internally within the Clipboard class.
+    """
+
     pass
 
 
 class ClipboardToolBarButton(ctk.CTkButton):
+    """
+    A custom toolbar button class for clipboard tools.
+
+    This class inherits from ctk.CTkButton, a custom Tkinter Button class.
+    """
+
     def __init__(self, parent: Any, button_type: str, tooltip_message="", **kwargs):
+        """
+        Initialize the ClipboardToolBarButton.
+
+        Args:
+            parent (Any): The parent widget.
+            button_type (str): The type of the button.
+            tooltip_message (str, optional):
+                The tooltip message for the button.
+                Default is an empty string.
+            **kwargs: Configuration arguments for ctk.CTkButton.
+        """
         super().__init__(
             master=parent,
             text="",
@@ -351,6 +405,7 @@ class ClipboardToolBarButton(ctk.CTkButton):
         self.disable()
 
     def enable(self):
+        """Enable the button."""
         img_outline = Image.open(
             os.path.join(
                 DIRNAME,
@@ -379,6 +434,7 @@ class ClipboardToolBarButton(ctk.CTkButton):
         self.bind("<Leave>", lambda _: self.configure(image=ctk_img_outline), add="+")
 
     def disable(self):
+        """Disable the button."""
         img_disabled_light = Image.open(
             os.path.join(
                 DIRNAME,

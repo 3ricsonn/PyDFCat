@@ -30,7 +30,7 @@ except ModuleNotFoundError:
 
 
 class ToolBar(ctk.CTkFrame):
-    """Collection of tools to manipulate the pdf file pages"""
+    """Collection of tools to manipulate the pdf file pages."""
 
     def __init__(
         self,
@@ -51,7 +51,7 @@ class ToolBar(ctk.CTkFrame):
             open_file_command (Callable): The command to open a file.
             scale_page_command (Callable): The command to scale the page.
             scaling_variable (ctk.StringVar): The variable for scaling selection.
-            **kwargs: Arbitrary keyword arguments.
+            **kwargs: Configuration arguments for ctk.CTkFrame.
         """
         super().__init__(master=parent, **kwargs)
 
@@ -200,6 +200,7 @@ class ToolBar(ctk.CTkFrame):
         )
 
     def _ask_close_file(self):
+        """Opens a message to confirm closing."""
         msg = CTkMessagebox(
             title="Close Document",
             icon="question",
@@ -223,11 +224,12 @@ class ToolBar(ctk.CTkFrame):
             side="right", padx=TOOLBAR_X_PADDING, pady=TOOLBAR_Y_PADDING
         )
 
-    def enable_basic(self):
+    def enable_open(self):
+        """Only enables the open button."""
         self.open_button.enable()
 
-    def disable_all_except_basic(self):
-        """Disable the toolbar tools."""
+    def disable_all_except_open(self):
+        """Disable the toolbar tools except the open button."""
         self.save_option_menu.disable()
         self.undo_button.disable()
         self.redo_button.disable()
@@ -238,12 +240,30 @@ class ToolBar(ctk.CTkFrame):
         self.update_idletasks()
 
     def disable_all(self):
+        """Disable all tools."""
         self.open_button.disable()
-        self.disable_all_except_basic()
+        self.disable_all_except_open()
 
 
 class ToolBarButton(ctk.CTkButton):
+    """
+    A custom toolbar button class.
+
+    This class inherits from ctk.CTkButton, a custom Tkinter Button class.
+    """
+
     def __init__(self, parent: Any, button_type: str, tooltip_message="", **kwargs):
+        """
+        Initialize the ToolBarButton.
+
+        Args:
+            parent: The parent widget.
+            button_type (str): The type of the button.
+            tooltip_message (str, optional):
+                The tooltip message for the button.
+                Default is an empty string.
+            **kwargs: Configuration arguments for CTkButton.
+        """
         super().__init__(
             master=parent,
             text="",
@@ -269,6 +289,7 @@ class ToolBarButton(ctk.CTkButton):
                 self.bind("<Leave>", self.tooltip.on_leave)
 
     def enable(self):
+        """Enable the button."""
         img_outline = Image.open(
             os.path.join(
                 DIRNAME,
@@ -297,6 +318,7 @@ class ToolBarButton(ctk.CTkButton):
         self.bind("<Leave>", lambda _: self.configure(image=ctk_img_outline), add="+")
 
     def disable(self):
+        """Disable the button."""
         img_disabled_light = Image.open(
             os.path.join(
                 DIRNAME,
@@ -326,7 +348,23 @@ class ToolBarButton(ctk.CTkButton):
 
 
 class SaveOptionMenu(ctk.CTkOptionMenu):
+    """
+    A custom option menu for saving options.
+
+    This class inherits from ctk.CTkOptionMenu, a custom Tkinter OptionMenu class.
+    """
+
     def __init__(self, parent: Any, command: Callable, tooltip_message=""):
+        """
+        Initialize the SaveOptionMenu.
+
+        Args:
+            parent (Any): The parent widget.
+            command (Callable): The function to be executed on option selection.
+            tooltip_message (str, optional):
+                The tooltip message for the option menu.
+                Default is an empty string.
+        """
         super().__init__(
             master=parent,
             values=["save", "save as"],
@@ -341,10 +379,12 @@ class SaveOptionMenu(ctk.CTkOptionMenu):
         self.disable()
 
     def _add_image_to_tk_label(self, img: ImageTk):
+        """Add image to the option menu."""
         self._text_label.configure(image=img)
         self._text_label.image = img
 
     def enable(self):
+        """Enable the option menu."""
         self.configure(state="normal")
         img_save_solid = Image.open(
             os.path.join(DIRNAME, "assets/toolbar_icons/save/save-outline.png")
@@ -371,6 +411,7 @@ class SaveOptionMenu(ctk.CTkOptionMenu):
         )
 
     def disable(self):
+        """Disable the option menu."""
         self.configure(state="disabled")
 
         if ctk.get_appearance_mode() == "light":

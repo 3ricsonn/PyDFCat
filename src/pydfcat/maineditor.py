@@ -8,6 +8,7 @@ import customtkinter as ctk
 import fitz  # PyMuPDF
 from CTkMessagebox import CTkMessagebox
 from PIL import Image
+from loadingWindow import LoadingWindow
 
 from .settings import (
     COLOR_SELECTED_BLUE,
@@ -19,7 +20,7 @@ from .widgets import DynamicScrollableFrame
 
 
 class MainEditor(ctk.CTkFrame):
-    """Main editor class to manage file pages"""
+    """Main editor class to manage file pages."""
 
     def __init__(
         self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar
@@ -59,14 +60,14 @@ class MainEditor(ctk.CTkFrame):
         )
 
     def get_new_document(
-        self, document: fitz.Document, loading_window: ctk.CTkToplevel
+        self, document: fitz.Document, loading_window: LoadingWindow
     ) -> None:
         """
         Load a new document into the Main Editor.
 
         Args:
             document (fitz.Document): The document to load.
-            loading_window (ctk.CTKToplevel): A window with loadingbar
+            loading_window (LoadingWindow): A window with loadingbar.
         """
         self.document = document
 
@@ -97,12 +98,12 @@ class MainEditor(ctk.CTkFrame):
             scale_string (str): The scaling factor as a percentage.
         """
         if re.match(r"^[0-9]+%$", scale_string):
-            scale_string = scale_string[:-1]
+            scale_number_string = scale_string[:-1]
         else:
-            scale_string = scale_string
-            self.scaling_variable.set(f"{scale_string}%")
+            scale_number_string = scale_string
+            self.scaling_variable.set(f"{scale_number_string}%")
         try:
-            scale = int(scale_string)
+            scale = int(scale_number_string)
         except ValueError:
             # Show an error message if the scale isn't a hole number
             CTkMessagebox(
@@ -143,7 +144,7 @@ class MainEditor(ctk.CTkFrame):
             self.document_view.update_pages(scale_decimal)
 
     def open_file_error(self) -> None:
-        """display error message"""
+        """Display error message."""
         if not self.document_view.winfo_ismapped():
             self.error_label.grid(row=1, column=0, sticky="n", pady=5)
 
@@ -180,7 +181,7 @@ class _DocumentEditor(DynamicScrollableFrame):
 
         Args:
             *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
+            **kwargs: Configuration arguments for DynamicScrollableFrame.
         """
         super().__init__(*args, **kwargs, orientation="vertical")
         self._images: list[Image] = []
@@ -193,14 +194,14 @@ class _DocumentEditor(DynamicScrollableFrame):
         self.scale = 1.0
 
     def load_pages(
-        self, document: fitz.Document, loading_window: ctk.CTkToplevel
+        self, document: fitz.Document, loading_window: LoadingWindow
     ) -> None:
         """
         Display the document pages by creating new labels.
 
         Args:
             document (fitz.Document): The document to display.
-            loading_window (ctk.CTkToplevel): window for loading animation
+            loading_window (LoadingWindow): Window for loading animation.
         """
         loading_window.aim(percentage=0.5, absolut=len(document) + 2)
 
@@ -445,10 +446,10 @@ class _DocumentEditor(DynamicScrollableFrame):
         page_num = row_num * self._columns + column_num
 
         if self._last_selected < page_num + 1:
-            for label in self.winfo_children()[self._last_selected: page_num + 1]:
+            for label in self.winfo_children()[self._last_selected : page_num + 1]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
         else:
-            for label in self.winfo_children()[page_num: self._last_selected]:
+            for label in self.winfo_children()[page_num : self._last_selected]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
 
         self._selected_pages.update(set(range(self._last_selected, page_num + 1)))

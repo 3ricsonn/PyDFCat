@@ -72,7 +72,6 @@ class CollapsableFrame(ctk.CTkFrame):
             button_compound (str, optional):
                 The compound style of the hide button. Default is "left".
         """
-
         # container
         self._parent_frame = ctk.CTkFrame(
             master=parent,
@@ -149,9 +148,6 @@ class CollapsableFrame(ctk.CTkFrame):
             button_image (str): The image of the button.
             button_hover (bool): Whether the button should have a hover effect.
             button_compound (str): The compound style of the button.
-
-        Returns:
-            None
         """
         if "button_corner_radius" in kwargs:
             self._hide_button.configure(
@@ -190,9 +186,6 @@ class CollapsableFrame(ctk.CTkFrame):
 
         Keyword Arguments:
             Same as the pack method in tkinter.
-
-        Returns:
-            None
         """
         self._parent_frame.pack(**kwargs)
 
@@ -202,9 +195,6 @@ class CollapsableFrame(ctk.CTkFrame):
 
         Keyword Arguments:
             Same as the place method in tkinter.
-
-        Returns:
-            None
         """
         self._parent_frame.place(**kwargs)
 
@@ -214,46 +204,23 @@ class CollapsableFrame(ctk.CTkFrame):
 
         Keyword Arguments:
             Same as the grid method in tkinter.
-
-        Returns:
-            None
         """
         self._parent_frame.grid(**kwargs)
 
     def pack_forget(self) -> None:
-        """
-        Forget the widget packed using the pack geometry manager.
-
-        Returns:
-            None
-        """
+        """Forget the widget packed using the pack geometry manager."""
         self._parent_frame.pack_forget()
 
     def place_forget(self) -> None:
-        """
-        Forget the widget placed using the place geometry manager.
-
-        Returns:
-            None
-        """
+        """Forget the widget placed using the place geometry manager."""
         self._parent_frame.place_forget()
 
     def grid_forget(self) -> None:
-        """
-        Forget the widget gridded using the grid geometry manager.
-
-        Returns:
-            None
-        """
+        """Forget the widget gridded using the grid geometry manager."""
         self._parent_frame.grid_forget()
 
     def grid_remove(self) -> None:
-        """
-        Remove the widget from the grid.
-
-        Returns:
-            None
-        """
+        """Remove the widget from the grid."""
         self._parent_frame.grid_remove()
 
     def grid_propagate(self, **kwargs) -> None:
@@ -262,9 +229,6 @@ class CollapsableFrame(ctk.CTkFrame):
 
         Keyword Arguments:
             Same as the grid_propagate method in tkinter.
-
-        Returns:
-            None
         """
         self._parent_frame.grid_propagate(**kwargs)
 
@@ -283,9 +247,6 @@ class CollapsableFrame(ctk.CTkFrame):
 
         Parameters:
             aboveThis (Any): The widget above which to lift the current widget.
-
-        Returns:
-            None
         """
         self._parent_frame.lift(aboveThis)
 
@@ -295,9 +256,6 @@ class CollapsableFrame(ctk.CTkFrame):
 
         Parameters:
             belowThis (Any): The widget below which to lower the current widget.
-
-        Returns:
-            None
         """
         self._parent_frame.lower(belowThis)
 

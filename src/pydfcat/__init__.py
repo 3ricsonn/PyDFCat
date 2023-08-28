@@ -12,6 +12,7 @@ __version__ = "0.1.0-dev.2"
 
 
 def start():
+    """Start the program and process arguments from CLI"""
     usage_info = "usage %prog [options] [FILE]"
     version_info = f"%prog {__version__}"
     description = (
@@ -22,7 +23,7 @@ def start():
         usage=usage_info, version=version_info, description=description
     )
     # parser.add_option()
-    (options, args) = parser.parse_args()
+    (_, args) = parser.parse_args()
 
     file_name = ""
     if len(args) > 1:

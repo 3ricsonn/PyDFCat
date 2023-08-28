@@ -18,10 +18,10 @@ from .toolbar import ToolBar
 
 
 class ApplicationWindow(ctk.CTk):
-    """Application window class"""
+    """Application window class."""
 
     def __init__(self):
-        """Create and configure the application window"""
+        """Create and configure the application window."""
         super().__init__()
 
         # window properties
@@ -89,9 +89,10 @@ class ApplicationWindow(ctk.CTk):
         if file_name:
             self.open_file(file_name)
         else:
-            self.toolbar.enable_basic()
+            self.toolbar.enable_open()
 
     def open_file(self, file_name: str) -> None:
+        """Opens and distributes the given document to the panels of the editor."""
         if has_file_extension(file_name, ".pdf"):
             # Load the selected PDF file using fitz
             pdf_document = fitz.Document(file_name)
@@ -111,13 +112,13 @@ class ApplicationWindow(ctk.CTk):
         else:
             # user selected a non-pdf file
             self.main_editor.open_file_error()
-            self.toolbar.enable_basic()
+            self.toolbar.enable_open()
 
     def close_file(self):
-        """CLose the file and discard all changes"""
+        """CLose the file and discard all changes."""
         self.main_editor.close_document()
         self.sidebar.close_document()
-        self.toolbar.disable_all_except_basic()
+        self.toolbar.disable_all_except_open()
         self.sidebar.disable_tools()
 
         self.title("PyDFCat")

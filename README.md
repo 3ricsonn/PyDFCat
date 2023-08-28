@@ -30,7 +30,7 @@ To install PyDFCat, follow these steps:
     pip install .
     ```
 
-4. Optional: Install optional dependencies (if you want tooltips) from the optional-requirements.txt file:
+4. OPTIONAL: Install optional dependencies (if you want tooltips) from the optional-requirements.txt file:
     ```bash
     pip install -r optional-requirements.txt
     ```
@@ -47,7 +47,7 @@ To install PyDFCat, follow these steps:
    pip uninstall pydfcat
    ```
 
-2. if you installed the optional dependencies
+2. If you installed the optional dependencies
    ```bash
    pip uninstall -r optional-requirements.txt
    ```
