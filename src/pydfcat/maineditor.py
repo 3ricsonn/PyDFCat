@@ -8,14 +8,14 @@ import customtkinter as ctk
 import fitz  # PyMuPDF
 from CTkMessagebox import CTkMessagebox
 from PIL import Image
-from settings import (
-    COLOR_MAIN_EDITOR_BACKGROUND,
+
+from .settings import (
     COLOR_SELECTED_BLUE,
     PAGE_IPADDING,
     PAGE_X_PADDING,
     PAGE_Y_PADDING,
 )
-from widgets import DynamicScrollableFrame
+from .widgets import DynamicScrollableFrame
 
 
 class MainEditor(ctk.CTkFrame):
@@ -58,12 +58,15 @@ class MainEditor(ctk.CTkFrame):
             self.ui_frame, text="Wrong file type!", text_color="#FF0000"
         )
 
-    def get_new_document(self, document: fitz.Document) -> None:
+    def get_new_document(
+        self, document: fitz.Document, loading_window: ctk.CTkToplevel
+    ) -> None:
         """
         Load a new document into the Main Editor.
 
         Args:
             document (fitz.Document): The document to load.
+            loading_window (ctk.CTKToplevel): A window with loadingbar
         """
         self.document = document
 
@@ -72,7 +75,7 @@ class MainEditor(ctk.CTkFrame):
         self.error_label.grid_forget()
         self.document_view.pack(expand=True, fill="both")
 
-        self.document_view.load_pages(self.document)
+        self.document_view.load_pages(self.document, loading_window)
 
         # events
         self.bind("<Configure>", self.update_document)
@@ -93,37 +96,51 @@ class MainEditor(ctk.CTkFrame):
         Parameters:
             scale_string (str): The scaling factor as a percentage.
         """
-        # Check if the scale string matches the expected format
-        if not re.match(r"^([1-9]([0-9]){1,2})%$", scale_string):
-            # Show an error message if the scale string is invalid
+        if re.match(r"^[0-9]+%$", scale_string):
+            scale_string = scale_string[:-1]
+        else:
+            scale_string = scale_string
+            self.scaling_variable.set(f"{scale_string}%")
+        try:
+            scale = int(scale_string)
+        except ValueError:
+            # Show an error message if the scale isn't a hole number
             CTkMessagebox(
-                title="Invalid scaling",
+                title="Invalid scaling (invalid input)",
                 icon="warning",
                 message="You entered an invalid scaling factor. "
-                "Please make sure you entered a number.",
+                "Please make sure you entered a hole number.",
             )
-            self.scaling_variable.set("100%")
+            self.scaling_variable.set(f"{self.document_view.scale * 100:.0f}%")
             return
 
-        scale = scale_string[:-1]
+        # Check if the scale is less than 10%
+        if scale < 10:
+            # Show an error message if the scale is too low
+            CTkMessagebox(
+                title="Invalid scaling (to low)",
+                icon="warning",
+                message="You entered a too low scaling. "
+                "Please enter a scaling bigger then or equal to 10%.",
+            )
+            self.scaling_variable.set(f"{self.document_view.scale * 100:.0f}%")
 
         # Check if the scale is greater than 200%
-        if int(scale) > 200:
+        elif scale > 200:
             # Show an error message if the scale is too high
             CTkMessagebox(
-                title="Invalid scaling",
+                title="Invalid scaling (to high)",
                 icon="warning",
                 message="You entered a too high scaling. "
                 "Please enter a scaling smaller than 200%.",
             )
-            self.scaling_variable.set("100%")
-            return
+            self.scaling_variable.set(f"{self.document_view.scale * 100:.0f}%")
 
-        # Convert the scale to a decimal value
-        scale_decimal = int(scale) / 100
-
-        # Update the scaling of the document view
-        self.document_view.update_pages(scale_decimal)
+        else:
+            # Convert the scale to a decimal value
+            scale_decimal = scale / 100
+            # Update the scaling of the document view
+            self.document_view.update_pages(scale_decimal)
 
     def open_file_error(self) -> None:
         """display error message"""
@@ -173,29 +190,40 @@ class _DocumentEditor(DynamicScrollableFrame):
         self._last_selected = 0
         self._rows = 0
         self._columns = 0
-        self._scale = 1.0
+        self.scale = 1.0
 
-    def load_pages(self, document: fitz.Document) -> None:
+    def load_pages(
+        self, document: fitz.Document, loading_window: ctk.CTkToplevel
+    ) -> None:
         """
         Display the document pages by creating new labels.
 
         Args:
             document (fitz.Document): The document to display.
+            loading_window (ctk.CTkToplevel): window for loading animation
         """
+        loading_window.aim(percentage=0.5, absolut=len(document) + 2)
+
         self.clear()
         self._images = [self._convert_page(page) for page in document]
         self._ctk_images = self._create_images(
             self._images, self._get_img_size(self._images[0])
         )
+
+        loading_window.add()
+
         for image in self._ctk_images:
             label = ctk.CTkLabel(self, image=image, text="")
             label.bind("<Button-1>", command=self._select_page)
-            label.bind("<Control-Button-1>",
-                       command=self._select_pages_control)
+            label.bind("<Control-Button-1>", command=self._select_pages_control)
             label.bind("<Shift-Button-1>", command=self._select_pages_shift)
             self._labels.append(label)
 
+            loading_window.add()
+
         self._update_grid()
+
+        loading_window.add()
 
         # updates the first few pages so the scrollbar wound overlaps with the images
         if self.winfo_height() > self._parent_canvas.winfo_height():
@@ -211,7 +239,7 @@ class _DocumentEditor(DynamicScrollableFrame):
         new_size = self._get_img_size(self._images[0])
 
         if new_scaling is not None:
-            self._scale = new_scaling
+            self.scale = new_scaling
 
         if new_scaling is not None or (
             new_size and self._ctk_images[0].cget("size") != new_size
@@ -258,7 +286,7 @@ class _DocumentEditor(DynamicScrollableFrame):
             ctk_img = ctk.CTkImage(
                 light_image=img,
                 dark_image=img,
-                size=(int(size[0] * self._scale), int(size[1] * self._scale)),
+                size=(int(size[0] * self.scale), int(size[1] * self.scale)),
             )
             img_list.append(ctk_img)
 
@@ -282,13 +310,15 @@ class _DocumentEditor(DynamicScrollableFrame):
         canvas_width = self._parent_canvas.winfo_width()
         canvas_height = self._parent_canvas.winfo_height()
 
-        if (canvas_width - 2 * PAGE_X_PADDING) / img_ratio <= canvas_height:
+        if (
+            canvas_width - 2 * (PAGE_X_PADDING + PAGE_IPADDING)
+        ) / img_ratio <= canvas_height:
             # The image fits within the canvas width
-            img_width = canvas_width - 2 * PAGE_X_PADDING
-            img_height = canvas_width / img_ratio
+            img_width = canvas_width - 2 * (PAGE_X_PADDING + PAGE_IPADDING)
+            img_height = img_width / img_ratio
         else:
             # The image fits within the canvas height
-            img_height = canvas_height
+            img_height = canvas_height - 2 * (PAGE_Y_PADDING + PAGE_IPADDING)
             img_width = canvas_height * img_ratio
 
         return int(img_width), int(img_height)
@@ -323,8 +353,7 @@ class _DocumentEditor(DynamicScrollableFrame):
             )
         self.update_idletasks()
 
-        self._parent_canvas.configure(
-            scrollregion=self._parent_canvas.bbox("all"))
+        self._parent_canvas.configure(scrollregion=self._parent_canvas.bbox("all"))
 
         return True
 
@@ -352,12 +381,10 @@ class _DocumentEditor(DynamicScrollableFrame):
             document (fitz.Document): The document whose pages are being displayed.
         """
         page_in_sight = math.ceil(
-            self._parent_canvas.winfo_height(
-            ) / self.winfo_children()[0].winfo_height()
+            self._parent_canvas.winfo_height() / self.winfo_children()[0].winfo_height()
         )
 
-        self._images[:page_in_sight] = [
-            self._convert_page(page) for page in document]
+        self._images[:page_in_sight] = [self._convert_page(page) for page in document]
 
         self._ctk_images[:page_in_sight] = self._create_images(
             self._images[:page_in_sight], self._get_img_size(self._images[0])
@@ -375,8 +402,7 @@ class _DocumentEditor(DynamicScrollableFrame):
         page_overlap = 1 if len(self._labels) % self._columns != 0 else 0
         row_num = page_num // self._columns
 
-        self._parent_canvas.yview_moveto(
-            str(row_num / (self._rows + page_overlap)))
+        self._parent_canvas.yview_moveto(str(row_num / (self._rows + page_overlap)))
 
     def _select_page(self, event: tk.Event) -> None:
         """Select page with a single click."""
@@ -404,7 +430,7 @@ class _DocumentEditor(DynamicScrollableFrame):
         if page_num in self._selected_pages:
             self._last_selected = 0
             self._selected_pages.discard(page_num)
-            ctk_label.configure(fg_color=COLOR_MAIN_EDITOR_BACKGROUND)
+            ctk_label.configure(fg_color=ctk_label.cget("bg_color"))
         else:
             self._last_selected = page_num
             self._selected_pages.add(page_num)
@@ -419,19 +445,18 @@ class _DocumentEditor(DynamicScrollableFrame):
         page_num = row_num * self._columns + column_num
 
         if self._last_selected < page_num + 1:
-            for label in self.winfo_children()[self._last_selected: page_num + 1]:
+            for label in self.winfo_children()[self._last_selected : page_num + 1]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
         else:
-            for label in self.winfo_children()[page_num: self._last_selected]:
+            for label in self.winfo_children()[page_num : self._last_selected]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
 
-        self._selected_pages.update(
-            set(range(self._last_selected, page_num + 1)))
+        self._selected_pages.update(set(range(self._last_selected, page_num + 1)))
 
     def clear_selection(self) -> None:
         """Remove selected pages from selection and reset page background."""
         for widget in self.winfo_children():
-            widget.configure(fg_color=COLOR_MAIN_EDITOR_BACKGROUND)
+            widget.configure(fg_color=widget.cget("bg_color"))
         self._last_selected = 0
         self._selected_pages.clear()
 
@@ -443,6 +468,9 @@ class _DocumentEditor(DynamicScrollableFrame):
         self._images.clear()
         self._ctk_images.clear()
         self._labels.clear()
+        self._selected_pages.clear()
+        self._last_selected = 0
         self._rows = 0
+        self._columns = 0
 
         self.update_idletasks()

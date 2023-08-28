@@ -37,40 +37,42 @@ class CollapsableFrame(ctk.CTkFrame):
         """
         Initialize the Collapsible Frame.
 
-        Parameters:
+        Args:
             parent (Any): The parent widget.
-            alignment (Literal["left", "right"]): The alignment of the hide button.
-            expanded (bool, optional): Whether the frame is initially expanded.
-            Default is True.
-            corner_radius (Optional[Union[int, str]], optional): The corner radius of the frame.
-            Default is None.
-            border_width (Optional[Union[int, str]], optional): The border width of the frame.
-            Default is None.
-            bg_color (Union[str, Tuple[str, str]], optional): The background color of the frame.
-            Default is "transparent".
-            fg_color (Optional[Union[str, Tuple[str, str]]], optional): The foreground color of the frame.
-            Default is None.
-            border_color (Optional[Union[str, Tuple[str, str]]], optional): The border color of the frame.
-            Default is None.
-            button_corner_radius (Optional[Union[int, str]], optional): The corner radius of the hide button.
-            Default is None.
-            button_border_width (Optional[Union[int, str]], optional): The border width of the hide button.
-            Default is None.
-            button_fg_color (Optional[Union[str, Tuple[str, str]]], optional): The foreground color of the hide button.
-            Default is None.
-            button_hover_color (Optional[Union[str, Tuple[str, str]]], optional): The hover color of the hide button.
-            Default is None.
-            button_border_color (Optional[Union[str, Tuple[str, str]]], optional): The border color of the hide button.
-            Default is None.
-            button_text_color (Optional[Union[str, Tuple[str, str]]], optional): The text color of the hide button.
-            Default is None.
-            button_image (Union[ctk.CTkImage, ImageTk.PhotoImage, None], optional): The image of the hide button.
-            Default is None.
-            button_hover (bool, optional): Whether the hide button should have a hover effect.
-            Default is True.
-            button_compound (str, optional): The compound style of the hide button.
-            Default is "left".
+            alignment (Literal["left", "right"]):
+                The alignment of the hide button, either "left" or "right".
+            expanded (bool, optional):
+                Whether the frame is initially expanded. Default is True.
+            corner_radius (Optional[Union[int, str]], optional):
+                The corner radius of the frame. Default is None.
+            border_width (Optional[Union[int, str]], optional):
+                The border width of the frame. Default is None.
+            bg_color (Union[str, Tuple[str, str]], optional):
+                The background color of the frame. Default is "transparent".
+            fg_color (Optional[Union[str, Tuple[str, str]]], optional):
+                The foreground color of the frame. Default is None.
+            border_color (Optional[Union[str, Tuple[str, str]]], optional):
+                The border color of the frame. Default is None.
+            button_corner_radius (Optional[Union[int, str]], optional):
+                The corner radius of the hide button. Default is None.
+            button_border_width (Optional[Union[int, str]], optional):
+                The border width of the hide button. Default is None.
+            button_fg_color (Optional[Union[str, Tuple[str, str]]], optional):
+                The foreground color of the hide button. Default is None.
+            button_hover_color (Optional[Union[str, Tuple[str, str]]], optional):
+                The hover color of the hide button. Default is None.
+            button_border_color (Optional[Union[str, Tuple[str, str]]], optional):
+                The border color of the hide button. Default is None.
+            button_text_color (Optional[Union[str, Tuple[str, str]]], optional):
+                The text color of the hide button. Default is None.
+            button_image (Union[ctk.CTkImage, ImageTk.PhotoImage, None], optional):
+                The image of the hide button. Default is None.
+            button_hover (bool, optional):
+                Whether the hide button should have a hover effect. Default is True.
+            button_compound (str, optional):
+                The compound style of the hide button. Default is "left".
         """
+
         # container
         self._parent_frame = ctk.CTkFrame(
             master=parent,
@@ -127,7 +129,7 @@ class CollapsableFrame(ctk.CTkFrame):
         self.update()
 
     def _show(self) -> None:
-        """Show the widget by packing it with expand and fill options, and updating the hide button."""
+        """Show the widget and updating the hide button."""
         self.expanded = True
         super().pack(expand=True, fill="both")
         self._hide_button.configure(text=self.char[0], command=self._hide)
@@ -157,23 +159,19 @@ class CollapsableFrame(ctk.CTkFrame):
             )
 
         if "button_border_width" in kwargs:
-            self._hide_button.configure(
-                border_width=kwargs.pop("button_border_width"))
+            self._hide_button.configure(border_width=kwargs.pop("button_border_width"))
 
         if "button_fg_color" in kwargs:
             self._hide_button.configure(fg_color=kwargs.pop("button_fg_color"))
 
         if "button_hover_color" in kwargs:
-            self._hide_button.configure(
-                hover_color=kwargs.pop("button_hover_color"))
+            self._hide_button.configure(hover_color=kwargs.pop("button_hover_color"))
 
         if "button_border_color" in kwargs:
-            self._hide_button.configure(
-                border_color=kwargs.pop("button_border_color"))
+            self._hide_button.configure(border_color=kwargs.pop("button_border_color"))
 
         if "button_text_color" in kwargs:
-            self._hide_button.configure(
-                text_color=kwargs.pop("button_text_color"))
+            self._hide_button.configure(text_color=kwargs.pop("button_text_color"))
 
         if "button_image" in kwargs:
             self._hide_button.configure(image=kwargs.pop("button_image"))
@@ -325,8 +323,10 @@ class DynamicScrollableFrame(ctk.CTkScrollableFrame):
             bg_color (Union[str, Tuple[str, str]]): The background color of the frame.
             fg_color (Optional[Union[str, Tuple[str, str]]]): The foreground color of the frame.
             border_color (Optional[Union[str, Tuple[str, str]]]): The border color of the frame.
-            scrollbar_fg_color (Optional[Union[str, Tuple[str, str]]]): The foreground color of the scrollbars.
-            scrollbar_button_color (Optional[Union[str, Tuple[str, str]]]): The color of the scrollbar buttons.
+            scrollbar_fg_color (Optional[Union[str, Tuple[str, str]]]):
+                The foreground color of the scrollbars.
+            scrollbar_button_color (Optional[Union[str, Tuple[str, str]]]):
+                The color of the scrollbar buttons.
             scrollbar_button_hover_color (Optional[Union[str, Tuple[str, str]]]):
                 The color of the scrollbar buttons when hovered.
             orientation (Literal["horizontal", "vertical", "both"]): The scrolling orientation.
@@ -385,11 +385,9 @@ class DynamicScrollableFrame(ctk.CTkScrollableFrame):
         """
         if self._parent_canvas.yview() != (0.0, 1.0):
             if sys.platform.startswith("win"):
-                self._parent_canvas.yview_scroll(
-                    int(-1 * (event.delta / 120)), "units")
+                self._parent_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
             elif sys.platform == "darwin":
-                self._parent_canvas.yview_scroll(
-                    int(-1 * event.delta), "units")
+                self._parent_canvas.yview_scroll(int(-1 * event.delta), "units")
             else:
                 if event.num == 4:
                     self._parent_canvas.yview_scroll(-1, "units")
@@ -405,11 +403,9 @@ class DynamicScrollableFrame(ctk.CTkScrollableFrame):
         """
         if self._parent_canvas.xview() != (0.0, 1.0):
             if sys.platform.startswith("win"):
-                self._parent_canvas.xview_scroll(
-                    int(-1 * (event.delta / 120)), "units")
+                self._parent_canvas.xview_scroll(int(-1 * (event.delta / 120)), "units")
             elif sys.platform == "darwin":
-                self._parent_canvas.xview_scroll(
-                    int(-1 * event.delta), "units")
+                self._parent_canvas.xview_scroll(int(-1 * event.delta), "units")
             else:
                 if event.num == 4:
                     self._parent_canvas.xview_scroll(-1, "units")
@@ -421,13 +417,11 @@ class DynamicScrollableFrame(ctk.CTkScrollableFrame):
         Bind scrolling events when entering the frame.
 
         Parameters:
-            _event (tk.Event): The enter event.
+            _event (tk.Event): The event.
         """
         if sys.platform.startswith("linux"):
-            self._parent_canvas.bind_all(
-                "<Button-4>", self._on_mouse_wheel, add="+")
-            self._parent_canvas.bind_all(
-                "<Button-5>", self._on_mouse_wheel, add="+")
+            self._parent_canvas.bind_all("<Button-4>", self._on_mouse_wheel, add="+")
+            self._parent_canvas.bind_all("<Button-5>", self._on_mouse_wheel, add="+")
             self._parent_canvas.bind_all(
                 "<Shift-Button-4>", self._on_shift_mouse_wheel, add="+"
             )
@@ -435,8 +429,7 @@ class DynamicScrollableFrame(ctk.CTkScrollableFrame):
                 "<Shift-Button-5>", self._on_shift_mouse_wheel, add="+"
             )
         else:
-            self._parent_canvas.bind_all(
-                "<MouseWheel>", self._on_mouse_wheel, add="+")
+            self._parent_canvas.bind_all("<MouseWheel>", self._on_mouse_wheel, add="+")
             self._parent_canvas.bind_all(
                 "<Shift-MouseWheel>", self._on_shift_mouse_wheel, add="+"
             )
@@ -473,10 +466,8 @@ if __name__ == "__main__":
     collapsable_frame.pack(side="left", expand=True, fill="both")
     # collapsable_frame.grid(column=0, row=0, sticky="news")
 
-    ctk.CTkLabel(collapsable_frame, text="Test Label").pack(
-        fill="x", expand=True)
-    ctk.CTkButton(collapsable_frame, text="Test Button").pack(
-        fill="x", expand=True)
+    ctk.CTkLabel(collapsable_frame, text="Test Label").pack(fill="x", expand=True)
+    ctk.CTkButton(collapsable_frame, text="Test Button").pack(fill="x", expand=True)
 
     # debugging scrollable frame
     scrollable_frame = DynamicScrollableFrame(window)  # , orientation="auto")

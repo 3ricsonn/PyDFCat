@@ -2,4 +2,4 @@ crossfiledialog==0.1.2
 CTkMessagebox==2.5
 customtkinter==5.2.0
 Pillow==10.0.0
-PyMuPDF
+PyMuPDF==1.23.1

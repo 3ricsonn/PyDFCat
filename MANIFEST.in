@@ -1,0 +1,2 @@
+include src/pydfcat/assets/**/*.png
+include src/pydfcat/assets/ctktheme.json
