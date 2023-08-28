@@ -367,8 +367,6 @@ class _ClipboardPageView(DynamicScrollableFrame):
     It's intended to be used internally within the Clipboard class.
     """
 
-    pass
-
 
 class ClipboardToolBarButton(ctk.CTkButton):
     """

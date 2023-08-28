@@ -8,8 +8,8 @@ import customtkinter as ctk
 import fitz  # PyMuPDF
 from CTkMessagebox import CTkMessagebox
 from PIL import Image
-from loadingWindow import LoadingWindow
 
+from .loadingWindow import LoadingWindow
 from .settings import (
     COLOR_SELECTED_BLUE,
     PAGE_IPADDING,
