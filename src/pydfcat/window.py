@@ -67,6 +67,8 @@ class ApplicationWindow(ctk.CTk):
             close_file_command=self.close_file,
             scale_page_command=self.main_editor.update_scaling,
             scaling_variable=scaling_variable,
+            duplicate_pages_command=self.duplicate_selection,
+            delete_pages_command=self.delete_selection,
             height=TOOLBAR_HEIGHT,
         )
         self.toolbar.grid(
@@ -84,7 +86,9 @@ class ApplicationWindow(ctk.CTk):
         self.sidebar.disable_tools()
 
         # Open file dialog to select a PDF file
-        file_name = crossfiledialog.open_file(title="Choose your PDF you want to edit:")
+        file_name = crossfiledialog.open_file(
+            title="Choose your PDF you want to edit:", filter={"PDF-Files": "*.pdf"}
+        )
 
         if file_name:
             self.open_file(file_name)
@@ -95,13 +99,13 @@ class ApplicationWindow(ctk.CTk):
         """Opens and distributes the given document to the panels of the editor."""
         if has_file_extension(file_name, ".pdf"):
             # Load the selected PDF file using fitz
-            pdf_document = fitz.Document(file_name)
+            self.pdf_document = fitz.Document(file_name)
 
             loading_window = LoadingWindow(self, os.path.basename(file_name))
 
             # Update the PDF document in the main editor and sidebar
-            self.main_editor.get_new_document(pdf_document, loading_window)
-            self.sidebar.get_new_document(pdf_document, loading_window)
+            self.main_editor.get_new_document(self.pdf_document, loading_window)
+            self.sidebar.get_new_document(self.pdf_document, loading_window)
 
             loading_window.destroy()
 
@@ -113,6 +117,65 @@ class ApplicationWindow(ctk.CTk):
             # user selected a non-pdf file
             self.main_editor.open_file_error()
             self.toolbar.enable_open()
+
+    def copy_selection(self):
+        print("copy")
+        page_numbers = self.main_editor.get_selection()
+
+        if page_numbers:
+            # modifier document
+
+            # update editors
+
+            self.main_editor.clear_selection()
+
+    def cut_selection(self):
+        print("copy")
+        page_numbers = self.main_editor.get_selection()
+
+        if page_numbers:
+            # modifier document
+
+            # update editors
+
+            self.main_editor.clear_selection()
+
+    def past_selection(self):
+        print("copy")
+        page_numbers = self.main_editor.get_selection()
+
+        if page_numbers:
+            # modifier document
+
+            # update editors
+
+            self.main_editor.clear_selection()
+
+    def duplicate_selection(self):
+        print("duplicate")
+        page_numbers = self.main_editor.get_selection()
+
+        if page_numbers:
+            # modifier document
+            for page_number, n in enumerate(page_numbers):
+                self.pdf_document.fullcopy_page(page_number + n, page_number + n + 1)
+
+            # update editors
+            self.sidebar.duplicate_document_pages(page_numbers)
+            self.main_editor.duplicate_pages(page_numbers)
+
+            self.main_editor.clear_selection()
+
+    def delete_selection(self):
+        print("delete")
+        page_numbers = self.main_editor.get_selection()
+
+        if page_numbers:
+            # modifier document
+
+            # update editors
+
+            self.main_editor.clear_selection()
 
     def close_file(self):
         """CLose the file and discard all changes."""

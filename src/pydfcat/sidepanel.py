@@ -76,6 +76,21 @@ class SidePanel(CollapsableFrame):
         self.tabview.set("Navigator")
         self.navigator_tab.get_new_document(document, loading_window)
 
+    def delete_document_pages(self, page_numbers: set[int]) -> None:
+        self.navigator_tab.delete_pages(page_numbers)
+
+    def duplicate_document_pages(self, page_numbers: set[int]) -> None:
+        self.navigator_tab.duplicate_pages(page_numbers)
+
+    def past_page_into_document(self, position: int, pages: list[fitz.Page]) -> None:
+        self.navigator_tab.past_pages(position, pages)
+
+    def delete_clipboard_pages(self, page_numbers: set[int]) -> None:
+        self.clipboard_tab.delete_pages(page_numbers)
+
+    def past_page_into_clipboard(self, position: int, pages: list[fitz.Page]) -> None:
+        self.clipboard_tab.past_pages(position, pages)
+
     def close_document(self) -> None:
         """Close the current document in the Side Panel."""
         self.navigator_tab.close_document()
@@ -101,9 +116,6 @@ class _NavigatorPanel(ctk.CTkFrame):
         """
         super().__init__(master=parent, fg_color="transparent")
 
-        # data
-        self.document = fitz.Document()
-
         # page view
         self.document_view = _NavigatorPageView(self, jump_to_page_command)
 
@@ -117,17 +129,22 @@ class _NavigatorPanel(ctk.CTkFrame):
             document (fitz.Document): The PDF document to load.
             loading_window (LoadingWindow): Window for loading animation.
         """
-        self.document = document
-
         # place page view widget
         self.document_view.pack(expand=True, fill="both")
 
-        self.document_view.load_pages(self.document, loading_window)
+        self.document_view.load_pages(document, loading_window)
+
+    def delete_pages(self, page_numbers: set[int]) -> None:
+        self.document_view.delete_pages(page_numbers)
+
+    def duplicate_pages(self, page_numbers: set[int]) -> None:
+        self.document_view.duplicate_pages(page_numbers)
+
+    def past_pages(self, position: int, pages: list[fitz.Page]) -> None:
+        self.document_view.insert_pages(position, pages)
 
     def close_document(self) -> None:
         """Close the current document."""
-        self.document = None
-
         self.document_view.clear()
 
         # remove page view widget
@@ -174,20 +191,13 @@ class _NavigatorPageView(DynamicScrollableFrame):
             image = self._convert_page(page)
 
             # Create a labeled image widget and pack it
-            label = ctk.CTkLabel(self, image=image, text="")
-            label.bind("<Button-1>", command=self._select_page)
-            label.pack(
-                expand=True,
-                fill="x",
-                ipadx=PAGE_IPADDING,
-                ipady=PAGE_IPADDING,
-                padx=PAGE_X_PADDING,
-                pady=(0, PAGE_Y_PADDING),
-            )
+            label = self._create_label(image)
 
             self._labels.append(label)
 
             loading_window.add()
+
+        self._place_label()
 
         self.update_idletasks()
         self._parent_canvas.configure(scrollregion=self._parent_canvas.bbox("all"))
@@ -227,6 +237,26 @@ class _NavigatorPageView(DynamicScrollableFrame):
 
         return ctk_img
 
+    def _create_label(self, image: ctk.CTkImage) -> ctk.CTkLabel:
+        label = ctk.CTkLabel(self, image=image, text="")
+        label.bind("<Button-1>", command=self._select_page)
+        return label
+
+    def _place_label(self):
+        for widget in self.winfo_children():
+            widget.pack_forget()
+
+        for label in self._labels:
+            label.pack(
+                expand=True,
+                fill="x",
+                ipadx=PAGE_IPADDING,
+                ipady=PAGE_IPADDING,
+                padx=PAGE_X_PADDING,
+                pady=(0, PAGE_Y_PADDING),
+            )
+            self.update()
+
     def _update_pages_in_sight(self, document: fitz.Document) -> None:
         """
         Update the visible pages based on the current canvas size and document content.
@@ -237,7 +267,7 @@ class _NavigatorPageView(DynamicScrollableFrame):
         page_in_sight = math.ceil(
             self._parent_canvas.winfo_height() / self.winfo_children()[0].winfo_height()
         )
-        print(page_in_sight)
+
         for index in range(page_in_sight):
             img = self._convert_page(document[index])
             self._labels[index].configure(image=img)
@@ -253,6 +283,20 @@ class _NavigatorPageView(DynamicScrollableFrame):
         page_num = ctk_label.winfo_y() // ctk_label.winfo_height()
 
         self._jump_to_page(page_num)
+
+    def delete_pages(self, page_nums: set[int]) -> None:
+        pass
+
+    def duplicate_pages(self, page_nums: set[int]) -> None:
+        # TODO: what if page nums aren't continues
+        position = max(page_nums) + 1
+        for n, page_num in enumerate(page_nums):
+            label = self._create_label(self._labels[page_num].cget("image"))
+            self._labels.insert(position + n, label)
+        self._place_label()
+
+    def insert_pages(self, pos: int, pages: list[fitz.Page]) -> None:
+        pass
 
     def clear_selection(self) -> None:
         """Remove selected pages from selection and reset page background."""
@@ -344,6 +388,12 @@ class _ClipboardPanel(ctk.CTkFrame):
         self.page_view = _ClipboardPageView(self)
         self.page_view.pack(expand=True, fill="both")
 
+    def delete_pages(self, page_numbers: set[int]) -> None:
+        self.page_view.delete_pages(page_numbers)
+
+    def past_pages(self, position: int, pages: list[fitz.Page]) -> None:
+        self.page_view.insert_pages(position, pages)
+
     def enable_tools(self):
         """Enable clipboard tools."""
         self.open_file_button.enable()
@@ -366,6 +416,12 @@ class _ClipboardPageView(DynamicScrollableFrame):
     This class inherits from DynamicScrollableFrame, a custom scrollable frame class.
     It's intended to be used internally within the Clipboard class.
     """
+
+    def delete_pages(self, page_nums: set[int]) -> None:
+        pass
+
+    def insert_pages(self, pos: int, pages: list[fitz.Page]) -> None:
+        pass
 
 
 class ClipboardToolBarButton(ctk.CTkButton):

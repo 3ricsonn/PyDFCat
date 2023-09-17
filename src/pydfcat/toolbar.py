@@ -40,6 +40,8 @@ class ToolBar(ctk.CTkFrame):
         close_file_command: Callable,
         scale_page_command: Callable,
         scaling_variable: ctk.StringVar,
+        duplicate_pages_command: Callable,
+        delete_pages_command: Callable,
         **kwargs,
     ) -> None:
         """
@@ -165,7 +167,7 @@ class ToolBar(ctk.CTkFrame):
         self.duplicate_button = ToolBarButton(
             self,
             "duplicate",
-            command=lambda: print("duplicate"),
+            command=duplicate_pages_command,
             state="disabled",
             tooltip_message="duplicate selection",
         )
@@ -177,7 +179,7 @@ class ToolBar(ctk.CTkFrame):
         self.delete_button = ToolBarButton(
             self,
             "delete",
-            command=lambda: print("delete"),
+            command=delete_pages_command,
             state="disabled",
             tooltip_message="delete selection",
         )
@@ -220,6 +222,8 @@ class ToolBar(ctk.CTkFrame):
         self.undo_button.enable()
         self.redo_button.enable()
         self.scaling_combobox.configure(state="normal")
+        self.duplicate_button.enable()
+        self.delete_button.enable()
         self.close_button.pack(
             side="right", padx=TOOLBAR_X_PADDING, pady=TOOLBAR_Y_PADDING
         )
@@ -235,6 +239,9 @@ class ToolBar(ctk.CTkFrame):
         self.redo_button.disable()
 
         self.scaling_combobox.configure(state="disabled")
+
+        self.duplicate_button.disable()
+        self.delete_button.disable()
 
         self.close_button.pack_forget()
         self.update_idletasks()
