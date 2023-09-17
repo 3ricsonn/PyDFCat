@@ -285,7 +285,8 @@ class _NavigatorPageView(DynamicScrollableFrame):
         self._jump_to_page(page_num)
 
     def delete_pages(self, page_nums: set[int]) -> None:
-        pass
+        for n, page_num in enumerate(page_nums):
+            self._labels.pop(page_num - n).pack_forget()
 
     def duplicate_pages(self, page_nums: set[int]) -> None:
         # TODO: what if page nums aren't continues

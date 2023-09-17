@@ -415,10 +415,10 @@ class _DocumentEditor(DynamicScrollableFrame):
         self._parent_canvas.yview_moveto(str(row_num / (self._rows + page_overlap)))
 
     def delete_pages(self, page_nums: set[int]) -> None:
-        pass
+        for n, page_num in enumerate(page_nums):
+            self._labels.pop(page_num - n).grid_forget()
 
     def duplicate_pages(self, page_nums: set[int]) -> None:
-        print("duplicate: main")
         position = max(page_nums) + 1
         for n, page_num in enumerate(page_nums):
             self._images.insert(position + n, self._images[page_num])

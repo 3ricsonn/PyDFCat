@@ -152,7 +152,6 @@ class ApplicationWindow(ctk.CTk):
             self.main_editor.clear_selection()
 
     def duplicate_selection(self):
-        print("duplicate")
         page_numbers = self.main_editor.get_selection()
 
         if page_numbers:
@@ -172,8 +171,11 @@ class ApplicationWindow(ctk.CTk):
 
         if page_numbers:
             # modifier document
+            self.pdf_document.delete_pages(*page_numbers)
 
             # update editors
+            self.sidebar.delete_document_pages(page_numbers)
+            self.main_editor.delete_pages(page_numbers)
 
             self.main_editor.clear_selection()
 
