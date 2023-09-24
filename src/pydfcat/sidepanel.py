@@ -34,180 +34,19 @@ except ModuleNotFoundError:
     tooltip = False
 
 
-class SidePanel(CollapsableFrame):
-    """Side panel to preview the file and the selection."""
-
-    def __init__(self, parent: Any, jump_to_page_command: Callable):
+class _PageView(DynamicScrollableFrame):
+    def __init__(self, parent, **kwargs) -> None:
         """
-        Initialize the Side Panel.
-
-        Args:
-            parent (Any): The parent widget.
-        """
-        super().__init__(parent=parent, alignment="left", fg_color="transparent")
-
-        # tabview
-        self.tabview = ctk.CTkTabview(master=self, width=253)
-        self.tabview.add("Navigator")
-        self.tabview.add("Clipboard")
-        self.tabview.pack(expand=True, fill="both")
-
-        # preview and navigator tab
-        self.navigator_tab = _NavigatorPanel(
-            parent=self.tabview.tab("Navigator"),
-            jump_to_page_command=jump_to_page_command,
-        )
-        self.navigator_tab.pack(expand=True, fill="both")
-
-        # clipboard tab
-        self.clipboard_tab = _ClipboardPanel(parent=self.tabview.tab("Clipboard"))
-        self.clipboard_tab.pack(expand=True, fill="both")
-
-    def get_new_document(
-        self, document: fitz.Document, loading_window: LoadingWindow
-    ) -> None:
-        """
-        Load a new PDF document in the Side Panel.
-
-        Args:
-            document (fitz.Document): The PDF document to load.
-            loading_window (LoadingWindow): Window for loading animation.
-        """
-        self.tabview.set("Navigator")
-        self.navigator_tab.get_new_document(document, loading_window)
-
-    def delete_document_pages(self, page_numbers: set[int]) -> None:
-        self.navigator_tab.delete_pages(page_numbers)
-
-    def duplicate_document_pages(self, page_numbers: set[int]) -> None:
-        self.navigator_tab.duplicate_pages(page_numbers)
-
-    def past_page_into_document(self, position: int, pages: list[fitz.Page]) -> None:
-        self.navigator_tab.past_pages(position, pages)
-
-    def delete_clipboard_pages(self, page_numbers: set[int]) -> None:
-        self.clipboard_tab.delete_pages(page_numbers)
-
-    def past_page_into_clipboard(self, position: int, pages: list[fitz.Page]) -> None:
-        self.clipboard_tab.past_pages(position, pages)
-
-    def close_document(self) -> None:
-        """Close the current document in the Side Panel."""
-        self.navigator_tab.close_document()
-
-    def disable_tools(self):
-        """Disable the tools of the child panels."""
-        self.clipboard_tab.disable_tools()
-
-    def enable_tools(self):
-        """Enable the tools of the child panels."""
-        self.clipboard_tab.enable_tools()
-
-
-class _NavigatorPanel(ctk.CTkFrame):
-    """Class to preview document and navigator for the main editor."""
-
-    def __init__(self, parent: Any, jump_to_page_command: Callable) -> None:
-        """
-        Initialize the Navigator Panel.
-
-        Args:
-            parent (Any): The parent widget.
-        """
-        super().__init__(master=parent, fg_color="transparent")
-
-        # page view
-        self.document_view = _NavigatorPageView(self, jump_to_page_command)
-
-    def get_new_document(
-        self, document: fitz.Document, loading_window: LoadingWindow
-    ) -> None:
-        """
-        Load a new PDF document.
-
-        Args:
-            document (fitz.Document): The PDF document to load.
-            loading_window (LoadingWindow): Window for loading animation.
-        """
-        # place page view widget
-        self.document_view.pack(expand=True, fill="both")
-
-        self.document_view.load_pages(document, loading_window)
-
-    def delete_pages(self, page_numbers: set[int]) -> None:
-        self.document_view.delete_pages(page_numbers)
-
-    def duplicate_pages(self, page_numbers: set[int]) -> None:
-        self.document_view.duplicate_pages(page_numbers)
-
-    def past_pages(self, position: int, pages: list[fitz.Page]) -> None:
-        self.document_view.insert_pages(position, pages)
-
-    def close_document(self) -> None:
-        """Close the current document."""
-        self.document_view.clear()
-
-        # remove page view widget
-        self.document_view.pack_forget()
-
-
-class _NavigatorPageView(DynamicScrollableFrame):
-    """
-    A class representing a preview to display file pages.
-
-    This class inherits from DynamicScrollableFrame, a custom scrollable frame class.
-    """
-
-    def __init__(self, parent, jump_page_command: Callable, **kwargs) -> None:
-        """
-        Initialize the _NavigatorPageView.
+        Initialize the _PageView.
 
         Args:
             parent: The parent widget.
-            jump_page_command (Callable): A callable to jump to a specific page.
             **kwargs: Configuration arguments for DynamicScrollableFrame.
         """
         super().__init__(master=parent, **kwargs, orientation="vertical")
 
         # data
-        self._jump_to_page = jump_page_command
         self._labels: list[ctk.CTkLabel] = []
-
-    def load_pages(
-        self, document: fitz.Document, loading_window: LoadingWindow
-    ) -> None:
-        """
-        Load and display the pages of a document.
-
-        Parameters:
-            document (fitz.Document): The document to load the pages from.
-            loading_window (LoadingWindow): Window for loading animation.
-        """
-        loading_window.aim(percentage=0.5, absolut=len(document) + 1)
-        self.clear()
-
-        for page in document:
-            # Convert the page to an image
-            image = self._convert_page(page)
-
-            # Create a labeled image widget and pack it
-            label = self._create_label(image)
-
-            self._labels.append(label)
-
-            loading_window.add()
-
-        self._place_label()
-
-        self.update_idletasks()
-        self._parent_canvas.configure(scrollregion=self._parent_canvas.bbox("all"))
-        self.update()
-
-        loading_window.add()
-
-        # updates the first few pages so the scrollbar wound overlaps with the images
-        if self.winfo_height() > self._parent_canvas.winfo_height():
-            self._update_pages_in_sight(document)
 
     def _convert_page(self, page: fitz.Page) -> ctk.CTkImage:
         """
@@ -257,6 +96,157 @@ class _NavigatorPageView(DynamicScrollableFrame):
             )
             self.update()
 
+    def _select_page(self, event: tk.Event) -> None:
+        pass
+
+
+class SidePanel(CollapsableFrame):
+    """Side panel to preview the file and the selection."""
+
+    def __init__(self, parent: Any, jump_to_page_command: Callable):
+        """
+        Initialize the Side Panel.
+
+        Args:
+            parent (Any): The parent widget.
+        """
+        super().__init__(parent=parent, alignment="left", fg_color="transparent")
+
+        # tabview
+        self.tabview = ctk.CTkTabview(master=self, width=253)
+        self.tabview.add("Navigator")
+        self.tabview.add("Clipboard")
+        self.tabview.pack(expand=True, fill="both")
+
+        # preview and navigator tab
+        self.navigator = _NavigatorPanel(
+            parent=self.tabview.tab("Navigator"),
+            jump_to_page_command=jump_to_page_command,
+        )
+        self.navigator.pack(expand=True, fill="both")
+
+        # clipboard tab
+        self.clipboard = _ClipboardPanel(parent=self.tabview.tab("Clipboard"))
+        self.clipboard.pack(expand=True, fill="both")
+
+    def get_new_document(
+        self, document: fitz.Document, loading_window: LoadingWindow
+    ) -> None:
+        """
+        Load a new PDF document in the Side Panel.
+
+        Args:
+            document (fitz.Document): The PDF document to load.
+            loading_window (LoadingWindow): Window for loading animation.
+        """
+        self.tabview.set("Navigator")
+        self.navigator.get_new_document(document, loading_window)
+
+
+class _NavigatorPanel(ctk.CTkFrame):
+    """Class to preview document and navigator for the main editor."""
+
+    def __init__(self, parent: Any, jump_to_page_command: Callable) -> None:
+        """
+        Initialize the Navigator Panel.
+
+        Args:
+            parent (Any): The parent widget.
+        """
+        super().__init__(master=parent, fg_color="transparent")
+
+        # page view
+        self.document_view = _NavigatorPageView(self, jump_to_page_command)
+
+    def get_new_document(
+        self, document: fitz.Document, loading_window: LoadingWindow
+    ) -> None:
+        """
+        Load a new PDF document.
+
+        Args:
+            document (fitz.Document): The PDF document to load.
+            loading_window (LoadingWindow): Window for loading animation.
+        """
+        # place page view widget
+        self.document_view.pack(expand=True, fill="both")
+
+        self.document_view.load_pages(document, loading_window)
+
+    def delete_pages(self, page_numbers: list[int]) -> None:
+        self.document_view.delete_pages(page_numbers)
+
+    def duplicate_pages(self, page_numbers: list[int]) -> None:
+        self.document_view.duplicate_pages(page_numbers)
+
+    def insert_pages(self, position: int, pages: fitz.Document) -> None:
+        self.document_view.insert_pages(position, pages)
+
+    def close_document(self) -> None:
+        """Close the current document."""
+        self.document_view.clear()
+
+        # remove page view widget
+        self.document_view.pack_forget()
+
+
+class _NavigatorPageView(_PageView):
+    """
+    A class representing a preview to display file pages.
+
+    This class inherits from DynamicScrollableFrame, a custom scrollable frame class.
+    """
+
+    def __init__(self, parent, jump_page_command: Callable, **kwargs) -> None:
+        """
+        Initialize the _NavigatorPageView.
+
+        Args:
+            parent: The parent widget.
+            jump_page_command (Callable): A callable to jump to a specific page.
+            **kwargs: Configuration arguments for DynamicScrollableFrame.
+        """
+        super().__init__(parent=parent, **kwargs)
+
+        # data
+        self._jump_to_page = jump_page_command
+
+    def load_pages(
+        self, document: fitz.Document, loading_window: LoadingWindow
+    ) -> None:
+        """
+        Load and display the pages of a document.
+
+        Parameters:
+            document (fitz.Document): The document to load the pages from.
+            loading_window (LoadingWindow): Window for loading animation.
+        """
+        loading_window.aim(percentage=0.5, absolut=len(document) + 1)
+        self.clear()
+
+        for page in document:
+            # Convert the page to an image
+            image = self._convert_page(page)
+
+            # Create a labeled image widget and pack it
+            label = self._create_label(image)
+
+            self._labels.append(label)
+
+            loading_window.add()
+
+        self._place_label()
+
+        self.update_idletasks()
+        self._parent_canvas.configure(scrollregion=self._parent_canvas.bbox("all"))
+        self.update()
+
+        loading_window.add()
+
+        # updates the first few pages so the scrollbar wound overlaps with the images
+        if self.winfo_height() > self._parent_canvas.winfo_height():
+            self._update_pages_in_sight(document)
+
     def _update_pages_in_sight(self, document: fitz.Document) -> None:
         """
         Update the visible pages based on the current canvas size and document content.
@@ -284,11 +274,11 @@ class _NavigatorPageView(DynamicScrollableFrame):
 
         self._jump_to_page(page_num)
 
-    def delete_pages(self, page_nums: set[int]) -> None:
+    def delete_pages(self, page_nums: list[int]) -> None:
         for n, page_num in enumerate(page_nums):
             self._labels.pop(page_num - n).pack_forget()
 
-    def duplicate_pages(self, page_nums: set[int]) -> None:
+    def duplicate_pages(self, page_nums: list[int]) -> None:
         # TODO: what if page nums aren't continues
         position = max(page_nums) + 1
         for n, page_num in enumerate(page_nums):
@@ -296,7 +286,7 @@ class _NavigatorPageView(DynamicScrollableFrame):
             self._labels.insert(position + n, label)
         self._place_label()
 
-    def insert_pages(self, pos: int, pages: list[fitz.Page]) -> None:
+    def insert_pages(self, pos: int, pages: fitz.Document) -> None:
         pass
 
     def clear_selection(self) -> None:
@@ -389,10 +379,10 @@ class _ClipboardPanel(ctk.CTkFrame):
         self.page_view = _ClipboardPageView(self)
         self.page_view.pack(expand=True, fill="both")
 
-    def delete_pages(self, page_numbers: set[int]) -> None:
+    def delete_pages(self, page_numbers: list[int]) -> None:
         self.page_view.delete_pages(page_numbers)
 
-    def past_pages(self, position: int, pages: list[fitz.Page]) -> None:
+    def insert_pages(self, position: int, pages: fitz.Document) -> None:
         self.page_view.insert_pages(position, pages)
 
     def enable_tools(self):
@@ -410,7 +400,7 @@ class _ClipboardPanel(ctk.CTkFrame):
         self.clear_clipboard_button.disable()
 
 
-class _ClipboardPageView(DynamicScrollableFrame):
+class _ClipboardPageView(_PageView):
     """
     A private class representing a view for clipboard pages.
 
@@ -418,11 +408,17 @@ class _ClipboardPageView(DynamicScrollableFrame):
     It's intended to be used internally within the Clipboard class.
     """
 
-    def delete_pages(self, page_nums: set[int]) -> None:
+    def delete_pages(self, page_nums: list[int]) -> None:
         pass
 
-    def insert_pages(self, pos: int, pages: list[fitz.Page]) -> None:
-        pass
+    def insert_pages(self, pos: int, pages: fitz.Document) -> None:
+        for i, page in enumerate(pages):
+            label = self._create_label(self._convert_page(page))
+            if pos == -1:
+                self._labels.append(label)
+            else:
+                self._labels.insert(pos + i, label)
+        self._place_label()
 
 
 class ClipboardToolBarButton(ctk.CTkButton):

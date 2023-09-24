@@ -158,13 +158,13 @@ class MainEditor(ctk.CTkFrame):
     def get_selection(self) -> set[int]:
         return self.document_view.selected_pages
 
-    def delete_pages(self, page_numbers: set[int]) -> None:
+    def delete_pages(self, page_numbers: list[int]) -> None:
         self.document_view.delete_pages(page_numbers)
 
-    def duplicate_pages(self, page_numbers: set[int]) -> None:
+    def duplicate_pages(self, page_numbers: list[int]) -> None:
         self.document_view.duplicate_pages(page_numbers)
 
-    def past_pages(self, position: int, pages: list[fitz.Page]) -> None:
+    def insert_pages(self, position: int, pages: fitz.Document) -> None:
         self.document_view.insert_pages(position, pages)
 
     def clear_selection(self) -> None:
@@ -414,11 +414,11 @@ class _DocumentEditor(DynamicScrollableFrame):
 
         self._parent_canvas.yview_moveto(str(row_num / (self._rows + page_overlap)))
 
-    def delete_pages(self, page_nums: set[int]) -> None:
+    def delete_pages(self, page_nums: list[int]) -> None:
         for n, page_num in enumerate(page_nums):
             self._labels.pop(page_num - n).grid_forget()
 
-    def duplicate_pages(self, page_nums: set[int]) -> None:
+    def duplicate_pages(self, page_nums: list[int]) -> None:
         position = max(page_nums) + 1
         for n, page_num in enumerate(page_nums):
             self._images.insert(position + n, self._images[page_num])
@@ -429,7 +429,7 @@ class _DocumentEditor(DynamicScrollableFrame):
 
         self._update_grid()
 
-    def insert_pages(self, pos: int, pages: list[fitz.Page]) -> None:
+    def insert_pages(self, pos: int, pages: fitz.Document) -> None:
         pass
 
     def _select_page(self, event: tk.Event) -> None:
