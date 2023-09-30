@@ -18,6 +18,7 @@ display, rearrange, delete, duplicate, and add pages to a PDF file.
 - [ ] View copied and cut pages in the clipboard tab.
 - [ ] Delete specific pages from a PDF document.
 - [ ] Add new pages from an existing PDF document.
+- [ ] Undo and redo document changes.
 
 ## Installation
 To install PyDFCat, follow these steps:

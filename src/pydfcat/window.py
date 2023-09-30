@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-import copy
-
 import crossfiledialog
 import customtkinter as ctk
 import fitz  # PyMuPDF
 import os
+from io import BytesIO
 
 from .loadingWindow import LoadingWindow
 from .maineditor import MainEditor
@@ -106,7 +105,7 @@ class ApplicationWindow(ctk.CTk):
 
     def open_file(self, file_name: str) -> None:
         """Opens and distributes the given document to the panels of the editor."""
-        if has_file_extension(file_name, ".pdf"):
+        if has_file_extension(file_name, "pdf"):
             # Load the selected PDF file using fitz
             pdf_document = fitz.Document(file_name)
 
@@ -135,8 +134,9 @@ class ApplicationWindow(ctk.CTk):
         page_numbers = sorted(self.main_editor.get_selection())
 
         if page_numbers:
-            # get document pages
-            pages = copy.copy(self.main_document)
+            # get document pages (make document copy)
+            doc_buffer = BytesIO(self.main_document.write(garbage=4))
+            pages = fitz.Document(stream=doc_buffer, filetype="pdf")
             pages.select(page_numbers)
 
             # modifier documents
@@ -154,17 +154,20 @@ class ApplicationWindow(ctk.CTk):
         page_numbers = sorted(self.main_editor.get_selection())
 
         if page_numbers:
-            # get document pages
-            pages = copy.copy(self.main_document)
+            # get document pages (make document copy)
+            doc_buffer = BytesIO(self.main_document.write(garbage=4))
+            pages = fitz.Document(stream=doc_buffer, filetype="pdf")
             pages.select(page_numbers)
 
             # modifier documents
-            self.main_document.delete_pages(*pages)
             self.clipboard_document.insert_pdf(pages)
+            self.main_document.delete_pages(*page_numbers)
+
+            self.sidebar.tabview.set("Clipboard")
 
             # update editors
             self.main_editor.delete_pages(page_numbers)
-            self.main_editor.delete_pages(page_numbers)
+            self.sidebar.navigator.delete_pages(page_numbers)
             self.sidebar.clipboard.insert_pages(-1, pages)
 
             self.main_editor.clear_selection()
@@ -176,8 +179,9 @@ class ApplicationWindow(ctk.CTk):
         # clipboard_page_numbers = self.sidebar.clipboard.get_selection()
 
         if main_page_numbers:
-            # get document pages
-            pages = copy.copy(self.clipboard_document)
+            # get document pages (make document copy)
+            doc_buffer = BytesIO(self.main_document.write(garbage=4))
+            pages = fitz.Document(stream=doc_buffer, filetype="pdf")
             # pages.select(clipboard_page_numbers)
 
             # modifier document
@@ -232,10 +236,10 @@ def has_file_extension(file_name: str, extension: str) -> bool:
 
     Args:
         file_name (str): The file name to check.
-        extension (str): The desired file extension (e.g., ".txt").
+        extension (str): The desired file extension (e.g. "txt").
 
     Returns:
         bool: True if the file name has the specified extension, False otherwise.
     """
     file_extension = os.path.splitext(file_name)[1]
-    return file_extension.lower() == extension.lower()
+    return file_extension.lower() == "." + extension.lower()

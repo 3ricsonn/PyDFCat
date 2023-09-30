@@ -227,6 +227,7 @@ class ToolBar(ctk.CTkFrame):
         self.redo_button.enable()
         self.scaling_combobox.configure(state="normal")
 
+        self.cut_button.enable()
         self.copy_button.enable()
         self.duplicate_button.enable()
         self.delete_button.enable()
@@ -242,6 +243,7 @@ class ToolBar(ctk.CTkFrame):
 
         self.scaling_combobox.configure(state="disabled")
 
+        self.cut_button.enable()
         self.copy_button.disable()
         self.duplicate_button.disable()
         self.delete_button.disable()
