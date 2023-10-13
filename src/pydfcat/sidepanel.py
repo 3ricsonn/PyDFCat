@@ -408,6 +408,7 @@ class _ClipboardPageView(_PageView):
     It's intended to be used internally within the Clipboard class.
     """
 
+    pages: list[fitz.Page] = []
     selected_pages: set[int] = set()
     _last_selected = 0
 
@@ -474,17 +475,54 @@ class _ClipboardPageView(_PageView):
     def insert_pages(self, pos: int, pages: fitz.Document) -> None:
         for i, page in enumerate(pages):
             label = self._create_label(self._convert_page(page))
+            self.pages.append(page)
             if pos == -1:
                 self._labels.append(label)
             else:
                 self._labels.insert(pos + i, label)
         self._place_label()
 
+        # updates the first few pages so the scrollbar would overlap with the images
+        if (
+            len(self._labels)
+            == self._parent_canvas.winfo_height() // label.winfo_height() + 1
+        ):
+            self._update_pages_in_sight()
+
+    def _update_pages_in_sight(self) -> None:
+        """
+        Update the visible pages based on the current canvas size and clipboard content.
+        """
+        page_in_sight = math.ceil(
+            self._parent_canvas.winfo_height() / self.winfo_children()[0].winfo_height()
+        )
+
+        images = [
+            self.__update_image_size(label.cget("image"))
+            for label in self._labels[:page_in_sight]
+        ]
+
+        for label, img in zip(self._labels[:page_in_sight], images):
+            label.configure(image=img)
+
+    def __update_image_size(self, img: ctk.CTkImage) -> ctk.CTkImage:
+        self._parent_canvas.update()
+        ratio = img.cget("size")[0] / img.cget("size")[1]
+        img_width = self._parent_canvas.winfo_width() - 2 * (
+            PAGE_IPADDING + PAGE_X_PADDING
+        )
+        img_height = img_width / ratio
+
+        img.configure(size=(int(img_width), int(img_height)))
+
+        return img
+
     def clear(self):
         for widget in self.winfo_children():
             widget.destroy()
 
         # clear data
+        self.pages.clear()
         self.selected_pages.clear()
         self._last_selected = 0
 
