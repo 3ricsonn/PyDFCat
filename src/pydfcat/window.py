@@ -224,6 +224,7 @@ class ApplicationWindow(ctk.CTk):
         """CLose the file and discard all changes."""
         self.main_editor.close_document()
         self.sidebar.navigator.close_document()
+        self.sidebar.clipboard.page_view.clear()
         self.toolbar.disable_all_except_open()
         self.sidebar.clipboard.disable_tools()
 

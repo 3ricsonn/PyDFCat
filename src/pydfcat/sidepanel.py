@@ -408,6 +408,66 @@ class _ClipboardPageView(_PageView):
     It's intended to be used internally within the Clipboard class.
     """
 
+    selected_pages: set[int] = set()
+    _last_selected = 0
+
+    def _create_label(self, image: ctk.CTkImage) -> ctk.CTkLabel:
+        label = ctk.CTkLabel(self, image=image, text="")
+        label.bind("<Button-1>", command=self._select_page)
+        label.bind("<Control-Button-1>", command=self._select_pages_control)
+        label.bind("<Shift-Button-1>", command=self._select_pages_shift)
+        return label
+
+    def _select_page(self, event: tk.Event) -> None:
+        """Select page with a single click."""
+        self.clear_selection()
+
+        ctk_label: ctk.CTkLabel = event.widget.master
+
+        ctk_label.configure(fg_color=COLOR_SELECTED_BLUE)
+
+        page_num = ctk_label.winfo_y() // ctk_label.winfo_height()
+
+        self._last_selected = page_num
+        self.selected_pages.add(page_num)
+
+    def _select_pages_control(self, event: tk.Event) -> None:
+        """Select multiple pages by holding control."""
+        ctk_label: ctk.CTkLabel = event.widget.master
+
+        page_num = ctk_label.winfo_y() // ctk_label.winfo_height()
+
+        if page_num in self.selected_pages:
+            self._last_selected = 0
+            self.selected_pages.discard(page_num)
+            ctk_label.configure(fg_color=ctk_label.cget("bg_color"))
+        else:
+            self._last_selected = page_num
+            self.selected_pages.add(page_num)
+            ctk_label.configure(fg_color=COLOR_SELECTED_BLUE)
+
+    def _select_pages_shift(self, event: tk.Event) -> None:
+        """Selection a range of pages by holding shift and clicking start and end."""
+        ctk_label: ctk.CTkLabel = event.widget.master
+
+        page_num = ctk_label.winfo_y() // ctk_label.winfo_height()
+
+        if self._last_selected < page_num + 1:
+            for label in self.winfo_children()[self._last_selected : page_num + 1]:
+                label.configure(fg_color=COLOR_SELECTED_BLUE)
+        else:
+            for label in self.winfo_children()[page_num : self._last_selected]:
+                label.configure(fg_color=COLOR_SELECTED_BLUE)
+
+        self.selected_pages.update(set(range(self._last_selected, page_num + 1)))
+
+    def clear_selection(self) -> None:
+        """Remove selected pages from selection and reset page background."""
+        for widget in self.winfo_children():
+            widget.configure(fg_color=widget.cget("bg_color"))
+        self._last_selected = 0
+        self.selected_pages.clear()
+
     def delete_pages(self, page_nums: list[int]) -> None:
         pass
 
@@ -419,6 +479,14 @@ class _ClipboardPageView(_PageView):
             else:
                 self._labels.insert(pos + i, label)
         self._place_label()
+
+    def clear(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+
+        # clear data
+        self.selected_pages.clear()
+        self._last_selected = 0
 
 
 class ClipboardToolBarButton(ctk.CTkButton):
