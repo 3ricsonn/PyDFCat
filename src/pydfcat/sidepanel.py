@@ -284,7 +284,10 @@ class _NavigatorPageView(_PageView):
         self._place_label()
 
     def insert_pages(self, pos: int, pages: fitz.Document) -> None:
-        pass
+        self._labels[pos:pos] = [
+            self._create_label(self._convert_page(page)) for page in pages
+        ]
+        self._place_label()
 
     def clear_selection(self) -> None:
         """Remove selected pages from selection and reset page background."""
@@ -375,6 +378,9 @@ class _ClipboardPanel(ctk.CTkFrame):
         # clipboard page view
         self.page_view = _ClipboardPageView(self)
         self.page_view.pack(expand=True, fill="both")
+
+    def get_selection(self) -> set[int]:
+        return self.page_view.selected_pages
 
     def delete_pages(self, page_numbers: list[int]) -> None:
         self.page_view.delete_pages(page_numbers)

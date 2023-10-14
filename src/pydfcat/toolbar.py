@@ -229,6 +229,7 @@ class ToolBar(ctk.CTkFrame):
 
         self.cut_button.enable()
         self.copy_button.enable()
+        self.past_button.enable()
         self.duplicate_button.enable()
         self.delete_button.enable()
         self.close_button.pack(
@@ -245,6 +246,7 @@ class ToolBar(ctk.CTkFrame):
 
         self.cut_button.disable()
         self.copy_button.disable()
+        self.past_button.disable()
         self.duplicate_button.disable()
         self.delete_button.disable()
 

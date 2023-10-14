@@ -130,7 +130,6 @@ class ApplicationWindow(ctk.CTk):
             self.toolbar.open_button.enable()
 
     def copy_selection(self):
-        print("copy")
         page_numbers = sorted(self.main_editor.get_selection())
 
         if page_numbers:
@@ -150,7 +149,6 @@ class ApplicationWindow(ctk.CTk):
             self.main_editor.clear_selection()
 
     def cut_selection(self):
-        print("cut")
         page_numbers = sorted(self.main_editor.get_selection())
 
         if page_numbers:
@@ -173,25 +171,27 @@ class ApplicationWindow(ctk.CTk):
             self.main_editor.clear_selection()
 
     def past_selection(self):
-        print("past")
         main_page_numbers = self.main_editor.get_selection()
-        insert_index = max(main_page_numbers)
-        # clipboard_page_numbers = self.sidebar.clipboard.get_selection()
+        insert_index = max(main_page_numbers) + 1
+        clipboard_page_numbers = sorted(self.sidebar.clipboard.get_selection())
 
-        if main_page_numbers:
+        if main_page_numbers and clipboard_page_numbers:
             # get document pages (make document copy)
-            doc_buffer = BytesIO(self.main_document.write(garbage=4))
+            doc_buffer = BytesIO(self.clipboard_document.write(garbage=4))
             pages = fitz.Document(stream=doc_buffer, filetype="pdf")
-            # pages.select(clipboard_page_numbers)
+            pages.select(clipboard_page_numbers)
 
             # modifier document
-            self.main_document.insert_pdf(pages, start_at=insert_index + 1)
+            self.main_document.insert_pdf(pages, start_at=insert_index)
 
             # update editors
-            self.main_editor.insert_pages(insert_index + 1, pages)
-            self.sidebar.navigator.insert_pages(insert_index + 1, pages)
+            self.main_editor.insert_pages(insert_index, pages)
+            self.sidebar.navigator.insert_pages(insert_index, pages)
 
-            # self.main_editor.set_selection(insert_index)
+            self.main_editor.select_range(
+                insert_index, insert_index + len(clipboard_page_numbers)
+            )
+            self.main_editor.jump_to_page(insert_index)
 
     def duplicate_selection(self):
         page_numbers = sorted(self.main_editor.get_selection())

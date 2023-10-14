@@ -167,6 +167,9 @@ class MainEditor(ctk.CTkFrame):
     def insert_pages(self, position: int, pages: fitz.Document) -> None:
         self.document_view.insert_pages(position, pages)
 
+    def select_range(self, start: int, end: int) -> None:
+        self.document_view.set_selection(range(start, end))
+
     def clear_selection(self) -> None:
         self.document_view.clear_selection()
 
@@ -430,7 +433,17 @@ class _DocumentEditor(DynamicScrollableFrame):
         self._update_grid()
 
     def insert_pages(self, pos: int, pages: fitz.Document) -> None:
-        pass
+        self._images[pos:pos] = [self._convert_page(page) for page in pages]
+        self._ctk_images[pos:pos] = self._create_images(
+            self._images[pos : pos + len(pages)],
+            self._get_img_size(self._images[0]),
+        )
+
+        for n, image in enumerate(self._ctk_images[pos : pos + len(pages)]):
+            label = self._create_label(image)
+            self._labels.insert(pos + n, label)
+
+        self._update_grid()
 
     def _select_page(self, event: tk.Event) -> None:
         """Select page with a single click."""
@@ -480,6 +493,14 @@ class _DocumentEditor(DynamicScrollableFrame):
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
 
         self.selected_pages.update(set(range(self._last_selected, page_num + 1)))
+
+    def set_selection(self, index_range: range) -> None:
+        self.clear_selection()
+        for selected_page in index_range:
+            self._labels[selected_page].configure(fg_color=COLOR_SELECTED_BLUE)
+            self.selected_pages.add(selected_page)
+
+        self._last_selected = selected_page
 
     def clear_selection(self) -> None:
         """Remove selected pages from selection and reset page background."""
