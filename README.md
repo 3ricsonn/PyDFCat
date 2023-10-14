@@ -13,11 +13,27 @@ display, rearrange, delete, duplicate, and add pages to a PDF file.
 ## (Planned) Features
 
 - [x] Open and display PDF-Files.
-- [ ] Duplicate pages within a PDF document.
-- [ ] Copy, cut, and paste pages within the document.
-- [ ] View copied and cut pages in the clipboard tab.
-- [ ] Delete specific pages from a PDF document.
+- [x] Duplicate pages within a PDF document.
+- [x] Copy, cut, and paste pages within the document.
+- [x] Delete specific pages from a PDF document.
+- [x] View copied and cut pages in the clipboard tab.
+- [ ] Edit copied and cut pages in the clipboard tab.
 - [ ] Add new pages from an existing PDF document.
+- [ ] Undo and redo document changes.
+
+## Usage
+```bash
+usage: pydfcat [-h] [-V] [FILE]
+
+PyDFCat is a GUI PDF editor providing functionality to rearrange and delete pages within a PDF-file, as well as adding pages from other PDF-files
+
+positional arguments:
+  FILE           path to the file to open in pydfcat
+
+options:
+  -h, --help     show this help message and exit
+  -V, --version  show program's version number and exit
+```
 
 ## Installation
 To install PyDFCat, follow these steps:

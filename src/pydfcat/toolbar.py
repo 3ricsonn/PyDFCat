@@ -40,6 +40,11 @@ class ToolBar(ctk.CTkFrame):
         close_file_command: Callable,
         scale_page_command: Callable,
         scaling_variable: ctk.StringVar,
+        cut_command: Callable,
+        copy_command: Callable,
+        past_command: Callable,
+        duplicate_command: Callable,
+        delete_command: Callable,
         **kwargs,
     ) -> None:
         """
@@ -129,7 +134,7 @@ class ToolBar(ctk.CTkFrame):
         self.cut_button = ToolBarButton(
             self,
             "cut",
-            command=lambda: print("cut pages"),
+            command=cut_command,
             state="disabled",
             tooltip_message="cut to clipboard",
         )
@@ -141,7 +146,7 @@ class ToolBar(ctk.CTkFrame):
         self.copy_button = ToolBarButton(
             self,
             "copy",
-            command=lambda: print("copied pages"),
+            command=copy_command,
             state="disabled",
             tooltip_message="copy to clipboard",
         )
@@ -153,7 +158,7 @@ class ToolBar(ctk.CTkFrame):
         self.past_button = ToolBarButton(
             self,
             "past",
-            command=lambda: print("past pages"),
+            command=past_command,
             state="disabled",
             tooltip_message="past from clipboard",
         )
@@ -165,7 +170,7 @@ class ToolBar(ctk.CTkFrame):
         self.duplicate_button = ToolBarButton(
             self,
             "duplicate",
-            command=lambda: print("duplicate"),
+            command=duplicate_command,
             state="disabled",
             tooltip_message="duplicate selection",
         )
@@ -177,7 +182,7 @@ class ToolBar(ctk.CTkFrame):
         self.delete_button = ToolBarButton(
             self,
             "delete",
-            command=lambda: print("delete"),
+            command=delete_command,
             state="disabled",
             tooltip_message="delete selection",
         )
@@ -217,16 +222,19 @@ class ToolBar(ctk.CTkFrame):
         """Enable the toolbar tools."""
         self.open_button.enable()
         self.save_option_menu.enable()
+
         self.undo_button.enable()
         self.redo_button.enable()
         self.scaling_combobox.configure(state="normal")
+
+        self.cut_button.enable()
+        self.copy_button.enable()
+        self.past_button.enable()
+        self.duplicate_button.enable()
+        self.delete_button.enable()
         self.close_button.pack(
             side="right", padx=TOOLBAR_X_PADDING, pady=TOOLBAR_Y_PADDING
         )
-
-    def enable_open(self):
-        """Only enables the open button."""
-        self.open_button.enable()
 
     def disable_all_except_open(self):
         """Disable the toolbar tools except the open button."""
@@ -235,6 +243,12 @@ class ToolBar(ctk.CTkFrame):
         self.redo_button.disable()
 
         self.scaling_combobox.configure(state="disabled")
+
+        self.cut_button.disable()
+        self.copy_button.disable()
+        self.past_button.disable()
+        self.duplicate_button.disable()
+        self.delete_button.disable()
 
         self.close_button.pack_forget()
         self.update_idletasks()

@@ -3,7 +3,7 @@
   <component name="Black">
     <option name="enabledOnSave" value="true" />
     <option name="pathToExecutable" value="$USER_HOME$/.local/bin/black" />
-    <option name="sdkUUID" value="9ef5c244-2b3c-45ce-bc5e-254e99e29f8a" />
+    <option name="sdkName" value="Python 3.11 (PDFCat)" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.11 (PDFCat)" project-jdk-type="Python SDK" />
 </project>

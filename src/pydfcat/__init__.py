@@ -8,7 +8,7 @@ from .settings import DIRNAME
 from .window import ApplicationWindow
 
 
-__version__ = "0.1.0-dev.3"
+__version__ = "0.1.0-dev.4"
 
 
 def start():
