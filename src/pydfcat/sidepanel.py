@@ -76,11 +76,6 @@ class _PageView(DynamicScrollableFrame):
 
         return ctk_img
 
-    def _create_label(self, image: ctk.CTkImage) -> ctk.CTkLabel:
-        label = ctk.CTkLabel(self, image=image, text="")
-        label.bind("<Button-1>", command=self._select_page)
-        return label
-
     def _place_label(self):
         for widget in self.winfo_children():
             widget.pack_forget()
@@ -95,9 +90,6 @@ class _PageView(DynamicScrollableFrame):
                 pady=(0, PAGE_Y_PADDING),
             )
             self.update()
-
-    def _select_page(self, event: tk.Event) -> None:
-        pass
 
 
 class SidePanel(CollapsableFrame):
@@ -246,6 +238,11 @@ class _NavigatorPageView(_PageView):
         # updates the first few pages so the scrollbar wound overlaps with the images
         if self.winfo_height() > self._parent_canvas.winfo_height():
             self._update_pages_in_sight(document)
+
+    def _create_label(self, image: ctk.CTkImage) -> ctk.CTkLabel:
+        label = ctk.CTkLabel(self, image=image, text="")
+        label.bind("<Button-1>", command=self._select_page)
+        return label
 
     def _update_pages_in_sight(self, document: fitz.Document) -> None:
         """
@@ -399,6 +396,11 @@ class _ClipboardPanel(ctk.CTkFrame):
         self.clear_select_button.disable()
         self.clear_clipboard_button.disable()
 
+    def close_document(self):
+        self.disable_tools()
+        self.page_view.clear()
+        self.page_view.pack_forget()
+
 
 class _ClipboardPageView(_PageView):
     """
@@ -408,7 +410,6 @@ class _ClipboardPageView(_PageView):
     It's intended to be used internally within the Clipboard class.
     """
 
-    pages: list[fitz.Page] = []
     selected_pages: set[int] = set()
     _last_selected = 0
 
@@ -475,7 +476,6 @@ class _ClipboardPageView(_PageView):
     def insert_pages(self, pos: int, pages: fitz.Document) -> None:
         for i, page in enumerate(pages):
             label = self._create_label(self._convert_page(page))
-            self.pages.append(page)
             if pos == -1:
                 self._labels.append(label)
             else:
@@ -520,11 +520,13 @@ class _ClipboardPageView(_PageView):
     def clear(self):
         for widget in self.winfo_children():
             widget.destroy()
+        self._labels.clear()
 
         # clear data
-        self.pages.clear()
         self.selected_pages.clear()
         self._last_selected = 0
+
+        self.update_idletasks()
 
 
 class ClipboardToolBarButton(ctk.CTkButton):

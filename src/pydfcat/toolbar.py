@@ -243,7 +243,7 @@ class ToolBar(ctk.CTkFrame):
 
         self.scaling_combobox.configure(state="disabled")
 
-        self.cut_button.enable()
+        self.cut_button.disable()
         self.copy_button.disable()
         self.duplicate_button.disable()
         self.delete_button.disable()
