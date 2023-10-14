@@ -25,7 +25,8 @@ display, rearrange, delete, duplicate, and add pages to a PDF file.
 ```bash
 usage: pydfcat [-h] [-V] [FILE]
 
-PyDFCat is a GUI PDF editor providing functionality to rearrange and delete pages within a PDF-file, as well as adding pages from other PDF-files
+PyDFCat is a GUI PDF editor providing functionality to rearrange and delete pages within a PDF-file,
+as well as adding pages from other PDF-files
 
 positional arguments:
   FILE           path to the file to open in pydfcat
