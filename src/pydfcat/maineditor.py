@@ -202,9 +202,7 @@ class MainEditor(ctk.CTkFrame):
         self.document_view.set_selection(range(start, end))
 
     def clear_selection(self) -> None:
-        """
-        Clear the current selection in the document view.
-        """
+        """Clear the current selection in the document view."""
         self.document_view.clear_selection()
 
     def close_document(self) -> None:

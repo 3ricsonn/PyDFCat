@@ -35,9 +35,7 @@ except ModuleNotFoundError:
 
 
 class _PageView(DynamicScrollableFrame):
-    """
-    A class for displaying document pages within a scrollable frame.
-    """
+    """A class for displaying document pages within a scrollable frame."""
 
     def __init__(self, parent, **kwargs) -> None:
         """
