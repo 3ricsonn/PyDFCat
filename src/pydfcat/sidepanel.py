@@ -479,7 +479,7 @@ class _ClipboardPageView(_PageView):
         self.selected_pages.clear()
 
     def delete_pages(self, page_nums: list[int]) -> None:
-        pass
+        raise NotImplementedError()
 
     def insert_pages(self, pos: int, pages: fitz.Document) -> None:
         for i, page in enumerate(pages):
@@ -498,9 +498,7 @@ class _ClipboardPageView(_PageView):
             self._update_pages_in_sight()
 
     def _update_pages_in_sight(self) -> None:
-        """
-        Update the visible pages based on the current canvas size and clipboard content.
-        """
+        """Update the visible pages based on the current canvas size and clipboard content."""
         page_in_sight = math.ceil(
             self._parent_canvas.winfo_height() / self.winfo_children()[0].winfo_height()
         )

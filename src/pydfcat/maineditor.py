@@ -68,7 +68,6 @@ class MainEditor(ctk.CTkFrame):
             document (fitz.Document): The document to load.
             loading_window (LoadingWindow): A window with loadingbar.
         """
-
         # remove file-open-button and place page view
         self.ui_frame.pack_forget()
         self.error_label.grid_forget()
@@ -346,9 +345,7 @@ class _DocumentEditor(DynamicScrollableFrame):
         return label
 
     def _update_grid(self) -> None:
-        """
-        Update the grid layout and labels based on the images.
-        """
+        """Update the grid layout and labels based on the images."""
         columns, _ = self._get_grid_dimension(self._ctk_images[0])
         self._columns = max(1, columns)
         self._rows = max(len(self._images) // self._columns, 1)
