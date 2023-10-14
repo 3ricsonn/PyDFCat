@@ -420,6 +420,10 @@ class _DocumentEditor(DynamicScrollableFrame):
     def delete_pages(self, page_nums: list[int]) -> None:
         for n, page_num in enumerate(page_nums):
             self._labels.pop(page_num - n).grid_forget()
+            self._images.pop(page_num - n)
+            self._ctk_images.pop(page_num - n)
+
+        self._update_grid()
 
     def duplicate_pages(self, page_nums: list[int]) -> None:
         position = max(page_nums) + 1

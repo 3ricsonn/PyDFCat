@@ -123,7 +123,7 @@ class ApplicationWindow(ctk.CTk):
             # Update the application title with the file name
             self.title(f"PyDFCat - Editing: {os.path.basename(file_name)}")
             self.toolbar.enable_all()
-            self.sidebar.clipboard.enable_tools()
+            self.sidebar.clipboard.enable_all()
         else:
             # user selected a non-pdf file
             self.main_editor.open_file_error()
@@ -159,7 +159,7 @@ class ApplicationWindow(ctk.CTk):
 
             # modifier documents
             self.clipboard_document.insert_pdf(pages)
-            self.main_document.delete_pages(*page_numbers)
+            self.main_document.delete_pages(page_numbers)
 
             self.sidebar.tabview.set("Clipboard")
 
@@ -172,10 +172,14 @@ class ApplicationWindow(ctk.CTk):
 
     def past_selection(self):
         main_page_numbers = self.main_editor.get_selection()
+
+        if not main_page_numbers:
+            return None
+
         insert_index = max(main_page_numbers) + 1
         clipboard_page_numbers = sorted(self.sidebar.clipboard.get_selection())
 
-        if main_page_numbers and clipboard_page_numbers:
+        if clipboard_page_numbers:
             # get document pages (make document copy)
             doc_buffer = BytesIO(self.clipboard_document.write(garbage=4))
             pages = fitz.Document(stream=doc_buffer, filetype="pdf")

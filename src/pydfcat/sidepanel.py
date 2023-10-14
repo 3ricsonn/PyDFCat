@@ -388,8 +388,10 @@ class _ClipboardPanel(ctk.CTkFrame):
     def insert_pages(self, position: int, pages: fitz.Document) -> None:
         self.page_view.insert_pages(position, pages)
 
-    def enable_tools(self):
+    def enable_all(self):
         """Enable clipboard tools."""
+        self.page_view.pack(expand=True, fill="both")
+
         self.open_file_button.enable()
         self.select_all_button.enable()
         self.clear_select_button.enable()
