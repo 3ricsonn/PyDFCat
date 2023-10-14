@@ -491,11 +491,11 @@ class _DocumentEditor(DynamicScrollableFrame):
         """
         self._images[pos:pos] = [self._convert_page(page) for page in pages]
         self._ctk_images[pos:pos] = self._create_images(
-            self._images[pos : pos + len(pages)],
+            self._images[pos: pos + len(pages)],
             self._get_img_size(self._images[0]),
         )
 
-        for n, image in enumerate(self._ctk_images[pos : pos + len(pages)]):
+        for n, image in enumerate(self._ctk_images[pos: pos + len(pages)]):
             label = self._create_label(image)
             self._labels.insert(pos + n, label)
 
@@ -542,10 +542,10 @@ class _DocumentEditor(DynamicScrollableFrame):
         page_num = row_num * self._columns + column_num
 
         if self._last_selected < page_num + 1:
-            for label in self.winfo_children()[self._last_selected : page_num + 1]:
+            for label in self.winfo_children()[self._last_selected: page_num + 1]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
         else:
-            for label in self.winfo_children()[page_num : self._last_selected]:
+            for label in self.winfo_children()[page_num: self._last_selected]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
 
         self.selected_pages.update(set(range(self._last_selected, page_num + 1)))
