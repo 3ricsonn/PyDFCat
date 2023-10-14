@@ -155,21 +155,56 @@ class MainEditor(ctk.CTkFrame):
         self.document_view.jump_to_page(page_num)
 
     def get_selection(self) -> set[int]:
+        """
+        Get the selected pages from the document view.
+
+        Returns:
+            set[int]: A set of selected page numbers.
+        """
         return self.document_view.selected_pages
 
     def delete_pages(self, page_numbers: list[int]) -> None:
+        """
+        Delete specific pages from the document view.
+
+        Args:
+            page_numbers (list[int]): The page numbers to delete.
+        """
         self.document_view.delete_pages(page_numbers)
 
     def duplicate_pages(self, page_numbers: list[int]) -> None:
+        """
+        Duplicate specific pages in the document view.
+
+        Args:
+            page_numbers (list[int]): The page numbers to duplicate.
+        """
         self.document_view.duplicate_pages(page_numbers)
 
     def insert_pages(self, position: int, pages: fitz.Document) -> None:
+        """
+        Insert pages from another document at a given position in the document view.
+
+        Args:
+            position (int): The position to insert the pages.
+            pages (fitz.Document): The pages to be inserted.
+        """
         self.document_view.insert_pages(position, pages)
 
     def select_range(self, start: int, end: int) -> None:
+        """
+        Select a range of pages in the document view.
+
+        Args:
+            start (int): The start page number of the selection.
+            end (int): The end page number of the selection.
+        """
         self.document_view.set_selection(range(start, end))
 
     def clear_selection(self) -> None:
+        """
+        Clear the current selection in the document view.
+        """
         self.document_view.clear_selection()
 
     def close_document(self) -> None:
@@ -338,6 +373,7 @@ class _DocumentEditor(DynamicScrollableFrame):
         return int(img_width), int(img_height)
 
     def _create_label(self, image: ctk.CTkImage) -> ctk.CTkLabel:
+        """Create a CTkLabel for a given CTkImage along corresponding bindings."""
         label = ctk.CTkLabel(self, image=image, text="")
         label.bind("<Button-1>", command=self._select_page)
         label.bind("<Control-Button-1>", command=self._select_pages_control)
@@ -415,6 +451,12 @@ class _DocumentEditor(DynamicScrollableFrame):
         self._parent_canvas.yview_moveto(str(row_num / (self._rows + page_overlap)))
 
     def delete_pages(self, page_nums: list[int]) -> None:
+        """
+        Delete specific pages from the view.
+
+        Args:
+            page_nums (list[int]): The page numbers to delete.
+        """
         for n, page_num in enumerate(page_nums):
             self._labels.pop(page_num - n).grid_forget()
             self._images.pop(page_num - n)
@@ -423,6 +465,12 @@ class _DocumentEditor(DynamicScrollableFrame):
         self._update_grid()
 
     def duplicate_pages(self, page_nums: list[int]) -> None:
+        """
+        Duplicate specific pages in the view.
+
+        Args:
+            page_nums (list[int]): The page numbers to duplicate.
+        """
         position = max(page_nums) + 1
         for n, page_num in enumerate(page_nums):
             self._images.insert(position + n, self._images[page_num])
@@ -434,13 +482,20 @@ class _DocumentEditor(DynamicScrollableFrame):
         self._update_grid()
 
     def insert_pages(self, pos: int, pages: fitz.Document) -> None:
+        """
+        Insert pages from another document at a given position in the view.
+
+        Args:
+            pos (int): The position to insert the pages.
+            pages (fitz.Document): The pages to be inserted.
+        """
         self._images[pos:pos] = [self._convert_page(page) for page in pages]
         self._ctk_images[pos:pos] = self._create_images(
-            self._images[pos: pos + len(pages)],
+            self._images[pos : pos + len(pages)],
             self._get_img_size(self._images[0]),
         )
 
-        for n, image in enumerate(self._ctk_images[pos: pos + len(pages)]):
+        for n, image in enumerate(self._ctk_images[pos : pos + len(pages)]):
             label = self._create_label(image)
             self._labels.insert(pos + n, label)
 
@@ -487,16 +542,19 @@ class _DocumentEditor(DynamicScrollableFrame):
         page_num = row_num * self._columns + column_num
 
         if self._last_selected < page_num + 1:
-            for label in self.winfo_children()[self._last_selected: page_num + 1]:
+            for label in self.winfo_children()[self._last_selected : page_num + 1]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
         else:
-            for label in self.winfo_children()[page_num: self._last_selected]:
+            for label in self.winfo_children()[page_num : self._last_selected]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
 
         self.selected_pages.update(set(range(self._last_selected, page_num + 1)))
 
     def set_selection(self, index_range: range) -> None:
+        """Select a given range of pages in the main editor."""
         self.clear_selection()
+
+        selected_page = 0
         for selected_page in index_range:
             self._labels[selected_page].configure(fg_color=COLOR_SELECTED_BLUE)
             self.selected_pages.add(selected_page)

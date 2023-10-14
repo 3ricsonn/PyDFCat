@@ -35,6 +35,10 @@ except ModuleNotFoundError:
 
 
 class _PageView(DynamicScrollableFrame):
+    """
+    A class for displaying document pages within a scrollable frame.
+    """
+
     def __init__(self, parent, **kwargs) -> None:
         """
         Initialize the _PageView.
@@ -77,6 +81,7 @@ class _PageView(DynamicScrollableFrame):
         return ctk_img
 
     def _place_label(self):
+        """Pack all CTkLabels after clearing the scrollable frame."""
         for widget in self.winfo_children():
             widget.pack_forget()
 
@@ -166,12 +171,31 @@ class _NavigatorPanel(ctk.CTkFrame):
         self.document_view.load_pages(document, loading_window)
 
     def delete_pages(self, page_numbers: list[int]) -> None:
+        """
+        Delete specific pages from the document view.
+
+        Args:
+            page_numbers (list[int]): The page numbers to delete.
+        """
         self.document_view.delete_pages(page_numbers)
 
     def duplicate_pages(self, page_numbers: list[int]) -> None:
+        """
+        Duplicate specific pages in the document view.
+
+        Args:
+            page_numbers (list[int]): The page numbers to duplicate.
+        """
         self.document_view.duplicate_pages(page_numbers)
 
     def insert_pages(self, position: int, pages: fitz.Document) -> None:
+        """
+        Insert pages from another document at a given position in the document view.
+
+        Args:
+            position (int): The position to insert the pages.
+            pages (fitz.Document): The pages to be inserted.
+        """
         self.document_view.insert_pages(position, pages)
 
     def close_document(self) -> None:
@@ -240,6 +264,7 @@ class _NavigatorPageView(_PageView):
             self._update_pages_in_sight(document)
 
     def _create_label(self, image: ctk.CTkImage) -> ctk.CTkLabel:
+        """Create a CTkLabel for the given CTkImage along with corresponding bindings."""
         label = ctk.CTkLabel(self, image=image, text="")
         label.bind("<Button-1>", command=self._select_page)
         return label
@@ -272,11 +297,23 @@ class _NavigatorPageView(_PageView):
         self._jump_to_page(page_num)
 
     def delete_pages(self, page_nums: list[int]) -> None:
+        """
+        Delete specific pages from the view.
+
+        Args:
+            page_nums (list[int]): The page numbers to delete.
+        """
         for n, page_num in enumerate(page_nums):
             self._labels.pop(page_num - n).pack_forget()
 
     def duplicate_pages(self, page_nums: list[int]) -> None:
-        # TODO: what if page nums aren't continues
+        """
+        Duplicate specific pages in the view.
+
+        Args:
+            page_nums (list[int]): The page numbers to duplicate.
+        """
+        # TODO: What if page numbers aren't contiguous?
         position = max(page_nums) + 1
         for n, page_num in enumerate(page_nums):
             label = self._create_label(self._labels[page_num].cget("image"))
@@ -284,6 +321,13 @@ class _NavigatorPageView(_PageView):
         self._place_label()
 
     def insert_pages(self, pos: int, pages: fitz.Document) -> None:
+        """
+        Insert pages from another document at a given position in the view.
+
+        Args:
+            pos (int): The position to insert the pages.
+            pages (fitz.Document): The pages to be inserted.
+        """
         self._labels[pos:pos] = [
             self._create_label(self._convert_page(page)) for page in pages
         ]
@@ -380,12 +424,30 @@ class _ClipboardPanel(ctk.CTkFrame):
         self.page_view.pack(expand=True, fill="both")
 
     def get_selection(self) -> set[int]:
-        return self.page_view.selected_pages
+        """
+        Get the selected pages from the page view.
+
+        Returns:
+            set[int]: A set of selected page numbers.
+        """
 
     def delete_pages(self, page_numbers: list[int]) -> None:
+        """
+        Delete specific pages from the page view.
+
+        Args:
+            page_numbers (list[int]): The page numbers to delete.
+        """
         self.page_view.delete_pages(page_numbers)
 
     def insert_pages(self, position: int, pages: fitz.Document) -> None:
+        """
+        Insert pages from another document at a given position in the page view.
+
+        Args:
+            position (int): The position to insert the pages.
+            pages (fitz.Document): The pages to be inserted.
+        """
         self.page_view.insert_pages(position, pages)
 
     def enable_all(self):
@@ -405,6 +467,7 @@ class _ClipboardPanel(ctk.CTkFrame):
         self.clear_clipboard_button.disable()
 
     def close_document(self):
+        """Disable tools and clears view port."""
         self.disable_tools()
         self.page_view.clear()
         self.page_view.pack_forget()
@@ -422,6 +485,7 @@ class _ClipboardPageView(_PageView):
     _last_selected = 0
 
     def _create_label(self, image: ctk.CTkImage) -> ctk.CTkLabel:
+        """Create CTkLabel for given CTkImage along corresponding bindings."""
         label = ctk.CTkLabel(self, image=image, text="")
         label.bind("<Button-1>", command=self._select_page)
         label.bind("<Control-Button-1>", command=self._select_pages_control)
@@ -463,10 +527,10 @@ class _ClipboardPageView(_PageView):
         page_num = ctk_label.winfo_y() // ctk_label.winfo_height()
 
         if self._last_selected < page_num + 1:
-            for label in self.winfo_children()[self._last_selected: page_num + 1]:
+            for label in self.winfo_children()[self._last_selected : page_num + 1]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
         else:
-            for label in self.winfo_children()[page_num: self._last_selected]:
+            for label in self.winfo_children()[page_num : self._last_selected]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
 
         self.selected_pages.update(set(range(self._last_selected, page_num + 1)))
@@ -479,9 +543,23 @@ class _ClipboardPageView(_PageView):
         self.selected_pages.clear()
 
     def delete_pages(self, page_nums: list[int]) -> None:
+        """
+        Delete specific pages from the view.
+
+        Args:
+            page_nums (list[int]): The page numbers to delete.
+        """
         raise NotImplementedError()
 
     def insert_pages(self, pos: int, pages: fitz.Document) -> None:
+        """
+        Insert pages from another document at a given position in the view.
+
+        Args:
+            pos (int): The position to insert the pages.
+                Use -1 to insert at the end.
+            pages (fitz.Document): The pages to be inserted.
+        """
         for i, page in enumerate(pages):
             label = self._create_label(self._convert_page(page))
             if pos == -1:
@@ -490,7 +568,7 @@ class _ClipboardPageView(_PageView):
                 self._labels.insert(pos + i, label)
         self._place_label()
 
-        # updates the first few pages so the scrollbar would overlap with the images
+        # Updates the first few pages so the scrollbar would overlap with the images
         if (
             len(self._labels)
             == self._parent_canvas.winfo_height() // label.winfo_height() + 1
@@ -512,6 +590,15 @@ class _ClipboardPageView(_PageView):
             label.configure(image=img)
 
     def __update_image_size(self, img: ctk.CTkImage) -> ctk.CTkImage:
+        """
+        Update the size of a given CTkImage to fit the available canvas space.
+
+        Args:
+            img (ctk.CTkImage): The CTkImage to update.
+
+        Returns:
+            ctk.CTkImage: The updated CTkImage.
+        """
         self._parent_canvas.update()
         ratio = img.cget("size")[0] / img.cget("size")[1]
         img_width = self._parent_canvas.winfo_width() - 2 * (
@@ -524,11 +611,17 @@ class _ClipboardPageView(_PageView):
         return img
 
     def clear(self):
+        """
+        Clear the view, removing all child widgets and resetting data.
+
+        This method clears the view by destroying all child widgets (labels) and
+        resetting data like selected pages and last selected page number.
+        """
         for widget in self.winfo_children():
             widget.destroy()
         self._labels.clear()
 
-        # clear data
+        # Clear data
         self.selected_pages.clear()
         self._last_selected = 0
 

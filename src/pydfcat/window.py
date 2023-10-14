@@ -129,99 +129,156 @@ class ApplicationWindow(ctk.CTk):
             self.main_editor.open_file_error()
             self.toolbar.open_button.enable()
 
-    def copy_selection(self):
+    def copy_selection(self) -> None:
+        """
+        Copy the selected content from the main editor to the clipboard.
+
+        This method copies the selected pages from the main document and inserts them
+        into the clipboard document, updating the clipboard and switching to the
+        Clipboard tab in the sidebar.
+        """
+        # Get the page numbers of the selected content
         page_numbers = sorted(self.main_editor.get_selection())
 
         if page_numbers:
-            # get document pages (make document copy)
+            # Get document pages and make a document copy
             doc_buffer = BytesIO(self.main_document.write(garbage=4))
             pages = fitz.Document(stream=doc_buffer, filetype="pdf")
             pages.select(page_numbers)
 
-            # modifier documents
+            # Insert selected pages into the clipboard document
             self.clipboard_document.insert_pdf(pages)
 
+            # Switch to the Clipboard tab in the sidebar
             self.sidebar.tabview.set("Clipboard")
 
-            # update editors
+            # Update the clipboard with the copied pages
             self.sidebar.clipboard.insert_pages(-1, pages)
 
+            # Clear the selection in the main editor
             self.main_editor.clear_selection()
 
-    def cut_selection(self):
+    def cut_selection(self) -> None:
+        """
+        Cut the selected content from the main editor and place it in the clipboard.
+
+        This method cuts the selected pages from the main document, inserts them into
+        the clipboard document, and updates the editors and navigators accordingly.
+        """
+        # Get the page numbers of the selected content
         page_numbers = sorted(self.main_editor.get_selection())
 
         if page_numbers:
-            # get document pages (make document copy)
+            # Get document pages and make a document copy
             doc_buffer = BytesIO(self.main_document.write(garbage=4))
             pages = fitz.Document(stream=doc_buffer, filetype="pdf")
             pages.select(page_numbers)
 
-            # modifier documents
+            # Insert selected pages into the clipboard document
             self.clipboard_document.insert_pdf(pages)
+
+            # Delete the selected pages from the main document
             self.main_document.delete_pages(page_numbers)
 
+            # Switch to the Clipboard tab in the sidebar
             self.sidebar.tabview.set("Clipboard")
 
-            # update editors
+            # Update the main editor, navigator, and clipboard
             self.main_editor.delete_pages(page_numbers)
             self.sidebar.navigator.delete_pages(page_numbers)
             self.sidebar.clipboard.insert_pages(-1, pages)
 
+            # Clear the selection in the main editor
             self.main_editor.clear_selection()
 
-    def past_selection(self):
+    def paste_selection(self) -> None:
+        """
+        Paste the selected content from the clipboard into the main document.
+
+        This method selects content from the clipboard, inserts it into the
+        main document, and updates the editors accordingly.
+        """
+        # Get the selected content from the main editor
         main_page_numbers = self.main_editor.get_selection()
 
+        # If no content is selected, return
         if not main_page_numbers:
             return None
 
+        # Determine the insert index for the clipboard content
         insert_index = max(main_page_numbers) + 1
         clipboard_page_numbers = sorted(self.sidebar.clipboard.get_selection())
 
         if clipboard_page_numbers:
-            # get document pages (make document copy)
+            # Get document pages from the clipboard and make a document copy
             doc_buffer = BytesIO(self.clipboard_document.write(garbage=4))
             pages = fitz.Document(stream=doc_buffer, filetype="pdf")
             pages.select(clipboard_page_numbers)
 
-            # modifier document
+            # Insert clipboard pages into the main document
             self.main_document.insert_pdf(pages, start_at=insert_index)
 
-            # update editors
+            # Update the main editor with the inserted pages
             self.main_editor.insert_pages(insert_index, pages)
+
+            # Update the navigator in the sidebar
             self.sidebar.navigator.insert_pages(insert_index, pages)
 
+            # Select the inserted range in the main editor
             self.main_editor.select_range(
                 insert_index, insert_index + len(clipboard_page_numbers)
             )
+
+            # Jump to the page where the clipboard content was inserted
             self.main_editor.jump_to_page(insert_index)
 
+        return None
+
     def duplicate_selection(self):
+        """
+        Duplicate the selected content in the main editor.
+
+        This method duplicates the selected pages in the main document and updates
+        the editors and navigators accordingly.
+        """
+        # Get the page numbers of the selected content
         page_numbers = sorted(self.main_editor.get_selection())
 
         if page_numbers:
-            # modifier document
+            # Duplicate the selected pages in the main document
             for page_number, n in enumerate(page_numbers):
                 self.main_document.fullcopy_page(page_number + n, page_number + n + 1)
 
-            # update editors
+            # Update the main editor with duplicated pages
             self.main_editor.duplicate_pages(page_numbers)
+
+            # Duplicate the pages in the sidebar navigator
             self.sidebar.navigator.duplicate_pages(page_numbers)
 
+            # Clear the selection in the main editor
             self.main_editor.clear_selection()
 
-    def delete_selection(self):
+    def delete_selection(self) -> None:
+        """
+        Delete the selected content from the main editor and the main document.
+
+        This method deletes the selected pages from the main document and updates
+        the editors and navigators accordingly.
+        """
+        # Get the page numbers of the selected content
         page_numbers = sorted(self.main_editor.get_selection())
 
         if page_numbers:
-            # modifier document
+            # Delete the selected pages from the main document
             self.main_document.delete_pages(*page_numbers)
 
-            # update editors
+            # Update the main editor with the deleted pages
             self.main_editor.delete_pages(page_numbers)
+
+            # Delete the pages from the sidebar navigator
             self.sidebar.navigator.delete_pages(page_numbers)
 
+            # Clear the selection in the main editor
             self.main_editor.clear_selection()
 
     def close_file(self):
