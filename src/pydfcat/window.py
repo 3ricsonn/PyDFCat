@@ -26,6 +26,7 @@ class ApplicationWindow(ctk.CTk):
         super().__init__()
 
         # data
+        self.file_name = ""
         self.main_document = fitz.Document()
         self.clipboard_document = fitz.Document()
 
@@ -68,7 +69,7 @@ class ApplicationWindow(ctk.CTk):
         self.toolbar = ToolBar(
             self,
             open_file_command=self.open_file_command,
-            save_file_command=lambda _: print("save file"),
+            save_file_command=self.save_file_command,
             close_file_command=self.close_file,
             scale_page_command=self.main_editor.update_scaling,
             scaling_variable=scaling_variable,
@@ -128,6 +129,33 @@ class ApplicationWindow(ctk.CTk):
             # user selected a non-pdf file
             self.main_editor.open_file_error()
             self.toolbar.open_button.enable()
+
+    def save_file_command(self, mode: str) -> None:
+        """
+        Save or prompt for a file name and location based on the chosen mode.
+
+        Args:
+            mode (str): The save mode, either "save" or "save as" to prompt for a new file name.
+
+        If mode is "save" and a file name is already assigned, the document is saved without
+        prompting.
+        If mode is "save as" or no file name is assigned, a file dialog is shown for the user
+        to choose a file name and location.
+
+        The file is saved in PDF format.
+        """
+        if not (mode == "save" and self.file_name):
+            file_name = crossfiledialog.save_file(
+                title="Choose a file name and location for your file:"
+            )
+            if not file_name:
+                return
+
+            if not os.path.splitext(file_name)[1] == ".pdf":
+                file_name += ".pdf"
+            self.file_name = file_name
+
+        self.main_document.save(self.file_name, garbage=4)
 
     def copy_selection(self) -> None:
         """
@@ -191,7 +219,7 @@ class ApplicationWindow(ctk.CTk):
             # Clear the selection in the main editor
             self.main_editor.clear_selection()
 
-    def paste_selection(self) -> None:
+    def past_selection(self) -> None:
         """
         Paste the selected content from the clipboard into the main document.
 
@@ -270,7 +298,7 @@ class ApplicationWindow(ctk.CTk):
 
         if page_numbers:
             # Delete the selected pages from the main document
-            self.main_document.delete_pages(*page_numbers)
+            self.main_document.delete_pages(page_numbers)
 
             # Update the main editor with the deleted pages
             self.main_editor.delete_pages(page_numbers)
