@@ -5,6 +5,7 @@ import fitz  # PyMuPDF
 import os
 from io import BytesIO
 
+from .importWIndow import ImportWindow
 from .loadingWindow import LoadingWindow
 from .maineditor import MainEditor
 from .settings import (
@@ -61,7 +62,9 @@ class ApplicationWindow(ctk.CTk):
 
         # sidebar
         self.sidebar = SidePanel(
-            self, jump_to_page_command=self.main_editor.jump_to_page
+            self,
+            jump_to_page_command=self.main_editor.jump_to_page,
+            import_file_command=self.import_file_to_clipboard,
         )
         self.sidebar.grid(column=0, row=1, sticky="news", padx=10, pady=10)
 
@@ -308,6 +311,39 @@ class ApplicationWindow(ctk.CTk):
 
             # Clear the selection in the main editor
             self.main_editor.clear_selection()
+
+    def import_file_to_clipboard(self):
+        self.toolbar.disable_all()
+        self.sidebar.clipboard.disable_tools()
+
+        # Open file dialog to select a PDF file
+        file_name = crossfiledialog.open_file(
+            title="Choose your PDF you want to import to your clipboard:",
+            filter={"PDF-Files": "*.pdf"},
+        )
+
+        if file_name and has_file_extension(file_name, "pdf"):
+            import_doc = fitz.Document(file_name)
+
+            import_window = ImportWindow(
+                self,
+                lambda pages: self.import_file_to_clipboard_command(
+                    pages, import_window
+                ),
+            )
+            import_window.load_pages(import_doc)
+
+    def import_file_to_clipboard_command(
+        self, pages: fitz.Document, window: ImportWindow
+    ) -> None:
+        window.destroy()
+
+        # import into clipboard
+        self.sidebar.clipboard.insert_pages(-1, pages)
+
+        # cleanup
+        self.toolbar.enable_all()
+        self.sidebar.clipboard.enable_all()
 
     def close_file(self):
         """CLose the file and discard all changes."""
