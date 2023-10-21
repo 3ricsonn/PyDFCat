@@ -9,6 +9,9 @@ WINDOW_RATIO = 0.9423076923076923
 WINDOW_MIN_WIDTH_FACTOR = 0.62
 WINDOW_MIN_HEIGHT_FACTOR = 0.56
 
+# import window properties
+IMPORT_WINDOW_HEIGHT_RATIO = 2.057
+
 # widgets properties
 # page view
 PAGE_X_PADDING = 5

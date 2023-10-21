@@ -98,7 +98,9 @@ class _PageView(DynamicScrollableFrame):
 class SidePanel(CollapsableFrame):
     """Side panel to preview the file and the selection."""
 
-    def __init__(self, parent: Any, jump_to_page_command: Callable):
+    def __init__(
+        self, parent: Any, jump_to_page_command: Callable, import_file_command: Callable
+    ):
         """
         Initialize the Side Panel.
 
@@ -121,7 +123,9 @@ class SidePanel(CollapsableFrame):
         self.navigator.pack(expand=True, fill="both")
 
         # clipboard tab
-        self.clipboard = _ClipboardPanel(parent=self.tabview.tab("Clipboard"))
+        self.clipboard = _ClipboardPanel(
+            parent=self.tabview.tab("Clipboard"), open_file_command=import_file_command
+        )
         self.clipboard.pack(expand=True, fill="both")
 
     def get_new_document(
@@ -354,7 +358,7 @@ class _ClipboardPanel(ctk.CTkFrame):
     It's intended to be used internally within the Clipboard class.
     """
 
-    def __init__(self, parent: Any, **kwargs):
+    def __init__(self, parent: Any, open_file_command: Callable, **kwargs):
         """
         Initialize the _ClipboardPanel.
 
@@ -368,9 +372,16 @@ class _ClipboardPanel(ctk.CTkFrame):
         self.toolbar = ctk.CTkFrame(self, fg_color="transparent")
         self.toolbar.pack(fill="x", pady=CLIPB_TOOLBAR_PADDING)
 
+        # clipboard page view
+        self.page_view = _ClipboardPageView(self)
+        self.page_view.pack(expand=True, fill="both")
+
         # open file to clipboard
         self.open_file_button = ClipboardToolBarButton(
-            self.toolbar, button_type="open", tooltip_message="open file to clipboard"
+            self.toolbar,
+            button_type="open",
+            tooltip_message="open file to clipboard",
+            command=open_file_command,
         )
         self.open_file_button.pack(
             side="left",
@@ -381,7 +392,10 @@ class _ClipboardPanel(ctk.CTkFrame):
 
         # select all
         self.select_all_button = ClipboardToolBarButton(
-            self.toolbar, button_type="select-all", tooltip_message="select all"
+            self.toolbar,
+            button_type="select-all",
+            tooltip_message="select all",
+            command=self.page_view.select_all,
         )
         self.select_all_button.pack(
             side="left",
@@ -395,6 +409,7 @@ class _ClipboardPanel(ctk.CTkFrame):
             self.toolbar,
             button_type="clear-select",
             tooltip_message="clear selection",
+            command=self.page_view.clear_selection,
         )
         self.clear_select_button.pack(
             side="left",
@@ -409,6 +424,7 @@ class _ClipboardPanel(ctk.CTkFrame):
             button_type="clear",
             tooltip_message="clear clipboard",
             hover_color=COLOR_CLOSE_RED,
+            command=self.page_view.clear(),
         )
         self.clear_clipboard_button.pack(
             side="left",
@@ -417,10 +433,6 @@ class _ClipboardPanel(ctk.CTkFrame):
             pady=CLIPB_TOOLBAR_PADDING,
         )
 
-        # clipboard page view
-        self.page_view = _ClipboardPageView(self)
-        self.page_view.pack(expand=True, fill="both")
-
     def get_selection(self) -> set[int]:
         """
         Get the selected pages from the page view.
@@ -428,6 +440,7 @@ class _ClipboardPanel(ctk.CTkFrame):
         Returns:
             set[int]: A set of selected page numbers.
         """
+        return self.page_view.selected_pages
 
     def delete_pages(self, page_numbers: list[int]) -> None:
         """
@@ -532,6 +545,19 @@ class _ClipboardPageView(_PageView):
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
 
         self.selected_pages.update(set(range(self._last_selected, page_num + 1)))
+
+    def select_all(self):
+        """
+        Select all the pages in the preview.
+
+        This method changes the text color of all labels to COLOR_SELECTED_BLUE, indicating that
+        all pages are selected.
+        It also updates the `selected_pages` set to include all page numbers in the preview.
+        """
+        for widget in self.winfo_children():
+            widget.configure(fg_color=COLOR_SELECTED_BLUE)
+        self._last_selected = len(self._labels) - 1
+        self.selected_pages = set(range(0, len(self._labels)))
 
     def clear_selection(self) -> None:
         """Remove selected pages from selection and reset page background."""

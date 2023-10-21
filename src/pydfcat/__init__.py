@@ -8,7 +8,7 @@ from .settings import DIRNAME
 from .window import ApplicationWindow
 
 
-__version__ = "0.1.0-dev.4"
+__version__ = "0.1.00-dev.5"
 
 
 def start():
@@ -34,13 +34,13 @@ def start():
 
     customtkinter.set_default_color_theme(os.path.join(DIRNAME, "assets/ctktheme.json"))
 
-    window = ApplicationWindow()
+    root_window = ApplicationWindow()
 
     # open file from cli argument
     if args.filepath:
-        window.toolbar.disable_all()
-        window.open_file(args.filepath)
-        window.toolbar.enable_all()
+        root_window.toolbar.disable_all()
+        root_window.open_file(args.filepath)
+        root_window.toolbar.enable_all()
 
     # run the windows mainloop
-    window.mainloop()
+    root_window.mainloop()

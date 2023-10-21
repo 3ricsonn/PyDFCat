@@ -1,10 +1,19 @@
 # -*- coding: utf-8 -*-
+import math
 import sys
 import tkinter as tk
 from typing import Any, Literal, Optional, Tuple, Union
 
 import customtkinter as ctk
-from PIL import ImageTk
+import fitz  # PyMuPDF
+from PIL import Image, ImageTk
+
+from .settings import (
+    COLOR_SELECTED_BLUE,
+    PAGE_IPADDING,
+    PAGE_X_PADDING,
+    PAGE_Y_PADDING,
+)
 
 
 class CollapsableFrame(ctk.CTkFrame):
@@ -407,6 +416,240 @@ class DynamicScrollableFrame(ctk.CTkScrollableFrame):
         else:
             self._parent_canvas.unbind_all("<MouseWheel>")
             self._parent_canvas.unbind_all("<Shift-MouseWheel>")
+
+
+class _DocumentDisplay(DynamicScrollableFrame):
+    """Class to display file pages"""
+
+    def __init__(self, *args, **kwargs) -> None:
+        """
+        Initialize the Document Editor.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Configuration arguments for DynamicScrollableFrame.
+        """
+        super().__init__(*args, **kwargs, orientation="vertical")
+        self._images: list[Image] = []
+        self._ctk_images: list[ctk.CTkImage] = []
+        self._labels: list[ctk.CTkLabel] = []
+        self.selected_pages: set[int] = set()
+        self._last_selected = 0
+        self._rows = 0
+        self._columns = 0
+        self.scale = 1.0
+
+    @staticmethod
+    def _convert_page(page: fitz.Page) -> Image:
+        """
+        Convert a PyMuPDF page to a PIL.Image.
+
+        Parameters:
+            page (fitz.Page): The PyMuPDF page to convert.
+
+        Returns:
+            Image: The PIL.Image representation of the page.
+        """
+        pix = page.get_pixmap()
+        mode = "RGBA" if pix.alpha else "RGB"
+        img = Image.frombytes(mode, (pix.width, pix.height), pix.samples)
+
+        return img
+
+    def _create_images(
+        self, images: list[Image], size: tuple[int, int]
+    ) -> list[ctk.CTkImage]:
+        """
+        Create a list of ctk.CTkImage objects from a list of PIL.Image objects.
+
+        Parameters:
+            images (list[Image]): The list of PIL.Image objects to be converted.
+            size (tuple[int, int]): The target size of the images.
+
+        Returns:
+            list[ctk.CTkImage]: A list of ctk.CTkImage objects created from the input images.
+        """
+        img_list = []
+
+        for img in images:
+            ctk_img = ctk.CTkImage(
+                light_image=img,
+                dark_image=img,
+                size=(int(size[0] * self.scale), int(size[1] * self.scale)),
+            )
+            img_list.append(ctk_img)
+
+        return img_list
+
+    def _get_img_size(self, img: Image) -> tuple[int, int]:
+        """
+        Calculate the size of the image to fit within the canvas while preserving its aspect ratio.
+
+        Parameters:
+            img (Image): The image to be resized.
+
+        Returns:
+            tuple[int, int]: A tuple containing the width and height of the resized image.
+        """
+        # Update the canvas to get the current dimensions
+        self._parent_canvas.update()
+
+        # Calculate the aspect ratio of the image and canvas
+        img_ratio = img.size[0] / img.size[1]
+        canvas_width = self._parent_canvas.winfo_width()
+        canvas_height = self._parent_canvas.winfo_height()
+
+        if (
+            canvas_width - 2 * (PAGE_X_PADDING + PAGE_IPADDING)
+        ) / img_ratio <= canvas_height:
+            # The image fits within the canvas width
+            img_width = canvas_width - 2 * (PAGE_X_PADDING + PAGE_IPADDING)
+            img_height = img_width / img_ratio
+        else:
+            # The image fits within the canvas height
+            img_height = canvas_height - 2 * (PAGE_Y_PADDING + PAGE_IPADDING)
+            img_width = canvas_height * img_ratio
+
+        return int(img_width), int(img_height)
+
+    def _create_label(self, image: ctk.CTkImage) -> ctk.CTkLabel:
+        """Create a CTkLabel for a given CTkImage along corresponding bindings."""
+        label = ctk.CTkLabel(self, image=image, text="")
+        label.bind("<Button-1>", command=self._select_page)
+        label.bind("<Control-Button-1>", command=self._select_pages_control)
+        label.bind("<Shift-Button-1>", command=self._select_pages_shift)
+        return label
+
+    def _update_grid(self) -> None:
+        """Update the grid layout and labels based on the images."""
+        columns, _ = self._get_grid_dimension(self._ctk_images[0])
+        self._columns = max(1, columns)
+        self._rows = max(len(self._images) // self._columns, 1)
+
+        self.update()
+        self.rowconfigure(tuple(range(self._columns)), weight=1)
+        self.columnconfigure(tuple(range(self._rows)), weight=1)
+
+        for index, label in enumerate(self._labels):
+            label.grid(
+                column=index % self._columns,
+                row=index // self._columns,
+                ipadx=PAGE_IPADDING,
+                ipady=PAGE_IPADDING,
+                padx=PAGE_X_PADDING,
+                pady=(0, PAGE_Y_PADDING),
+            )
+        self.update_idletasks()
+
+        self._parent_canvas.configure(scrollregion=self._parent_canvas.bbox("all"))
+
+    def _get_grid_dimension(self, img: ctk.CTkImage) -> tuple[int, int]:
+        """
+        Get the grid dimensions based on the parent canvas size.
+
+        Args:
+            img (ctk.CTkImage): The image object.
+
+        Returns:
+            tuple[int, int]: The grid dimensions.
+        """
+        self._parent_canvas.update()
+        return (
+            self._parent_canvas.winfo_width() // img.cget("size")[0],
+            self._parent_canvas.winfo_height() // img.cget("size")[1],
+        )
+
+    def _update_pages_in_sight(self, document: fitz.Document) -> None:
+        """
+        Update the visible pages based on the current canvas size and document content.
+
+        Args:
+            document (fitz.Document): The document whose pages are being displayed.
+        """
+        page_in_sight = (
+            math.ceil(
+                self._parent_canvas.winfo_height()
+                / self.winfo_children()[0].winfo_height()
+            )
+            * self._columns
+        )
+
+        self._images[:page_in_sight] = [self._convert_page(page) for page in document]
+
+        self._ctk_images[:page_in_sight] = self._create_images(
+            self._images[:page_in_sight], self._get_img_size(self._images[0])
+        )
+        for index, label in enumerate(self._labels[:page_in_sight]):
+            label.configure(image=self._ctk_images[index])
+
+    def _select_page(self, event: tk.Event) -> None:
+        """Select page with a single click."""
+        self.clear_selection()
+
+        ctk_label: ctk.CTkLabel = event.widget.master
+
+        ctk_label.configure(fg_color=COLOR_SELECTED_BLUE)
+
+        row_num = ctk_label.winfo_y() // ctk_label.winfo_height()
+        column_num = ctk_label.winfo_x() // ctk_label.winfo_width()
+        page_num = row_num * self._columns + column_num
+
+        self._last_selected = page_num
+        self.selected_pages.add(page_num)
+
+    def _select_pages_control(self, event: tk.Event) -> None:
+        """Select multiple pages by holding control."""
+        ctk_label: ctk.CTkLabel = event.widget.master
+
+        row_num = ctk_label.winfo_y() // ctk_label.winfo_height()
+        column_num = ctk_label.winfo_x() // ctk_label.winfo_width()
+        page_num = row_num * self._columns + column_num
+
+        if page_num in self.selected_pages:
+            self._last_selected = 0
+            self.selected_pages.discard(page_num)
+            ctk_label.configure(fg_color=ctk_label.cget("bg_color"))
+        else:
+            self._last_selected = page_num
+            self.selected_pages.add(page_num)
+            ctk_label.configure(fg_color=COLOR_SELECTED_BLUE)
+
+    def _select_pages_shift(self, event: tk.Event) -> None:
+        """Selection a range of pages by holding shift and clicking start and end."""
+        ctk_label: ctk.CTkLabel = event.widget.master
+
+        row_num = ctk_label.winfo_y() // ctk_label.winfo_height()
+        column_num = ctk_label.winfo_x() // ctk_label.winfo_width()
+        page_num = row_num * self._columns + column_num
+
+        if self._last_selected < page_num + 1:
+            for label in self.winfo_children()[self._last_selected: page_num + 1]:
+                label.configure(fg_color=COLOR_SELECTED_BLUE)
+        else:
+            for label in self.winfo_children()[page_num: self._last_selected]:
+                label.configure(fg_color=COLOR_SELECTED_BLUE)
+
+        self.selected_pages.update(set(range(self._last_selected, page_num + 1)))
+
+    def clear_selection(self) -> None:
+        """Remove selected pages from selection and reset page background."""
+        for widget in self.winfo_children():
+            widget.configure(fg_color=widget.cget("bg_color"))
+        self._last_selected = 0
+        self.selected_pages.clear()
+
+    def clear(self) -> None:
+        """Remove all widgets within the frame and reset data."""
+        for widget in self.winfo_children():
+            widget.destroy()
+
+        self._images.clear()
+        self._ctk_images.clear()
+        self._labels.clear()
+        self._rows = 0
+        self._columns = 0
+
+        self.update_idletasks()
 
 
 if __name__ == "__main__":
