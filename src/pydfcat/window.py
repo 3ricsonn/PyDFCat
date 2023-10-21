@@ -327,20 +327,21 @@ class ApplicationWindow(ctk.CTk):
 
             import_window = ImportWindow(
                 self,
-                lambda pages: self.import_file_to_clipboard_command(
-                    pages, import_window
-                ),
+                lambda pages: self.import_file_to_clipboard_command(pages),
+                self.enable_tools,
             )
             import_window.load_pages(import_doc)
+        else:
+            self.enable_tools()
 
-    def import_file_to_clipboard_command(
-        self, pages: fitz.Document, window: ImportWindow
-    ) -> None:
-        window.destroy()
-
+    def import_file_to_clipboard_command(self, pages: fitz.Document) -> None:
         # import into clipboard
         self.sidebar.clipboard.insert_pages(-1, pages)
 
+        # cleanup
+        self.enable_tools()
+
+    def enable_tools(self):
         # cleanup
         self.toolbar.enable_all()
         self.sidebar.clipboard.enable_all()

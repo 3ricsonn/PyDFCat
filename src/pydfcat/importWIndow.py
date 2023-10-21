@@ -20,12 +20,13 @@ from .widgets import _DocumentDisplay
 
 
 class ImportWindow(ctk.CTkToplevel):
-    def __init__(self, parent: Any, proceed_command: Callable):
+    def __init__(self, parent: Any, proceed_command: Callable, on_closing: Callable):
         super().__init__(master=parent)
 
         # data
         self.document = fitz.Document()
         self.proceed_command = proceed_command
+        self.on_closing = on_closing
 
         # window properties
         height = int(self.winfo_screenheight() / IMPORT_WINDOW_HEIGHT_RATIO)
@@ -59,6 +60,9 @@ class ImportWindow(ctk.CTkToplevel):
             pady=TOOLBAR_Y_PADDING,
         )
 
+        # events
+        self.protocol("WM_DELETE_WINDOW", self.close)
+
     def load_pages(self, document: fitz.Document) -> None:
         self.document = document
         self.page_view.load_pages(document)
@@ -70,6 +74,11 @@ class ImportWindow(ctk.CTkToplevel):
         selection = sorted(self.page_view.selected_pages)
         self.document.select(selection)
         self.proceed_command(self.document)
+        self.destroy()
+
+    def close(self):
+        self.on_closing()
+        self.destroy()
 
 
 class _DocumentPreview(_DocumentDisplay):
@@ -148,7 +157,7 @@ def __load_test_doc(window: ImportWindow, path: str):
 if __name__ == "__main__":
     root = ctk.CTk()
 
-    window = ImportWindow(root, lambda p: print(p))
+    window = ImportWindow(root, lambda p: print(p), lambda: print("closing"))
     window.after(
         1000,
         lambda: __load_test_doc(
