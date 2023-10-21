@@ -327,7 +327,7 @@ class ApplicationWindow(ctk.CTk):
 
             import_window = ImportWindow(
                 self,
-                lambda pages: self.import_file_to_clipboard_command(pages),
+                self.import_file_to_clipboard_command,
                 self.enable_tools,
             )
             import_window.load_pages(import_doc)

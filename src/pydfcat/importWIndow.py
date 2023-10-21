@@ -157,7 +157,7 @@ def __load_test_doc(window: ImportWindow, path: str):
 if __name__ == "__main__":
     root = ctk.CTk()
 
-    window = ImportWindow(root, lambda p: print(p), lambda: print("closing"))
+    window = ImportWindow(root, print, lambda: print("closing"))
     window.after(
         1000,
         lambda: __load_test_doc(
