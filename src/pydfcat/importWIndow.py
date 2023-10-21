@@ -20,7 +20,17 @@ from .widgets import _DocumentDisplay
 
 
 class ImportWindow(ctk.CTkToplevel):
+    """A window for selecting pages to import from a document."""
+
     def __init__(self, parent: Any, proceed_command: Callable, on_closing: Callable):
+        """
+        Initialize the ImportWindow.
+
+        Args:
+            parent (Any): The parent widget.
+            proceed_command (Callable): A function to execute when the "ok" button is clicked.
+            on_closing (Callable): A function to execute when the window is closed.
+        """
         super().__init__(master=parent)
 
         # data
@@ -64,6 +74,12 @@ class ImportWindow(ctk.CTkToplevel):
         self.protocol("WM_DELETE_WINDOW", self.close)
 
     def load_pages(self, document: fitz.Document) -> None:
+        """
+        Load pages from a document into the ImportWindow.
+
+        Args:
+            document (fitz.Document): The document to load pages from.
+        """
         self.document = document
         self.page_view.load_pages(document)
 
@@ -71,17 +87,21 @@ class ImportWindow(ctk.CTkToplevel):
         self.bind("<Configure>", lambda _: self.page_view.update_view())
 
     def proceed(self):
+        """Process the selected pages and execute the proceed command."""
         selection = sorted(self.page_view.selected_pages)
         self.document.select(selection)
         self.proceed_command(self.document)
         self.destroy()
 
     def close(self):
+        """Handle the closing of the ImportWindow."""
         self.on_closing()
         self.destroy()
 
 
 class _DocumentPreview(_DocumentDisplay):
+    """Document preview widget."""
+
     def load_pages(self, document: fitz.Document) -> None:
         """
         Display the document pages by creating new labels.
@@ -135,6 +155,7 @@ class _DocumentPreview(_DocumentDisplay):
         return int(img_width), int(img_height)
 
     def update_view(self) -> None:
+        """Update pages when window size changes."""
         # new_size = self._get_img_size(self._images[0])
         #
         # if new_size and self._ctk_images[0].cget("size") != new_size:
@@ -149,6 +170,13 @@ class _DocumentPreview(_DocumentDisplay):
 
 
 def __load_test_doc(window: ImportWindow, path: str):
+    """
+    Load a test document into the ImportWindow.
+
+    Args:
+        window (ImportWindow): The ImportWindow instance to load the document into.
+        path (str): The file path to the test document.
+    """
     doc = fitz.Document(path)
 
     window.load_pages(doc)
@@ -157,11 +185,11 @@ def __load_test_doc(window: ImportWindow, path: str):
 if __name__ == "__main__":
     root = ctk.CTk()
 
-    window = ImportWindow(root, print, lambda: print("closing"))
-    window.after(
+    import_window = ImportWindow(root, print, lambda: print("closing"))
+    import_window.after(
         1000,
         lambda: __load_test_doc(
-            window,
+            import_window,
             "/home/sebastian/Programming/20_Python/21_Projects/PDFCat/test_pdfs/"
             "20210830 10. Hygieneplan ohne Markierung der Änderungen.pdf",
         ),

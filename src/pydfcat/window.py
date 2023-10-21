@@ -313,6 +313,17 @@ class ApplicationWindow(ctk.CTk):
             self.main_editor.clear_selection()
 
     def import_file_to_clipboard(self):
+        """
+        Open a file dialog to select a PDF file for import to the clipboard.
+
+        This method opens a file dialog, allowing the user to select a PDF file for import
+        to the clipboard.
+        If a valid PDF file is selected, it creates an `ImportWindow` to select pages and
+        initiates the import process.
+
+        It also disables relevant tools in the toolbar and clipboard to prevent actions
+        during the import process.
+        """
         self.toolbar.disable_all()
         self.sidebar.clipboard.disable_tools()
 
@@ -335,14 +346,20 @@ class ApplicationWindow(ctk.CTk):
             self.enable_tools()
 
     def import_file_to_clipboard_command(self, pages: fitz.Document) -> None:
-        # import into clipboard
+        """
+        Command to import selected pages into the clipboard.
+
+        Args:
+            pages (fitz.Document): The selected pages to import into the clipboard.
+        """
+        # Import into clipboard
         self.sidebar.clipboard.insert_pages(-1, pages)
 
-        # cleanup
+        # Cleanup
         self.enable_tools()
 
     def enable_tools(self):
-        # cleanup
+        """Enable the disabled tools in the toolbar and clipboard."""
         self.toolbar.enable_all()
         self.sidebar.clipboard.enable_all()
 
