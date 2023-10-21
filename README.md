@@ -17,7 +17,7 @@ display, rearrange, delete, duplicate, and add pages to a PDF file.
 - [x] Copy, cut, and paste pages within the document.
 - [x] Delete specific pages from a PDF document.
 - [x] View copied in the clipboard tab.
-- [ ] Add new pages from an existing PDF document.
+- [x] Add new pages from an existing PDF document.
 - [ ] Undo and redo document changes.
 
 ## Usage
