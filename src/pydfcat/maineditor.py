@@ -315,11 +315,11 @@ class _DocumentEditor(_DocumentDisplay):
         """
         self._images[pos:pos] = [self._convert_page(page) for page in pages]
         self._ctk_images[pos:pos] = self._create_images(
-            self._images[pos : pos + len(pages)],
+            self._images[pos: pos + len(pages)],
             self._get_img_size(self._images[0]),
         )
 
-        for n, image in enumerate(self._ctk_images[pos : pos + len(pages)]):
+        for n, image in enumerate(self._ctk_images[pos: pos + len(pages)]):
             label = self._create_label(image)
             self._labels.insert(pos + n, label)
 
