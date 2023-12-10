@@ -3,9 +3,9 @@ import crossfiledialog
 import customtkinter as ctk
 import fitz  # PyMuPDF
 import os
-from io import BytesIO
 
 from .importWIndow import ImportWindow
+from .journal import _JournalDocument
 from .loadingWindow import LoadingWindow
 from .maineditor import MainEditor
 from .settings import (
@@ -22,14 +22,15 @@ from .toolbar import ToolBar
 class ApplicationWindow(ctk.CTk):
     """Application window class."""
 
+    main_doc: _JournalDocument
+    clipboard_doc: _JournalDocument
+
     def __init__(self):
         """Create and configure the application window."""
         super().__init__()
 
         # data
         self.file_name = ""
-        self.main_document = fitz.Document()
-        self.clipboard_document = fitz.Document()
 
         # window properties
         WINDOW_HEIGHT = self.winfo_screenheight()
@@ -97,7 +98,7 @@ class ApplicationWindow(ctk.CTk):
         self.toolbar.disable_all()
         self.sidebar.clipboard.disable_tools()
 
-        # Open file dialog to select a PDF file
+        # Open filedialog to select a PDF file
         file_name = crossfiledialog.open_file(
             title="Choose your PDF you want to edit:", filter={"PDF-Files": "*.pdf"}
         )
@@ -111,18 +112,16 @@ class ApplicationWindow(ctk.CTk):
         """Opens and distributes the given document to the panels of the editor."""
         if has_file_extension(file_name, "pdf"):
             # Load the selected PDF file using fitz
-            pdf_document = fitz.Document(file_name)
+            self.main_doc = _JournalDocument(file_name)
+            self.clipboard_doc = _JournalDocument()
 
             loading_window = LoadingWindow(self, os.path.basename(file_name))
 
             # Update the PDF document in the main editor and sidebar
-            self.main_editor.get_new_document(pdf_document, loading_window)
-            self.sidebar.get_new_document(pdf_document, loading_window)
+            self.main_editor.get_new_document(self.main_doc.document, loading_window)
+            self.sidebar.get_new_document(self.main_doc.document, loading_window)
 
             loading_window.destroy()
-
-            self.main_document = pdf_document
-            self.clipboard_document = fitz.Document()
 
             # Update the application title with the file name
             self.title(f"PyDFCat - Editing: {os.path.basename(file_name)}")
@@ -158,7 +157,7 @@ class ApplicationWindow(ctk.CTk):
                 file_name += ".pdf"
             self.file_name = file_name
 
-        self.main_document.save(self.file_name, garbage=4)
+        self.main_doc.document.save(self.file_name, garbage=4)
 
     def copy_selection(self) -> None:
         """
@@ -172,14 +171,14 @@ class ApplicationWindow(ctk.CTk):
         page_numbers = sorted(self.main_editor.get_selection())
 
         if page_numbers:
+            # update documents
             # Get document pages and make a document copy
-            doc_buffer = BytesIO(self.main_document.write(garbage=4))
-            pages = fitz.Document(stream=doc_buffer, filetype="pdf")
-            pages.select(page_numbers)
+            pages = self.main_doc.copy_pages(page_numbers)
 
             # Insert selected pages into the clipboard document
-            self.clipboard_document.insert_pdf(pages)
+            self.clipboard_doc.insert(-1, pages)
 
+            # update editor
             # Switch to the Clipboard tab in the sidebar
             self.sidebar.tabview.set("Clipboard")
 
@@ -201,15 +200,13 @@ class ApplicationWindow(ctk.CTk):
 
         if page_numbers:
             # Get document pages and make a document copy
-            doc_buffer = BytesIO(self.main_document.write(garbage=4))
-            pages = fitz.Document(stream=doc_buffer, filetype="pdf")
-            pages.select(page_numbers)
+            pages = self.main_doc.copy_pages(page_numbers)
 
             # Insert selected pages into the clipboard document
-            self.clipboard_document.insert_pdf(pages)
+            self.clipboard_doc.insert(-1, pages)
 
             # Delete the selected pages from the main document
-            self.main_document.delete_pages(page_numbers)
+            self.main_doc.delete(page_numbers)
 
             # Switch to the Clipboard tab in the sidebar
             self.sidebar.tabview.set("Clipboard")
@@ -230,9 +227,9 @@ class ApplicationWindow(ctk.CTk):
         main document, and updates the editors accordingly.
         """
         # Get the selected content from the main editor
-        main_page_numbers = self.main_editor.get_selection()
+        main_page_numbers = sorted(self.main_editor.get_selection())
 
-        # If no content is selected, return
+        # If no content is selected, scip code
         if not main_page_numbers:
             return None
 
@@ -242,12 +239,10 @@ class ApplicationWindow(ctk.CTk):
 
         if clipboard_page_numbers:
             # Get document pages from the clipboard and make a document copy
-            doc_buffer = BytesIO(self.clipboard_document.write(garbage=4))
-            pages = fitz.Document(stream=doc_buffer, filetype="pdf")
-            pages.select(clipboard_page_numbers)
+            pages = self.clipboard_doc.copy_pages(clipboard_page_numbers)
 
             # Insert clipboard pages into the main document
-            self.main_document.insert_pdf(pages, start_at=insert_index)
+            self.main_doc.insert(insert_index, pages)
 
             # Update the main editor with the inserted pages
             self.main_editor.insert_pages(insert_index, pages)
@@ -277,8 +272,8 @@ class ApplicationWindow(ctk.CTk):
 
         if page_numbers:
             # Duplicate the selected pages in the main document
-            for page_number, n in enumerate(page_numbers):
-                self.main_document.fullcopy_page(page_number + n, page_number + n + 1)
+            pages = self.main_doc.copy_pages(page_numbers)
+            self.main_doc.insert(-1, pages)
 
             # Update the main editor with duplicated pages
             self.main_editor.duplicate_pages(page_numbers)
@@ -301,7 +296,7 @@ class ApplicationWindow(ctk.CTk):
 
         if page_numbers:
             # Delete the selected pages from the main document
-            self.main_document.delete_pages(page_numbers)
+            self.main_doc.delete(page_numbers)
 
             # Update the main editor with the deleted pages
             self.main_editor.delete_pages(page_numbers)

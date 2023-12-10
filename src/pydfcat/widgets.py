@@ -623,13 +623,15 @@ class _DocumentDisplay(DynamicScrollableFrame):
         page_num = row_num * self._columns + column_num
 
         if self._last_selected < page_num + 1:
-            for label in self.winfo_children()[self._last_selected: page_num + 1]:
+            for label in self._labels[self._last_selected : page_num + 1]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
         else:
-            for label in self.winfo_children()[page_num: self._last_selected]:
+            for label in self._labels[page_num : self._last_selected]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
 
         self.selected_pages.update(set(range(self._last_selected, page_num + 1)))
+
+        print(self.selected_pages)
 
     def clear_selection(self) -> None:
         """Remove selected pages from selection and reset page background."""
