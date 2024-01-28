@@ -5,7 +5,7 @@ import fitz  # PyMuPDF
 import os
 
 from .importWIndow import ImportWindow
-from .journal import _JournalDocument
+from .journal import DocumentJournal
 from .loadingWindow import LoadingWindow
 from .maineditor import MainEditor
 from .settings import (
@@ -22,8 +22,7 @@ from .toolbar import ToolBar
 class ApplicationWindow(ctk.CTk):
     """Application window class."""
 
-    main_doc: _JournalDocument
-    clipboard_doc: _JournalDocument
+    document_journal: DocumentJournal = None
 
     def __init__(self):
         """Create and configure the application window."""
@@ -112,14 +111,19 @@ class ApplicationWindow(ctk.CTk):
         """Opens and distributes the given document to the panels of the editor."""
         if has_file_extension(file_name, "pdf"):
             # Load the selected PDF file using fitz
-            self.main_doc = _JournalDocument(file_name)
-            self.clipboard_doc = _JournalDocument()
+            self.document_journal = DocumentJournal(file_path=file_name)
+            self.main_editor.document_view.journal = self.document_journal
+            self.sidebar.clipboard.page_view.journal = self.document_journal
 
             loading_window = LoadingWindow(self, os.path.basename(file_name))
 
             # Update the PDF document in the main editor and sidebar
-            self.main_editor.get_new_document(self.main_doc.document, loading_window)
-            self.sidebar.get_new_document(self.main_doc.document, loading_window)
+            self.main_editor.get_new_document(
+                self.document_journal.main.document, loading_window
+            )
+            self.sidebar.get_new_document(
+                self.document_journal.main.document, loading_window
+            )
 
             loading_window.destroy()
 
@@ -157,7 +161,13 @@ class ApplicationWindow(ctk.CTk):
                 file_name += ".pdf"
             self.file_name = file_name
 
-        self.main_doc.document.save(self.file_name, garbage=4)
+        self.document_journal.main.document.save(self.file_name, garbage=4)
+
+    def undo_command(self):
+        pass
+
+    def redo_command(self):
+        pass
 
     def copy_selection(self) -> None:
         """
@@ -172,11 +182,7 @@ class ApplicationWindow(ctk.CTk):
 
         if page_numbers:
             # update documents
-            # Get document pages and make a document copy
-            pages = self.main_doc.copy_pages(page_numbers)
-
-            # Insert selected pages into the clipboard document
-            self.clipboard_doc.insert(-1, pages)
+            pages = self.document_journal.copy_pages_to_clipboard(page_numbers)
 
             # update editor
             # Switch to the Clipboard tab in the sidebar
@@ -200,13 +206,7 @@ class ApplicationWindow(ctk.CTk):
 
         if page_numbers:
             # Get document pages and make a document copy
-            pages = self.main_doc.copy_pages(page_numbers)
-
-            # Insert selected pages into the clipboard document
-            self.clipboard_doc.insert(-1, pages)
-
-            # Delete the selected pages from the main document
-            self.main_doc.delete(page_numbers)
+            pages = self.document_journal.move_pages_to_clipboard(page_numbers)
 
             # Switch to the Clipboard tab in the sidebar
             self.sidebar.tabview.set("Clipboard")
@@ -239,10 +239,9 @@ class ApplicationWindow(ctk.CTk):
 
         if clipboard_page_numbers:
             # Get document pages from the clipboard and make a document copy
-            pages = self.clipboard_doc.copy_pages(clipboard_page_numbers)
-
-            # Insert clipboard pages into the main document
-            self.main_doc.insert(insert_index, pages)
+            pages = self.document_journal.copy_pages_to_main(
+                insert_index, clipboard_page_numbers
+            )
 
             # Update the main editor with the inserted pages
             self.main_editor.insert_pages(insert_index, pages)
@@ -272,8 +271,7 @@ class ApplicationWindow(ctk.CTk):
 
         if page_numbers:
             # Duplicate the selected pages in the main document
-            pages = self.main_doc.copy_pages(page_numbers)
-            self.main_doc.insert(-1, pages)
+            self.document_journal.duplicate_pages_in_main(page_numbers)
 
             # Update the main editor with duplicated pages
             self.main_editor.duplicate_pages(page_numbers)
@@ -281,8 +279,10 @@ class ApplicationWindow(ctk.CTk):
             # Duplicate the pages in the sidebar navigator
             self.sidebar.navigator.duplicate_pages(page_numbers)
 
-            # Clear the selection in the main editor
-            self.main_editor.clear_selection()
+            # set the selection in the main editor
+            self.main_editor.select_range(
+                max(page_numbers) + 1, max(page_numbers) + 1 + len(page_numbers)
+            )
 
     def delete_selection(self) -> None:
         """
@@ -296,7 +296,7 @@ class ApplicationWindow(ctk.CTk):
 
         if page_numbers:
             # Delete the selected pages from the main document
-            self.main_doc.delete(page_numbers)
+            self.document_journal.main.delete(page_numbers)
 
             # Update the main editor with the deleted pages
             self.main_editor.delete_pages(page_numbers)

@@ -8,6 +8,7 @@ import fitz  # PyMuPDF
 import os
 from PIL import Image
 
+from .journal import DocumentJournal
 from .loadingWindow import LoadingWindow
 from .settings import (
     CLIPB_TOOLBAR_IMAGE_HEIGHT,
@@ -99,7 +100,10 @@ class SidePanel(CollapsableFrame):
     """Side panel to preview the file and the selection."""
 
     def __init__(
-        self, parent: Any, jump_to_page_command: Callable, import_file_command: Callable
+        self,
+        parent: Any,
+        jump_to_page_command: Callable,
+        import_file_command: Callable,
     ):
         """
         Initialize the Side Panel.
@@ -124,7 +128,8 @@ class SidePanel(CollapsableFrame):
 
         # clipboard tab
         self.clipboard = _ClipboardPanel(
-            parent=self.tabview.tab("Clipboard"), open_file_command=import_file_command
+            parent=self.tabview.tab("Clipboard"),
+            open_file_command=import_file_command,
         )
         self.clipboard.pack(expand=True, fill="both")
 
@@ -358,7 +363,12 @@ class _ClipboardPanel(ctk.CTkFrame):
     It's intended to be used internally within the Clipboard class.
     """
 
-    def __init__(self, parent: Any, open_file_command: Callable, **kwargs):
+    def __init__(
+        self,
+        parent: Any,
+        open_file_command: Callable,
+        **kwargs,
+    ):
         """
         Initialize the _ClipboardPanel.
 
@@ -409,7 +419,7 @@ class _ClipboardPanel(ctk.CTkFrame):
             self.toolbar,
             button_type="clear-select",
             tooltip_message="clear selection",
-            command=self.page_view.clear_selection,
+            command=self.page_view.clear_selection_command,
         )
         self.clear_select_button.pack(
             side="left",
@@ -424,7 +434,7 @@ class _ClipboardPanel(ctk.CTkFrame):
             button_type="clear",
             tooltip_message="clear clipboard",
             hover_color=COLOR_CLOSE_RED,
-            command=self.page_view.clear(),
+            command=self.page_view.clear,
         )
         self.clear_clipboard_button.pack(
             side="left",
@@ -494,6 +504,7 @@ class _ClipboardPageView(_PageView):
 
     selected_pages: set[int] = set()
     _last_selected = 0
+    journal: DocumentJournal
 
     def _create_label(self, image: ctk.CTkImage) -> ctk.CTkLabel:
         """Create CTkLabel for given CTkImage along corresponding bindings."""
@@ -515,6 +526,7 @@ class _ClipboardPageView(_PageView):
 
         self._last_selected = page_num
         self.selected_pages.add(page_num)
+        self.journal.clipboard.change_selection(sorted(self.selected_pages))
 
     def _select_pages_control(self, event: tk.Event) -> None:
         """Select multiple pages by holding control."""
@@ -530,6 +542,7 @@ class _ClipboardPageView(_PageView):
             self._last_selected = page_num
             self.selected_pages.add(page_num)
             ctk_label.configure(fg_color=COLOR_SELECTED_BLUE)
+        self.journal.clipboard.change_selection(sorted(self.selected_pages))
 
     def _select_pages_shift(self, event: tk.Event) -> None:
         """Selection a range of pages by holding shift and clicking start and end."""
@@ -538,13 +551,14 @@ class _ClipboardPageView(_PageView):
         page_num = ctk_label.winfo_y() // ctk_label.winfo_height()
 
         if self._last_selected < page_num + 1:
-            for label in self.winfo_children()[self._last_selected: page_num + 1]:
+            for label in self.winfo_children()[self._last_selected : page_num + 1]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
         else:
-            for label in self.winfo_children()[page_num: self._last_selected]:
+            for label in self.winfo_children()[page_num : self._last_selected]:
                 label.configure(fg_color=COLOR_SELECTED_BLUE)
 
         self.selected_pages.update(set(range(self._last_selected, page_num + 1)))
+        self.journal.clipboard.change_selection(sorted(self.selected_pages))
 
     def select_all(self):
         """
@@ -558,6 +572,7 @@ class _ClipboardPageView(_PageView):
             widget.configure(fg_color=COLOR_SELECTED_BLUE)
         self._last_selected = len(self._labels) - 1
         self.selected_pages = set(range(0, len(self._labels)))
+        self.journal.clipboard.change_selection(sorted(self.selected_pages))
 
     def clear_selection(self) -> None:
         """Remove selected pages from selection and reset page background."""
@@ -565,6 +580,10 @@ class _ClipboardPageView(_PageView):
             widget.configure(fg_color=widget.cget("bg_color"))
         self._last_selected = 0
         self.selected_pages.clear()
+
+    def clear_selection_command(self):
+        self.clear_selection()
+        self.journal.clipboard.change_selection(sorted(self.selected_pages))
 
     def delete_pages(self, page_nums: list[int]) -> None:
         """
@@ -584,12 +603,16 @@ class _ClipboardPageView(_PageView):
                 Use -1 to insert at the end.
             pages (fitz.Document): The pages to be inserted.
         """
+        self.clear_selection()
         for i, page in enumerate(pages):
             label = self._create_label(self._convert_page(page))
+            label.configure(fg_color=COLOR_SELECTED_BLUE)
             if pos == -1:
                 self._labels.append(label)
+                self.selected_pages.add(len(self._labels) - 1)
             else:
                 self._labels.insert(pos + i, label)
+                self.selected_pages.add(pos + i)
         self._place_label()
 
         # Updates the first few pages so the scrollbar would overlap with the images
@@ -648,6 +671,7 @@ class _ClipboardPageView(_PageView):
         # Clear data
         self.selected_pages.clear()
         self._last_selected = 0
+        self.journal.clipboard.change_selection(sorted(self.selected_pages))
 
         self.update_idletasks()
 

@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import re
+import tkinter as tk
 from typing import Any, Callable, Optional
 
 import customtkinter as ctk
 import fitz  # PyMuPDF
 from CTkMessagebox import CTkMessagebox
 
+from .journal import DocumentJournal
 from .loadingWindow import LoadingWindow
 from .settings import COLOR_SELECTED_BLUE
 from .widgets import _DocumentDisplay
@@ -15,7 +17,10 @@ class MainEditor(ctk.CTkFrame):
     """Main editor class to manage file pages."""
 
     def __init__(
-        self, parent: Any, open_file_command: Callable, scaling_variable: ctk.StringVar
+        self,
+        parent: Any,
+        open_file_command: Callable,
+        scaling_variable: ctk.StringVar,
     ) -> None:
         """
         Initialize the Main Editor.
@@ -204,6 +209,8 @@ class MainEditor(ctk.CTkFrame):
 class _DocumentEditor(_DocumentDisplay):
     """Class to display file pages"""
 
+    journal: DocumentJournal
+
     def load_pages(
         self, document: fitz.Document, loading_window: LoadingWindow
     ) -> None:
@@ -315,15 +322,27 @@ class _DocumentEditor(_DocumentDisplay):
         """
         self._images[pos:pos] = [self._convert_page(page) for page in pages]
         self._ctk_images[pos:pos] = self._create_images(
-            self._images[pos: pos + len(pages)],
+            self._images[pos : pos + len(pages)],
             self._get_img_size(self._images[0]),
         )
 
-        for n, image in enumerate(self._ctk_images[pos: pos + len(pages)]):
+        for n, image in enumerate(self._ctk_images[pos : pos + len(pages)]):
             label = self._create_label(image)
             self._labels.insert(pos + n, label)
 
         self._update_grid()
+
+    def _select_page(self, event: tk.Event) -> None:
+        super()._select_page(event)
+        self.journal.main.change_selection(sorted(self.selected_pages))
+
+    def _select_pages_control(self, event: tk.Event) -> None:
+        super()._select_pages_control(event)
+        self.journal.main.change_selection(sorted(self.selected_pages))
+
+    def _select_pages_shift(self, event: tk.Event) -> None:
+        super()._select_pages_shift(event)
+        self.journal.main.change_selection(sorted(self.selected_pages))
 
     def set_selection(self, index_range: range) -> None:
         """Select a given range of pages in the main editor."""
