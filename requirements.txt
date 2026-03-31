@@ -1,4 +1,4 @@
-crossfiledialog==0.2.0
+crossfiledialog==1.1.0
 CTkMessagebox==2.7
 customtkinter==5.2.2
 PyMuPDF==1.24.7
